@@ -423,23 +423,26 @@
           <div class="text-sm font-semibold text-toss-text">자산별 포트폴리오 비중</div>
           <span id="holdings-total" class="text-xs text-toss-sub">-</span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div class="text-[11px] text-toss-sub font-semibold mb-2 flex items-center gap-1">
-              <span class="dot bg-toss-blue"></span>코어
-            </div>
-            <div id="holdings-core" class="space-y-2"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+          <!-- 좌: 도넛 차트 -->
+          <div style="height:240px;position:relative">
+            <canvas id="holdings-pie"></canvas>
           </div>
-          <div>
-            <div class="text-[11px] text-toss-sub font-semibold mb-2 flex items-center gap-1">
-              <span class="dot bg-toss-purple"></span>위성
-            </div>
-            <div id="holdings-sat" class="space-y-2"></div>
+          <!-- 우: 테이블 -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="text-toss-sub border-b border-toss-border">
+                <tr>
+                  <th class="text-left py-1.5 font-semibold">자산</th>
+                  <th class="text-right py-1.5 font-semibold">비중</th>
+                  <th class="text-right py-1.5 font-semibold">평가금액</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-table"></tbody>
+            </table>
           </div>
         </div>
       </div>
-
-      <div id="position-memo" class="mt-4 p-3 bg-toss-blueL text-toss-blue text-sm rounded-toss font-medium hidden"></div>
     </section>
 
     <footer class="text-center py-8 text-xs text-toss-sub">
@@ -1327,44 +1330,74 @@
 
       // 자산별 포트폴리오 비중 렌더
       renderHoldingsBreakdown(master);
-
-      if (master?.memo) {
-        const memo = PI.$('position-memo');
-        memo.textContent = master.memo;
-        memo.classList.remove('hidden');
-      }
     }
+
+    const HOLDING_ASSETS = [
+      { ticker: 'QQQ',  cat: 'core', catLabel: '코어', color: '#3182F6' },
+      { ticker: 'SOXX', cat: 'core', catLabel: '코어', color: '#6EA8FC' },
+      { ticker: 'EWY',  cat: 'core', catLabel: '코어', color: '#A8C5FD' },
+      { ticker: 'TQQQ', cat: 'sat',  catLabel: '위성', color: '#8B5CF6' },
+      { ticker: 'SOXL', cat: 'sat',  catLabel: '위성', color: '#B29BFB' },
+      { ticker: 'KORU', cat: 'sat',  catLabel: '위성', color: '#D9CFFD' },
+    ];
 
     function renderHoldingsBreakdown(master) {
       const holdings = (master && master.holdings) || {};
-      const total = (master && master.total_krw) || 0;
-      const coreTickers = ['QQQ', 'SOXX', 'EWY'];
-      const satTickers  = ['TQQQ', 'SOXL', 'KORU'];
+      const total = Number((master && master.total_krw) || 0);
 
       PI.$('holdings-total').textContent = total > 0 ? `총 ${PI.fmtKrwUnit(total)}` : '미입력';
 
-      const renderList = (tickers, colorClass) => tickers.map(t => {
-        const val = Number(holdings[t] || 0);
+      const data = HOLDING_ASSETS.map(a => {
+        const val = Number(holdings[a.ticker] || 0);
         const pct = total > 0 ? (val / total * 100) : 0;
-        const pctText = pct.toFixed(pct >= 10 ? 0 : 1);
-        const krwText = val > 0 ? PI.fmtKrwUnit(val) : '0';
-        const barColor = val > 0 ? colorClass : 'bg-gray-200';
-        return `
-          <div>
-            <div class="flex items-center justify-between mb-0.5">
-              <span class="text-xs font-semibold text-toss-text">${t}</span>
-              <span class="text-xs text-toss-sub">${krwText}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="flex-1 gauge" style="height:6px"><div class="gauge-fill ${barColor}" style="width:${pct}%"></div></div>
-              <span class="text-xs font-bold num w-10 text-right">${pctText}%</span>
-            </div>
-          </div>
-        `;
-      }).join('');
+        return { ...a, val, pct };
+      });
 
-      PI.$('holdings-core').innerHTML = renderList(coreTickers, 'bg-toss-blue');
-      PI.$('holdings-sat').innerHTML  = renderList(satTickers,  'bg-toss-purple');
+      // 도넛 차트
+      const ctx = document.getElementById('holdings-pie').getContext('2d');
+      if (window._holdingsPie) window._holdingsPie.destroy();
+      const anyHold = data.some(d => d.val > 0);
+      window._holdingsPie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: data.map(d => d.ticker),
+          datasets: [{
+            data: anyHold ? data.map(d => d.val) : [1, 1, 1, 1, 1, 1],
+            backgroundColor: anyHold ? data.map(d => d.color) : data.map(() => '#E5E8EB'),
+            borderWidth: 2,
+            borderColor: '#FFFFFF',
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 10, family: 'Pretendard' }, boxWidth: 8, padding: 6 } },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  const d = data[c.dataIndex];
+                  if (!anyHold) return `${d.ticker}: 0%`;
+                  return `${d.ticker} (${d.catLabel}): ${d.pct.toFixed(1)}% · ${PI.fmtKrwUnit(d.val)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 테이블
+      PI.$('holdings-table').innerHTML = data.map(d => {
+        const pctText = total > 0 ? d.pct.toFixed(1) + '%' : '0%';
+        const krwText = d.val > 0 ? PI.fmtKrwUnit(d.val) : '0';
+        const dotHtml = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${d.color};margin-right:6px;vertical-align:middle"></span>`;
+        return `<tr class="border-b border-toss-border">
+          <td class="py-1.5">${dotHtml}<span class="font-semibold">${d.ticker}</span> <span class="text-[10px] text-toss-sub">(${d.catLabel})</span></td>
+          <td class="py-1.5 text-right num font-bold">${pctText}</td>
+          <td class="py-1.5 text-right num text-toss-sub">${krwText}</td>
+        </tr>`;
+      }).join('');
     }
 
     // ============================================================

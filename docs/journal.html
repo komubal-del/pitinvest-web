@@ -15,64 +15,36 @@
 
   <header id="app-header" class="sticky top-0 z-40 bg-toss-bg/90 backdrop-blur border-b border-toss-border"></header>
 
-  <main class="main-content max-w-4xl mx-auto px-5 py-6 space-y-6">
+  <main class="main-content max-w-5xl mx-auto px-5 py-6 space-y-6">
 
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <h1 class="text-3xl font-extrabold mb-2">📝 매매 일지</h1>
       <p class="text-toss-text leading-relaxed">
-        진입·탈출 시점의 심리, 결정 근거, 회고를 기록합니다.
+        업로드한 포지션 스냅샷이 시간순으로 쌓입니다. 각 행을 눌러 상세 보기.
       </p>
     </section>
 
-    <section class="bg-gradient-to-br from-toss-blueL to-purple-50 rounded-tossLg p-10 text-center">
-      <div class="text-6xl mb-4">🛠️</div>
-      <h2 class="text-2xl font-bold mb-3">준비 중</h2>
-      <p class="text-toss-text leading-relaxed max-w-md mx-auto mb-5">
-        현재 구글 Keep에 기록된 일지를<br />
-        노션으로 이관한 뒤 이 페이지에 임베드할 예정이에요.
-      </p>
-      <div class="inline-block bg-white rounded-toss px-4 py-3 text-sm font-semibold text-toss-text">
-        다음 업데이트에서 만나요 🙌
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">업로드 이력</h2>
+        <span id="journal-count" class="text-xs text-toss-sub">-</span>
       </div>
+      <div id="journal-empty" class="hidden text-center py-12 text-toss-sub text-sm">
+        아직 업로드된 포지션이 없어요. 홈에서 📸 스크린샷 업로드 버튼으로 기록을 시작하세요.
+      </div>
+      <div id="journal-list" class="space-y-2"></div>
     </section>
 
-    <section class="bg-toss-card rounded-tossLg p-7 shadow-toss">
-      <h2 class="text-xl font-bold mb-5">📋 기록 예정 항목</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-toss bg-toss-bg p-5">
-          <div class="font-bold mb-2">📌 진입 기록</div>
-          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
-            <li>진입 시점 · 충족된 조건</li>
-            <li>매수 종목 · 비중 · 평단</li>
-            <li>당시 심리 · 확신도</li>
-          </ul>
+    <!-- 상세 모달 -->
+    <div id="journal-detail-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeDetailModal(event)">
+      <div class="bg-toss-card rounded-tossLg max-w-xl w-full max-h-[85vh] overflow-y-auto shadow-toss" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-toss-border sticky top-0 bg-toss-card flex items-center justify-between">
+          <h2 id="detail-title" class="text-xl font-bold">-</h2>
+          <button onclick="closeDetailModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
         </div>
-        <div class="rounded-toss bg-toss-bg p-5">
-          <div class="font-bold mb-2">📌 탈출 기록</div>
-          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
-            <li>매도 시점 · 수익률</li>
-            <li>사용한 탈출 규칙 (수익 100%? 전문가 경고?)</li>
-            <li>로테이션 여부</li>
-          </ul>
-        </div>
-        <div class="rounded-toss bg-toss-bg p-5">
-          <div class="font-bold mb-2">📌 회고</div>
-          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
-            <li>룰을 지켰는가?</li>
-            <li>감정 개입 여부</li>
-            <li>개선할 점</li>
-          </ul>
-        </div>
-        <div class="rounded-toss bg-toss-bg p-5">
-          <div class="font-bold mb-2">📌 통계 (자동)</div>
-          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
-            <li>총 진입 횟수 · 승률</li>
-            <li>평균 보유기간</li>
-            <li>평균 수익률</li>
-          </ul>
-        </div>
+        <div id="detail-body" class="p-6"></div>
       </div>
-    </section>
+    </div>
 
     <footer class="text-center py-8 text-xs text-toss-sub">
       Not financial advice · 개인 매매 원칙 기록
@@ -83,6 +55,186 @@
   <nav id="bottom-nav"></nav>
 
   <script src="assets/common.js"></script>
-  <script>PI.initNav('journal');</script>
+  <script>
+    PI.initNav('journal');
+
+    const STAGE_BADGE = {
+      emergency: { label: '긴급탈출', cls: 'bg-toss-redL text-toss-red' },
+      reset:     { label: '자동 리셋', cls: 'bg-toss-blueL text-toss-blue' },
+      sell_near: { label: '매도 임박', cls: 'bg-toss-redL text-toss-red' },
+      exit:      { label: '구덩이 탈출', cls: 'bg-toss-yellowL text-toss-yellow' },
+      full:      { label: '구덩이 충족', cls: 'bg-toss-redL text-toss-red' },
+      deepening: { label: '구덩이 심화', cls: 'bg-toss-purpleL text-toss-purple' },
+      entry:     { label: '구덩이 진입', cls: 'bg-toss-yellowL text-toss-yellow' },
+      normal:    { label: '평시 운용', cls: 'bg-toss-greenL text-toss-green' },
+    };
+
+    const CAT_LABEL = {
+      core: '코어',
+      satellite: '위성',
+      other: '기타',
+    };
+
+    let _journalEntries = [];
+
+    function safeParseJson(s) {
+      try { return JSON.parse(s); } catch { return []; }
+    }
+
+    function fmtDateTime(ts) {
+      if (!ts) return '-';
+      try {
+        const d = new Date(ts);
+        return d.toLocaleString('ko-KR', {
+          year: '2-digit', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit',
+        });
+      } catch { return ts; }
+    }
+
+    function renderList() {
+      const listEl = PI.$('journal-list');
+      const emptyEl = PI.$('journal-empty');
+      const countEl = PI.$('journal-count');
+
+      if (_journalEntries.length === 0) {
+        emptyEl.classList.remove('hidden');
+        countEl.textContent = '-';
+        listEl.innerHTML = '';
+        return;
+      }
+      emptyEl.classList.add('hidden');
+      countEl.textContent = `총 ${_journalEntries.length}회`;
+
+      // 최신순
+      const sorted = [..._journalEntries].sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+
+      listEl.innerHTML = sorted.map((r, idx) => {
+        const stage = STAGE_BADGE[r.stage_at_capture] || { label: r.stage_at_capture || '-', cls: 'bg-gray-100 text-toss-sub' };
+        const total = Number(r.total_krw || 0);
+        const rc = Number(r.ratio_cash || 0);
+        const ro = Number(r.ratio_core || 0);
+        const rs = Number(r.ratio_sat || 0);
+
+        return `
+          <div class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition" onclick="openDetailModal(${idx})">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold">${fmtDateTime(r.timestamp)}</div>
+                <div class="text-xs text-toss-sub mt-0.5 truncate">${r.notes || '-'}</div>
+              </div>
+              <span class="chip ${stage.cls} shrink-0">${stage.label}</span>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+              <span class="text-toss-sub">💰 ${PI.fmtKrwUnit(total)}</span>
+              <span class="flex items-center gap-1">
+                <span class="dot bg-toss-sub"></span>${rc}%
+                <span class="dot bg-toss-blue" style="margin-left:4px"></span>${ro}%
+                <span class="dot bg-toss-purple" style="margin-left:4px"></span>${rs}%
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      // 정렬된 배열을 _sortedJournal 에 저장 (모달에서 인덱스 매핑)
+      _sortedJournal = sorted;
+    }
+
+    let _sortedJournal = [];
+
+    function openDetailModal(idx) {
+      const r = _sortedJournal[idx];
+      if (!r) return;
+      const holdings = safeParseJson(r.holdings_json);
+      const stage = STAGE_BADGE[r.stage_at_capture] || { label: '-', cls: 'bg-gray-100 text-toss-sub' };
+
+      PI.$('detail-title').textContent = fmtDateTime(r.timestamp);
+
+      const holdingsHtml = (holdings || []).length === 0
+        ? '<div class="text-sm text-toss-sub">보유 종목 없음</div>'
+        : holdings.map(h => {
+            const catLabel = CAT_LABEL[h.category] || h.category || '-';
+            const evalKrw = Number(h.eval_krw || 0);
+            return `
+              <div class="flex items-center justify-between py-1.5 border-b border-toss-border">
+                <div>
+                  <span class="font-semibold text-sm">${h.ticker || '-'}</span>
+                  <span class="text-[10px] text-toss-sub ml-1">${catLabel}</span>
+                </div>
+                <span class="text-sm num">${evalKrw > 0 ? PI.fmtKrwUnit(evalKrw) : '-'}</span>
+              </div>
+            `;
+          }).join('');
+
+      const body = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="chip ${stage.cls}">${stage.label}</span>
+            <span class="text-xs text-toss-sub">${r.source || '-'}</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-toss bg-toss-bg p-3">
+              <div class="text-[10px] text-toss-sub mb-1">현금</div>
+              <div class="text-lg font-bold num">${r.ratio_cash || 0}%</div>
+              <div class="text-[10px] text-toss-sub">${PI.fmtKrwUnit(Number(r.cash_krw || 0))}</div>
+            </div>
+            <div class="rounded-toss bg-toss-bg p-3">
+              <div class="text-[10px] text-toss-sub mb-1">코어</div>
+              <div class="text-lg font-bold num">${r.ratio_core || 0}%</div>
+              <div class="text-[10px] text-toss-sub">${PI.fmtKrwUnit(Number(r.core_krw || 0))}</div>
+            </div>
+            <div class="rounded-toss bg-toss-bg p-3">
+              <div class="text-[10px] text-toss-sub mb-1">위성</div>
+              <div class="text-lg font-bold num">${r.ratio_sat || 0}%</div>
+              <div class="text-[10px] text-toss-sub">${PI.fmtKrwUnit(Number(r.satellite_krw || 0))}</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-sm font-semibold mb-2">보유 종목</div>
+            ${holdingsHtml}
+          </div>
+
+          <div class="pt-2 border-t border-toss-border">
+            <div class="text-[10px] text-toss-sub mb-1">메모</div>
+            <div class="text-sm">${r.notes || '-'}</div>
+          </div>
+
+          <div class="text-[10px] text-toss-sub pt-2 border-t border-toss-border">
+            총자산: ${PI.fmtKrwUnit(Number(r.total_krw || 0))} · ${fmtDateTime(r.timestamp)}
+          </div>
+        </div>
+      `;
+      PI.$('detail-body').innerHTML = body;
+      PI.$('journal-detail-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('journal-detail-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDetailModal();
+    });
+
+    // journal.csv 로드 (common.js의 URLS.history 와 다른 경로)
+    const JOURNAL_URL = PI.URLS.snapshot.replace(/current_snapshot\.json$/, 'journal.csv');
+
+    (async () => {
+      try {
+        const text = await PI.fetchText(JOURNAL_URL);
+        _journalEntries = PI.parseCSV(text);
+        renderList();
+      } catch (e) {
+        console.error('journal 로드 실패', e);
+        PI.$('journal-empty').classList.remove('hidden');
+        PI.$('journal-empty').textContent = '일지 불러오기 실패. journal.csv 파일이 없거나 접근 불가능합니다.';
+      }
+    })();
+  </script>
 </body>
 </html>
