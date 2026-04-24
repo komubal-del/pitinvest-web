@@ -414,19 +414,22 @@
       </div>
 
       <div class="pt-4 border-t border-toss-border">
-        <div class="text-sm font-semibold text-toss-text mb-3">위성 평균단가</div>
-        <div class="grid grid-cols-3 gap-3">
-          <div class="rounded-toss bg-toss-bg p-3">
-            <div class="text-xs text-toss-sub">TQQQ</div>
-            <div class="text-lg font-bold num" id="avg-tqqq">-</div>
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-semibold text-toss-text">자산별 포트폴리오 비중</div>
+          <span id="holdings-total" class="text-xs text-toss-sub">-</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-[11px] text-toss-sub font-semibold mb-2 flex items-center gap-1">
+              <span class="dot bg-toss-blue"></span>코어
+            </div>
+            <div id="holdings-core" class="space-y-2"></div>
           </div>
-          <div class="rounded-toss bg-toss-bg p-3">
-            <div class="text-xs text-toss-sub">SOXL</div>
-            <div class="text-lg font-bold num" id="avg-soxl">-</div>
-          </div>
-          <div class="rounded-toss bg-toss-bg p-3">
-            <div class="text-xs text-toss-sub">KORU</div>
-            <div class="text-lg font-bold num" id="avg-koru">-</div>
+          <div>
+            <div class="text-[11px] text-toss-sub font-semibold mb-2 flex items-center gap-1">
+              <span class="dot bg-toss-purple"></span>위성
+            </div>
+            <div id="holdings-sat" class="space-y-2"></div>
           </div>
         </div>
       </div>
@@ -1259,16 +1262,46 @@
       PI.$('pos-core').textContent = core + '%';
       PI.$('pos-sat').textContent  = sat  + '%';
 
-      const fmtPrice = (v) => v && v > 0 ? `$${PI.fmt(v, 2)}` : '-';
-      PI.$('avg-tqqq').textContent = fmtPrice(exit?.tqqq_avg);
-      PI.$('avg-soxl').textContent = fmtPrice(exit?.soxl_avg);
-      PI.$('avg-koru').textContent = fmtPrice(exit?.koru_avg);
+      // 자산별 포트폴리오 비중 렌더
+      renderHoldingsBreakdown(master);
 
       if (master?.memo) {
         const memo = PI.$('position-memo');
         memo.textContent = master.memo;
         memo.classList.remove('hidden');
       }
+    }
+
+    function renderHoldingsBreakdown(master) {
+      const holdings = (master && master.holdings) || {};
+      const total = (master && master.total_krw) || 0;
+      const coreTickers = ['QQQ', 'SOXX', 'EWY'];
+      const satTickers  = ['TQQQ', 'SOXL', 'KORU'];
+
+      PI.$('holdings-total').textContent = total > 0 ? `총 ${PI.fmtKrwUnit(total)}` : '미입력';
+
+      const renderList = (tickers, colorClass) => tickers.map(t => {
+        const val = Number(holdings[t] || 0);
+        const pct = total > 0 ? (val / total * 100) : 0;
+        const pctText = pct.toFixed(pct >= 10 ? 0 : 1);
+        const krwText = val > 0 ? PI.fmtKrwUnit(val) : '0';
+        const barColor = val > 0 ? colorClass : 'bg-gray-200';
+        return `
+          <div>
+            <div class="flex items-center justify-between mb-0.5">
+              <span class="text-xs font-semibold text-toss-text">${t}</span>
+              <span class="text-xs text-toss-sub">${krwText}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex-1 gauge" style="height:6px"><div class="gauge-fill ${barColor}" style="width:${pct}%"></div></div>
+              <span class="text-xs font-bold num w-10 text-right">${pctText}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      PI.$('holdings-core').innerHTML = renderList(coreTickers, 'bg-toss-blue');
+      PI.$('holdings-sat').innerHTML  = renderList(satTickers,  'bg-toss-purple');
     }
 
     // ============================================================
