@@ -39,7 +39,7 @@ function fmtKrwUnit(n) {
   const abs = Math.abs(n);
   const sign = n < 0 ? '-' : n > 0 ? '+' : '';
   if (abs >= 1e12) return `${sign}${(abs / 1e12).toFixed(1)}조`;
-  if (abs >= 1e8)  return `${sign}${(abs / 1e8).toFixed(0)}억`;
+  if (abs >= 1e8)  return `${sign}${(abs / 1e8).toFixed(1)}억`;
   return `${sign}${fmt(abs)}`;
 }
 
