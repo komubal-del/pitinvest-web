@@ -20,31 +20,31 @@
   <main class="main-content max-w-6xl mx-auto px-5 py-6 space-y-4">
 
     <!-- ===== 히어로: 현재 상태 + 오늘의 액션 ===== -->
-    <section id="hero" class="bg-toss-card rounded-tossLg p-6 shadow-toss animate-fadein">
+    <section id="hero" class="bg-toss-card rounded-tossLg p-5 md:p-6 shadow-toss animate-fadein">
       <div class="flex items-start justify-between flex-wrap gap-4">
-        <div class="flex-1 min-w-[260px]">
-          <div class="flex items-center gap-2 mb-3">
+        <div class="flex-1 min-w-0 md:min-w-[260px]">
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
             <span id="hero-chip" class="chip bg-gray-100 text-toss-sub">로딩 중...</span>
             <span class="chip bg-gray-100 text-toss-sub">업데이트 · <span id="hero-updated">-</span></span>
           </div>
           <div class="flex items-center gap-3 mb-2">
             <span id="hero-dot" class="dot bg-toss-sub" style="width:10px;height:10px"></span>
-            <h1 id="hero-stage" class="text-3xl md:text-4xl font-extrabold">-</h1>
+            <h1 id="hero-stage" class="text-2xl md:text-4xl font-extrabold">-</h1>
           </div>
-          <p id="hero-desc" class="text-toss-text text-base leading-relaxed">-</p>
+          <p id="hero-desc" class="text-toss-text text-sm md:text-base leading-relaxed">-</p>
         </div>
-        <div class="bg-toss-bg rounded-toss p-5 min-w-[260px]">
+        <div class="bg-toss-bg rounded-toss p-4 md:p-5 w-full md:w-auto md:min-w-[260px]">
           <div class="text-xs font-semibold text-toss-sub mb-2">오늘의 액션</div>
-          <div id="hero-action" class="text-lg font-bold leading-relaxed">-</div>
+          <div id="hero-action" class="text-base md:text-lg font-bold leading-relaxed">-</div>
         </div>
       </div>
     </section>
 
     <!-- ===== 긴급탈출 게이지 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">긴급탈출 임박도</h2>
-        <span class="text-xs text-toss-sub">52주 신고가 대비 −10% 도달시 전량 현금화</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">52주 신고가 대비 −10% 도달시 전량 현금화</span>
       </div>
       <div class="space-y-4">
         <div>
@@ -66,7 +66,7 @@
 
     <!-- ===== 매수 3조건 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">매수 3대 조건</h2>
         <span id="cond-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
       </div>
@@ -106,7 +106,7 @@
 
     <!-- ===== 매도 3조건 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">매도 3대 조건</h2>
         <span id="sell-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
       </div>
@@ -257,9 +257,9 @@
 
     <!-- ===== 지수 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">주요 지수</h2>
-        <span class="text-xs text-toss-sub">현재가 · 52주 신고가 · 낙폭</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">현재가 · 52주 신고가 · 낙폭</span>
       </div>
       <div id="indices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <!-- JS 렌더 -->
@@ -268,9 +268,9 @@
 
     <!-- ===== 변동성 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">변동성 지표</h2>
-        <span class="text-xs text-toss-sub">시장 공포 심화 체크</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">시장 공포 심화 체크</span>
       </div>
       <div id="vol-grid" class="grid grid-cols-2 md:grid-cols-5 gap-3">
         <!-- JS 렌더 -->
@@ -279,9 +279,9 @@
 
     <!-- ===== 심리 상세 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">심리 상세</h2>
-        <span class="text-xs text-toss-sub">CNN 구성요소 + 보조지표</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">CNN 구성요소 + 보조지표</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
@@ -355,9 +355,9 @@
 
     <!-- ===== 국내 수급 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">국내 수급</h2>
-        <span class="text-xs text-toss-sub">한국 주식시장 자금 흐름</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">한국 주식시장 자금 흐름</span>
       </div>
       <div id="korea-flow" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <!-- JS 렌더 -->
@@ -366,9 +366,9 @@
 
     <!-- ===== 섹터 모멘텀 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">섹터 모멘텀</h2>
-        <span class="text-xs text-toss-sub">상대강도 · 로테이션 후보 체크</span>
+        <span class="text-xs text-toss-sub hidden sm:inline">상대강도 · 로테이션 후보 체크</span>
       </div>
       <div id="sector-bars" class="space-y-3">
         <!-- JS 렌더 -->
@@ -380,7 +380,7 @@
 
     <!-- ===== 내 포지션 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">내 포지션</h2>
         <div class="flex items-center gap-2">
           <button onclick="openUploadModal()" class="px-3 py-1.5 text-xs font-semibold text-white bg-toss-blue rounded-toss hover:bg-toss-blue/90 transition">
@@ -1236,13 +1236,15 @@
           // 매수/매도 시그널 마커 (슬롯별 첫 발생일만 · 색깔 구분)
           const M = _ytdState.markers || {};
           const markerSpecs = [
-            { label: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
-            { label: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
-            { label: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
-            { label: '매도1 · 레버리지 +100%',  set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
-            { label: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
-            { label: '매도3 · 전문가 경고',     set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
+            { label: '매수1', fullLabel: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
+            { label: '매수2', fullLabel: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
+            { label: '매수3', fullLabel: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
+            { label: '매도1', fullLabel: '매도1 · 레버리지 +100%', set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
+            { label: '매도2', fullLabel: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
+            { label: '매도3', fullLabel: '매도3 · 전문가 경고',    set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
           ];
+          // tooltip 시 풀 라벨로 표시
+          window._markerFullLabels = Object.fromEntries(markerSpecs.map(m => [m.label, m.fullLabel]));
           markerSpecs.forEach(ms => {
             if (!ms.set || ms.set.size === 0) return;
             datasets.push({
@@ -1299,14 +1301,17 @@
           plugins: {
             legend: {
               position: 'top', align: 'end',
-              labels: { font: { family: 'Pretendard', weight: 600 }, boxWidth: 10, boxHeight: 10, padding: 8 }
+              labels: { font: { family: 'Pretendard', weight: 600, size: 10 }, boxWidth: 8, boxHeight: 8, padding: 6 }
             },
             tooltip: {
               backgroundColor: '#191F28', padding: 10,
               titleFont: { family: 'Pretendard', weight: 700 },
               bodyFont:  { family: 'Pretendard' },
               callbacks: {
-                label: (c) => `${c.dataset.label}: ${c.raw === null ? '-' : c.raw.toFixed(2) + '%'}`,
+                label: (c) => {
+                  const full = (window._markerFullLabels && window._markerFullLabels[c.dataset.label]) || c.dataset.label;
+                  return `${full}: ${c.raw === null ? '-' : c.raw.toFixed(2) + '%'}`;
+                },
               }
             }
           },
