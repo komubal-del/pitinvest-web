@@ -43,14 +43,20 @@ function fmtKrwUnit(n) {
   return `${sign}${fmt(abs)}`;
 }
 
+function _bust(url) {
+  // raw.githubusercontent.com CDN 캐시 우회 (timestamp 쿼리 파라미터)
+  const sep = url.includes('?') ? '&' : '?';
+  return url + sep + 't=' + Date.now();
+}
+
 async function fetchJson(url) {
-  const res = await fetch(url, { cache: 'no-cache' });
+  const res = await fetch(_bust(url), { cache: 'no-cache' });
   if (!res.ok) throw new Error(`${url} ${res.status}`);
   return res.json();
 }
 
 async function fetchText(url) {
-  const res = await fetch(url, { cache: 'no-cache' });
+  const res = await fetch(_bust(url), { cache: 'no-cache' });
   if (!res.ok) throw new Error(`${url} ${res.status}`);
   return res.text();
 }
