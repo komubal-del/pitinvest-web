@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>일지 · 구덩이매매법</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/tailwind.config.js"></script>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+
+<body class="bg-toss-bg text-toss-dark">
+
+  <header id="app-header" class="sticky top-0 z-40 bg-toss-bg/90 backdrop-blur border-b border-toss-border"></header>
+
+  <main class="main-content max-w-4xl mx-auto px-5 py-6 space-y-6">
+
+    <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
+      <h1 class="text-3xl font-extrabold mb-2">📝 매매 일지</h1>
+      <p class="text-toss-text leading-relaxed">
+        진입·탈출 시점의 심리, 결정 근거, 회고를 기록합니다.
+      </p>
+    </section>
+
+    <section class="bg-gradient-to-br from-toss-blueL to-purple-50 rounded-tossLg p-10 text-center">
+      <div class="text-6xl mb-4">🛠️</div>
+      <h2 class="text-2xl font-bold mb-3">준비 중</h2>
+      <p class="text-toss-text leading-relaxed max-w-md mx-auto mb-5">
+        현재 구글 Keep에 기록된 일지를<br />
+        노션으로 이관한 뒤 이 페이지에 임베드할 예정이에요.
+      </p>
+      <div class="inline-block bg-white rounded-toss px-4 py-3 text-sm font-semibold text-toss-text">
+        다음 업데이트에서 만나요 🙌
+      </div>
+    </section>
+
+    <section class="bg-toss-card rounded-tossLg p-7 shadow-toss">
+      <h2 class="text-xl font-bold mb-5">📋 기록 예정 항목</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-toss bg-toss-bg p-5">
+          <div class="font-bold mb-2">📌 진입 기록</div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
+            <li>진입 시점 · 충족된 조건</li>
+            <li>매수 종목 · 비중 · 평단</li>
+            <li>당시 심리 · 확신도</li>
+          </ul>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-5">
+          <div class="font-bold mb-2">📌 탈출 기록</div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
+            <li>매도 시점 · 수익률</li>
+            <li>사용한 탈출 규칙 (수익 100%? 전문가 경고?)</li>
+            <li>로테이션 여부</li>
+          </ul>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-5">
+          <div class="font-bold mb-2">📌 회고</div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
+            <li>룰을 지켰는가?</li>
+            <li>감정 개입 여부</li>
+            <li>개선할 점</li>
+          </ul>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-5">
+          <div class="font-bold mb-2">📌 통계 (자동)</div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-5">
+            <li>총 진입 횟수 · 승률</li>
+            <li>평균 보유기간</li>
+            <li>평균 수익률</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center py-8 text-xs text-toss-sub">
+      Not financial advice · 개인 매매 원칙 기록
+    </footer>
+
+  </main>
+
+  <nav id="bottom-nav"></nav>
+
+  <script src="assets/common.js"></script>
+  <script>PI.initNav('journal');</script>
+</body>
+</html>

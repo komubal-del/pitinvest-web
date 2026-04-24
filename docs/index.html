@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>콕핏 · 구덩이매매법</title>
+  <meta name="description" content="공포의 구덩이에서 기회를 건진다" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/tailwind.config.js"></script>
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="bg-toss-bg text-toss-dark">
+
+  <header id="app-header" class="sticky top-0 z-40 bg-toss-bg/90 backdrop-blur border-b border-toss-border"></header>
+
+  <main class="main-content max-w-6xl mx-auto px-5 py-6 space-y-4">
+
+    <!-- ===== 히어로: 현재 상태 + 오늘의 액션 ===== -->
+    <section id="hero" class="bg-toss-card rounded-tossLg p-6 shadow-toss animate-fadein">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div class="flex-1 min-w-[260px]">
+          <div class="flex items-center gap-2 mb-3">
+            <span id="hero-chip" class="chip bg-gray-100 text-toss-sub">로딩 중...</span>
+            <span class="chip bg-gray-100 text-toss-sub">업데이트 · <span id="hero-updated">-</span></span>
+          </div>
+          <div class="flex items-center gap-3 mb-2">
+            <span id="hero-dot" class="dot bg-toss-sub" style="width:10px;height:10px"></span>
+            <h1 id="hero-stage" class="text-3xl md:text-4xl font-extrabold">-</h1>
+          </div>
+          <p id="hero-desc" class="text-toss-text text-base leading-relaxed">-</p>
+        </div>
+        <div class="bg-toss-bg rounded-toss p-5 min-w-[260px]">
+          <div class="text-xs font-semibold text-toss-sub mb-2">오늘의 액션</div>
+          <div id="hero-action" class="text-lg font-bold leading-relaxed">-</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 긴급탈출 게이지 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">긴급탈출 임박도</h2>
+        <span class="text-xs text-toss-sub">52주 신고가 대비 −10% 도달시 전량 현금화</span>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-semibold text-toss-text">나스닥</span>
+            <span class="text-sm font-bold num" id="em-nasdaq">-</span>
+          </div>
+          <div class="gauge"><div id="em-nasdaq-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-semibold text-toss-text">코스피</span>
+            <span class="text-sm font-bold num" id="em-kospi">-</span>
+          </div>
+          <div class="gauge"><div id="em-kospi-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 매수 3조건 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">매수 3대 조건</h2>
+        <span id="cond-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">공포탐욕지수</span>
+            <span id="cond-cnn-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="cond-cnn-value" class="text-3xl font-extrabold num">-</span>
+            <span class="text-xs text-toss-sub">/ 100</span>
+          </div>
+          <div class="text-xs text-toss-sub mt-1">조건: &lt; 10</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">VIX</span>
+            <span id="cond-vix-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div id="cond-vix-value" class="text-3xl font-extrabold num">-</div>
+          <div class="text-xs text-toss-sub mt-1">조건: &gt; 25</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">국내 강제청산</span>
+            <span id="cond-margin-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="cond-margin-value" class="text-3xl font-extrabold num">-</span>
+            <span class="text-xs text-toss-sub">개인 순매수</span>
+          </div>
+          <div class="text-xs text-toss-sub mt-1">뉴스 <span id="cond-margin-news" class="font-bold">-</span>건 · 조건: 뉴스≥1 + 개인≤−1조</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 매도 3조건 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">매도 3대 조건</h2>
+        <span id="sell-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- 조건 1: 레버리지 +100% -->
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">레버리지 수익률 +100%</span>
+            <span id="sell-profit-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div class="space-y-1.5 mt-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-toss-sub">TQQQ</span>
+              <span id="sell-tqqq-profit" class="font-bold num">-</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-toss-sub">SOXL</span>
+              <span id="sell-soxl-profit" class="font-bold num">-</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-toss-sub">KORU</span>
+              <span id="sell-koru-profit" class="font-bold num">-</span>
+            </div>
+          </div>
+          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 해당 자산 50% 매도 (코어 이동)</div>
+        </div>
+
+        <!-- 조건 2: 주도주 3일+ 상승 -->
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">주도주 3일+ 상승</span>
+            <span id="sell-leading-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div id="sell-leading-value" class="text-lg font-bold">-</div>
+          <div class="text-xs text-toss-sub mt-1">삼전/하닉 3일↑ + 개인 매수 우위</div>
+          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 위성 비중 −20%p</div>
+        </div>
+
+        <!-- 조건 3: 전문가 경고 -->
+        <div id="sell-expert-card" class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition" onclick="openExpertModal()">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-toss-text">전문가 경고</span>
+            <span id="sell-expert-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+          <div id="sell-expert-value" class="text-lg font-bold">-</div>
+          <div class="text-xs text-toss-sub mt-1">윤지호·박병창 Gemini 자동 분석</div>
+          <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📄 자세히 보기 →</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 올해 수익률 비교 (YTD) ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-bold">올해 수익률 비교</h2>
+        <span id="ytd-period" class="text-xs text-toss-sub">YTD</span>
+      </div>
+
+      <!-- 하이라이트: 구덩이 매매법 YTD -->
+      <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-5 mb-5">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
+            <span class="dot bg-toss-purple" style="width:8px;height:8px"></span>
+            구덩이 매매법
+          </span>
+          <span id="ytd-strategy-badge" class="chip bg-gray-100 text-toss-sub">-</span>
+        </div>
+        <div id="ytd-strategy-value" class="text-4xl font-extrabold num text-toss-blue">-</div>
+        <div id="ytd-strategy-note" class="text-xs text-toss-sub mt-1">-</div>
+      </div>
+
+      <!-- 바 비교 -->
+      <div id="ytd-bars" class="space-y-2.5 mb-5">
+        <!-- JS 렌더 -->
+      </div>
+
+      <!-- 누적 수익률 라인 차트 -->
+      <div class="pt-5 border-t border-toss-border">
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+          <div class="text-sm font-semibold text-toss-text">누적 수익률 추이</div>
+          <div id="ytd-benchmark-tabs" class="flex items-center gap-1 bg-toss-bg rounded-toss p-1">
+            <!-- JS 렌더 -->
+          </div>
+        </div>
+        <div style="height: 240px; position: relative;">
+          <canvas id="ytd-chart"></canvas>
+        </div>
+        <div class="mt-3 text-xs text-toss-sub leading-relaxed">
+          <div class="flex items-center gap-3 flex-wrap mb-1">
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #8B5CF6"></span>
+              매수1 · CNN&lt;10
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #F04452"></span>
+              매수2 · VIX&gt;25
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #F97316"></span>
+              매수3 · 강제청산
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:8px;height:8px;background:#00BF5C;transform:rotate(45deg)"></span>
+              매도1 · 레버리지 +100%
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:8px;height:8px;background:#3182F6;transform:rotate(45deg)"></span>
+              매도2 · 삼전/닉스 3일↑
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:8px;height:8px;background:#FFB900;transform:rotate(45deg)"></span>
+              매도3 · 전문가 경고
+            </span>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap mb-1">
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:10px;height:10px;background:rgba(240,68,82,0.4);border:1px solid rgba(240,68,82,0.8)"></span>
+              매수 3종 동시 발생일 (음영)
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span style="display:inline-block;width:10px;height:10px;background:rgba(0,191,92,0.4);border:1px solid rgba(0,191,92,0.8)"></span>
+              매도 3종 충족 · 사이클 리셋 (음영)
+            </span>
+          </div>
+          <div class="text-[11px]">각 시그널의 <strong>사이클 내 첫 발생일만</strong> 마커로 표시. 3종 동시 발생일은 세로 음영 띠로 강조 · 매도2·3은 오늘부터 누적 기록</div>
+        </div>
+      </div>
+
+      <!-- 월별 Breakdown -->
+      <div id="ytd-monthly-wrapper" class="pt-5 mt-5 border-t border-toss-border hidden">
+        <div class="text-sm font-semibold text-toss-text mb-3">월별 상세 (구덩이 매매법)</div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-left text-toss-sub border-b border-toss-border">
+              <tr>
+                <th class="py-2 px-2 font-semibold">월</th>
+                <th class="py-2 px-2 font-semibold text-right">월 수익률</th>
+                <th class="py-2 px-2 font-semibold text-right">월말 누적</th>
+                <th class="py-2 px-2 font-semibold text-right">월 중 최대 낙폭</th>
+              </tr>
+            </thead>
+            <tbody id="ytd-monthly-body"></tbody>
+          </table>
+        </div>
+        <div class="mt-2 text-[11px] text-toss-sub">월 MDD = 해당 달 내 peak → trough 최대 하락폭 (YTD 누적 수익률 기준)</div>
+      </div>
+    </section>
+
+    <!-- ===== 지수 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">주요 지수</h2>
+        <span class="text-xs text-toss-sub">현재가 · 52주 신고가 · 낙폭</span>
+      </div>
+      <div id="indices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- JS 렌더 -->
+      </div>
+    </section>
+
+    <!-- ===== 변동성 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">변동성 지표</h2>
+        <span class="text-xs text-toss-sub">시장 공포 심화 체크</span>
+      </div>
+      <div id="vol-grid" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <!-- JS 렌더 -->
+      </div>
+    </section>
+
+    <!-- ===== 심리 상세 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">심리 상세</h2>
+        <span class="text-xs text-toss-sub">CNN 구성요소 + 보조지표</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <div class="text-sm font-semibold text-toss-text mb-3">CNN Fear & Greed</div>
+
+          <!-- 종합 스코어 카드 -->
+          <div class="rounded-toss bg-toss-bg p-4 mb-4">
+            <div class="flex items-baseline justify-between mb-2">
+              <div class="flex items-baseline gap-1.5">
+                <span id="cnn-main-value" class="text-4xl font-extrabold num">-</span>
+                <span class="text-sm text-toss-sub">/ 100</span>
+              </div>
+              <span id="cnn-main-rating" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
+            <div class="gauge">
+              <div id="cnn-main-bar" class="gauge-fill" style="width:0%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-toss-sub mt-1.5">
+              <span>극단 공포</span>
+              <span>공포</span>
+              <span>중립</span>
+              <span>탐욕</span>
+              <span>극단 탐욕</span>
+            </div>
+          </div>
+
+          <div class="text-xs font-semibold text-toss-sub mb-2">구성요소 7개</div>
+          <div id="cnn-components" class="space-y-2">
+            <!-- JS 렌더 -->
+          </div>
+        </div>
+        <div id="sub-sentiment-wrapper">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-sm font-semibold text-toss-text">오늘의 과열/공포 뉴스</div>
+            <span id="news-ratio-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+          </div>
+
+          <!-- 카운트 비교 -->
+          <div class="rounded-toss bg-toss-bg p-4 mb-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="text-xs text-toss-sub mb-1 flex items-center gap-1.5">
+                  <span class="dot bg-toss-red" style="width:8px;height:8px"></span>과열 뉴스
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span id="news-greed-count" class="text-2xl font-extrabold num text-toss-red">-</span>
+                  <span class="text-xs text-toss-sub">건</span>
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-toss-sub mb-1 flex items-center gap-1.5">
+                  <span class="dot bg-toss-blue" style="width:8px;height:8px"></span>공포 뉴스
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span id="news-fear-count" class="text-2xl font-extrabold num text-toss-blue">-</span>
+                  <span class="text-xs text-toss-sub">건</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2 text-[10px] text-toss-sub">과열 &gt; 공포 → 탐욕 우세 · 공포 &gt; 과열 → 공포 우세</div>
+          </div>
+
+          <!-- 최신 헤드라인 -->
+          <div id="news-headlines" class="space-y-2"></div>
+          <div id="news-empty" class="hidden rounded-toss bg-toss-bg p-4 text-center text-toss-sub text-sm">
+            오늘 수집된 과열/공포 뉴스가 없어요
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 국내 수급 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">국내 수급</h2>
+        <span class="text-xs text-toss-sub">한국 주식시장 자금 흐름</span>
+      </div>
+      <div id="korea-flow" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- JS 렌더 -->
+      </div>
+    </section>
+
+    <!-- ===== 섹터 모멘텀 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">섹터 모멘텀</h2>
+        <span class="text-xs text-toss-sub">상대강도 · 로테이션 후보 체크</span>
+      </div>
+      <div id="sector-bars" class="space-y-3">
+        <!-- JS 렌더 -->
+      </div>
+      <div class="mt-4 text-xs text-toss-sub leading-relaxed">
+        💡 상대강도 &gt; 1.0 = 시장 대비 강세 / &lt; 1.0 = 약세. 반도체(SMH) 반등 선발대 → 로봇(BOTZ)·소프트웨어(IGV)로 전환 고려.
+      </div>
+    </section>
+
+    <!-- ===== 내 포지션 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">내 포지션</h2>
+        <span class="text-xs text-toss-sub">master_data.json</span>
+      </div>
+
+      <div id="position-stack" class="stack-bar mb-4">
+        <!-- JS 렌더 -->
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-sub"></span>
+            <span class="text-xs font-semibold text-toss-text">현금</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-cash">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-blue"></span>
+            <span class="text-xs font-semibold text-toss-text">코어</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-core">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-purple"></span>
+            <span class="text-xs font-semibold text-toss-text">위성</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-sat">-</div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-toss-border">
+        <div class="text-sm font-semibold text-toss-text mb-3">위성 평균단가</div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-toss bg-toss-bg p-3">
+            <div class="text-xs text-toss-sub">TQQQ</div>
+            <div class="text-lg font-bold num" id="avg-tqqq">-</div>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-3">
+            <div class="text-xs text-toss-sub">SOXL</div>
+            <div class="text-lg font-bold num" id="avg-soxl">-</div>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-3">
+            <div class="text-xs text-toss-sub">KORU</div>
+            <div class="text-lg font-bold num" id="avg-koru">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="position-memo" class="mt-4 p-3 bg-toss-blueL text-toss-blue text-sm rounded-toss font-medium hidden"></div>
+    </section>
+
+    <footer class="text-center py-8 text-xs text-toss-sub">
+      <div>봇 <span class="chip bg-toss-greenL text-toss-green"><span class="dot bg-toss-green"></span>Running</span> · Pitinvest v21.0 엔진</div>
+      <div class="mt-2">Not financial advice · 개인 매매 원칙 기록</div>
+    </footer>
+
+  </main>
+
+  <!-- ===== 전문가 분석 상세 모달 ===== -->
+  <div id="expert-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeExpertModal(event)">
+    <div class="bg-toss-card rounded-tossLg max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-toss animate-fadein" onclick="event.stopPropagation()">
+      <div class="p-6 border-b border-toss-border sticky top-0 bg-toss-card flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold">🎙️ 전문가 분석</h2>
+          <div id="expert-modal-date" class="text-xs text-toss-sub mt-1">-</div>
+        </div>
+        <button onclick="closeExpertModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
+      </div>
+      <div class="p-6">
+        <div id="expert-modal-empty" class="hidden text-center py-10 text-toss-sub text-sm">
+          오늘 박병창·윤지호 영상이 없고, 직전 분석 데이터도 없어요.
+        </div>
+        <div id="expert-modal-content" class="space-y-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav id="bottom-nav"></nav>
+
+  <!-- ====== JS ====== -->
+  <script src="assets/common.js"></script>
+  <script>
+    PI.initNav('home');
+
+    // ============================================================
+    // 렌더링 함수들
+    // ============================================================
+
+    function renderHero(stage, snapshot) {
+      const st = PI.STAGE_STYLE[stage.color];
+      PI.$('hero-stage').textContent = stage.label;
+      PI.$('hero-desc').textContent  = stage.desc;
+      PI.$('hero-dot').className     = 'dot ' + st.dot;
+      PI.$('hero-dot').style.width   = '10px';
+      PI.$('hero-dot').style.height  = '10px';
+      PI.$('hero-chip').className    = 'chip ' + st.chipBg + ' ' + st.chipTx;
+      PI.$('hero-chip').textContent  = stage.label;
+      PI.$('hero-updated').textContent = snapshot?.timestamp
+        ? new Date(snapshot.timestamp).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        : '-';
+      PI.$('hero-action').textContent = snapshot?.recommended_action || '데이터 수집 중';
+    }
+
+    function renderEmergency(nasdaqDrop, kospiDrop) {
+      const draw = (dropPct, elId, barId) => {
+        const el = PI.$(elId);
+        const bar = PI.$(barId);
+        if (dropPct === null || dropPct === undefined) {
+          el.textContent = '-'; bar.style.width = '0%';
+          return;
+        }
+        const abs = Math.abs(dropPct);
+        const fillPct = Math.min(100, (abs / 10) * 100);
+        el.textContent = PI.fmtPct(dropPct);
+        bar.style.width = fillPct + '%';
+        bar.className = 'gauge-fill ' + (abs >= 10 ? 'bg-toss-red' : abs >= 7 ? 'bg-toss-yellow' : 'bg-toss-green');
+      };
+      draw(nasdaqDrop, 'em-nasdaq', 'em-nasdaq-bar');
+      draw(kospiDrop, 'em-kospi', 'em-kospi-bar');
+    }
+
+    function renderConditions(snapshot) {
+      const sig = snapshot?.signals || {};
+      const count = sig.count || 0;
+      PI.$('cond-count').textContent = `충족 ${count} / 3`;
+      PI.$('cond-count').className = 'chip ' + (count >= 3 ? 'bg-toss-redL text-toss-red' : count >= 1 ? 'bg-toss-yellowL text-toss-yellow' : 'bg-gray-100 text-toss-sub');
+
+      const render = (triggered, chipEl, valueEl, valueText) => {
+        PI.$(chipEl).textContent = triggered ? '충족 ✓' : '미충족';
+        PI.$(chipEl).className = 'chip ' + (triggered ? 'bg-toss-redL text-toss-red' : 'bg-gray-100 text-toss-sub');
+        PI.$(valueEl).textContent = valueText;
+      };
+
+      const cnn    = snapshot?.sentiment?.cnn_fng;
+      const vix    = snapshot?.volatility?.vix;
+      const retail = snapshot?.korea_flow?.retail_net_buy_krw;
+      const news   = snapshot?.korea_flow?.news_count;
+
+      render(sig.cnn_under_10, 'cond-cnn-chip', 'cond-cnn-value', cnn != null ? PI.fmt(cnn, 0) : '-');
+      render(sig.vix_over_25,  'cond-vix-chip', 'cond-vix-value', vix != null ? PI.fmt(vix, 1) : '-');
+      render(sig.margin_call_trigger, 'cond-margin-chip', 'cond-margin-value', retail != null ? PI.fmtKrwUnit(retail) : '-');
+      PI.$('cond-margin-news').textContent = news != null ? news : '-';
+    }
+
+    function renderSellConditions(snapshot, exit) {
+      const sell = (snapshot && snapshot.sell_signals) || {};
+      const profits = (snapshot && snapshot.leverage_profit) || {};
+
+      // --- 조건 1: 레버리지 수익률 ---
+      const paint = (elId, val) => {
+        const el = PI.$(elId);
+        if (val === null || val === undefined || isNaN(val)) {
+          el.textContent = '-';
+          el.className = 'font-bold num';
+          return;
+        }
+        el.textContent = PI.fmtPct(val, 1);
+        el.className = 'font-bold num ' + (val >= 100 ? 'text-toss-red' : val > 0 ? 'text-toss-green' : val < 0 ? 'text-toss-red' : '');
+      };
+      const tq = profits.tqqq_profit_pct;
+      const sx = profits.soxl_profit_pct;
+      const kr = profits.koru_profit_pct;
+      paint('sell-tqqq-profit', tq);
+      paint('sell-soxl-profit', sx);
+      paint('sell-koru-profit', kr);
+      const profitTriggered = [tq, sx, kr].some(v => v !== null && v !== undefined && !isNaN(v) && v >= 100);
+
+      // --- 조건 2: 주도주 3일+ 상승 ---
+      const leadingTriggered = !!sell.leading_stock_rising_3d;
+      const leadingVal = PI.$('sell-leading-value');
+      if (sell.leading_stock_rising_3d === undefined || sell.leading_stock_rising_3d === null) {
+        leadingVal.textContent = '-';
+      } else {
+        leadingVal.textContent = leadingTriggered ? '상승 지속 ✓' : '대기 중';
+        leadingVal.className = 'text-lg font-bold ' + (leadingTriggered ? 'text-toss-red' : '');
+      }
+
+      // --- 조건 3: 전문가 경고 ---
+      const expertTriggered = (exit && exit.expert_sell_view === true) || !!sell.expert_warning;
+      const expertVal = PI.$('sell-expert-value');
+      expertVal.textContent = expertTriggered ? '경고 발생 ⚠' : '없음';
+      expertVal.className = 'text-lg font-bold ' + (expertTriggered ? 'text-toss-red' : '');
+
+      // --- 칩 ---
+      const setChip = (id, triggered) => {
+        const el = PI.$(id);
+        el.textContent = triggered ? '충족 ✓' : '미충족';
+        el.className = 'chip ' + (triggered ? 'bg-toss-redL text-toss-red' : 'bg-gray-100 text-toss-sub');
+      };
+      setChip('sell-profit-chip', profitTriggered);
+      setChip('sell-leading-chip', leadingTriggered);
+      setChip('sell-expert-chip', expertTriggered);
+
+      // --- 충족 카운트 ---
+      const count = [profitTriggered, leadingTriggered, expertTriggered].filter(Boolean).length;
+      const cc = PI.$('sell-count');
+      cc.textContent = `충족 ${count} / 3`;
+      cc.className = 'chip ' + (count >= 2 ? 'bg-toss-redL text-toss-red' : count >= 1 ? 'bg-toss-yellowL text-toss-yellow' : 'bg-gray-100 text-toss-sub');
+    }
+
+    function renderIndices(indices) {
+      const order = [
+        { key: 'nasdaq',    label: '나스닥',    sub: 'NASDAQ' },
+        { key: 'kospi',     label: '코스피',    sub: 'KOSPI' },
+        { key: 'kosdaq',    label: '코스닥',    sub: 'KOSDAQ' },
+        { key: 'sp500',     label: 'S&P 500',  sub: 'SPX' },
+        { key: 'russell2k', label: '러셀2000',  sub: 'RUT' },
+        { key: 'soxx',      label: 'SOXX',     sub: '반도체' },
+      ];
+      const grid = PI.$('indices-grid');
+      // null/미수집 지수는 건너뜀
+      grid.innerHTML = order.filter(({ key }) => {
+        const d = (indices || {})[key];
+        return d && d.current != null;
+      }).map(({ key, label, sub }) => {
+        const d = (indices || {})[key] || {};
+        const drop = d.drop_pct;
+        const dropColor = drop === undefined || drop === null ? 'text-toss-sub' :
+                          drop <= -10 ? 'text-toss-red' :
+                          drop <= -5  ? 'text-toss-yellow' :
+                          'text-toss-green';
+        return `
+          <div class="rounded-toss bg-toss-bg p-4 card-hover">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold">${label}</span>
+              <span class="text-xs text-toss-sub">${sub}</span>
+            </div>
+            <div class="text-2xl font-extrabold num mb-1">${PI.fmt(d.current, 2)}</div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-toss-sub">신고가 ${PI.fmt(d.high_52w, 2)}</span>
+              <span class="font-bold ${dropColor}">${PI.fmtPct(drop)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderVolatility(vol) {
+      const items = [
+        { key: 'vix',    label: 'VIX',    note: 'S&P500 변동성' },
+        { key: 'vvix',   label: 'VVIX',   note: 'VIX 변동성' },
+        { key: 'skew',   label: 'SKEW',   note: '꼬리 위험' },
+        { key: 'move',   label: 'MOVE',   note: '채권 변동성' },
+        { key: 'vkospi', label: 'VKOSPI', note: '코스피 변동성' },
+      ];
+      const v = vol || {};
+      const available = items.filter(x => v[x.key] != null);
+      // 개수에 맞춰 그리드 컬럼 자동 조정 (2~5 반응형)
+      const n = Math.max(1, available.length);
+      const gridCls = n >= 5 ? 'md:grid-cols-5' : n === 4 ? 'md:grid-cols-4' : n === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2';
+      const grid = PI.$('vol-grid');
+      grid.className = `grid grid-cols-2 ${gridCls} gap-3`;
+      grid.innerHTML = available.map(({ key, label, note }) => `
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="text-xs text-toss-sub mb-1">${label}</div>
+          <div class="text-2xl font-extrabold num">${PI.fmt(v[key], 1)}</div>
+          <div class="text-xs text-toss-sub mt-1">${note}</div>
+        </div>
+      `).join('');
+    }
+
+    function cnnRating(v) {
+      if (v === null || v === undefined) return { text: '-', chip: 'bg-gray-100 text-toss-sub', bar: 'bg-gray-300' };
+      if (v < 25) return { text: '극단적 공포', chip: 'bg-toss-redL text-toss-red',       bar: 'bg-toss-red' };
+      if (v < 45) return { text: '공포',       chip: 'bg-orange-100 text-orange-600',     bar: 'bg-toss-yellow' };
+      if (v < 55) return { text: '중립',       chip: 'bg-gray-100 text-toss-sub',         bar: 'bg-toss-sub' };
+      if (v < 75) return { text: '탐욕',       chip: 'bg-toss-greenL text-toss-green',    bar: 'bg-toss-green' };
+      return                 { text: '극단적 탐욕', chip: 'bg-toss-greenL text-toss-green', bar: 'bg-toss-green' };
+    }
+
+    function renderCnnComponents(sentiment) {
+      // 종합 CNN 값
+      const main = sentiment && sentiment.cnn_fng;
+      const mainEl = PI.$('cnn-main-value');
+      const ratingEl = PI.$('cnn-main-rating');
+      const barEl = PI.$('cnn-main-bar');
+      const rat = cnnRating(main);
+      if (main !== null && main !== undefined) {
+        mainEl.textContent = Number(main).toFixed(0);
+        barEl.style.width = Math.max(0, Math.min(100, main)) + '%';
+      } else {
+        mainEl.textContent = '-';
+        barEl.style.width = '0%';
+      }
+      barEl.className = 'gauge-fill ' + rat.bar;
+      ratingEl.textContent = rat.text;
+      ratingEl.className = 'chip ' + rat.chip;
+
+      // 구성요소 — null인 것은 표시 안 함
+      const components = (sentiment && sentiment.cnn_components) || {};
+      const order = [
+        ['momentum',   '주가 모멘텀'],
+        ['strength',   '주가 강도'],
+        ['breadth',    '주가 폭'],
+        ['put_call',   '풋/콜 비율'],
+        ['junk_bond',  '정크본드'],
+        ['volatility', '변동성'],
+        ['safe_haven', '안전자산 수요'],
+      ];
+      const availComp = order.filter(([key]) => components[key] != null);
+      PI.$('cnn-components').innerHTML = availComp.map(([key, label]) => {
+        const val = Number(components[key]);
+        const pct = Math.max(0, Math.min(100, val));
+        const color = val < 25 ? 'bg-toss-red' :
+                      val < 45 ? 'bg-toss-yellow' :
+                      val < 55 ? 'bg-toss-sub' :
+                                 'bg-toss-green';
+        return `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-toss-text">${label}</span>
+              <span class="text-sm font-bold num">${val}</span>
+            </div>
+            <div class="gauge"><div class="gauge-fill ${color}" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }).join('');
+
+      // 과열/공포 뉴스 플로우 렌더
+      renderNewsSentiment(sentiment?.news_sentiment);
+    }
+
+    function renderNewsSentiment(ns) {
+      const headlinesEl = PI.$('news-headlines');
+      const emptyEl     = PI.$('news-empty');
+      const chipEl      = PI.$('news-ratio-chip');
+
+      if (!ns) {
+        PI.$('news-greed-count').textContent = '-';
+        PI.$('news-fear-count').textContent  = '-';
+        headlinesEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        chipEl.textContent = '-';
+        chipEl.className = 'chip bg-gray-100 text-toss-sub';
+        return;
+      }
+
+      const g = ns.greed_count || 0;
+      const f = ns.fear_count  || 0;
+      PI.$('news-greed-count').textContent = g;
+      PI.$('news-fear-count').textContent  = f;
+
+      // 우세 판정 칩
+      if (g === 0 && f === 0) {
+        chipEl.textContent = '수집 없음';
+        chipEl.className = 'chip bg-gray-100 text-toss-sub';
+      } else if (g > f) {
+        chipEl.textContent = `탐욕 우세 +${g - f}`;
+        chipEl.className = 'chip bg-toss-redL text-toss-red';
+      } else if (f > g) {
+        chipEl.textContent = `공포 우세 +${f - g}`;
+        chipEl.className = 'chip bg-toss-blueL text-toss-blue';
+      } else {
+        chipEl.textContent = '중립';
+        chipEl.className = 'chip bg-gray-100 text-toss-sub';
+      }
+
+      // 헤드라인: 과열 top 3 + 공포 top 3 → 발행시간 순 정렬 → top 5 노출
+      const greed = (ns.greed_articles || []).slice(0, 3).map(a => ({ ...a, type: 'greed' }));
+      const fear  = (ns.fear_articles  || []).slice(0, 3).map(a => ({ ...a, type: 'fear'  }));
+      const all = [...greed, ...fear].filter(a => a.title);
+      all.sort((a, b) => {
+        const da = a.pub_date ? new Date(a.pub_date).getTime() : 0;
+        const db = b.pub_date ? new Date(b.pub_date).getTime() : 0;
+        return db - da;
+      });
+      const top = all.slice(0, 5);
+
+      if (top.length === 0) {
+        headlinesEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      headlinesEl.innerHTML = top.map(a => {
+        const chip = a.type === 'greed'
+          ? '<span class="chip bg-toss-redL text-toss-red" style="font-size:10px;padding:2px 6px;">과열</span>'
+          : '<span class="chip bg-toss-blueL text-toss-blue" style="font-size:10px;padding:2px 6px;">공포</span>';
+        let timeStr = '';
+        if (a.pub_date) {
+          try {
+            const d = new Date(a.pub_date);
+            timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+          } catch {}
+        }
+        // 제목에서 " - 출처" 꼬리 제거
+        let title = a.title;
+        if (a.source && title.endsWith(' - ' + a.source)) {
+          title = title.slice(0, -(a.source.length + 3));
+        }
+        return `
+          <a href="${a.link || '#'}" target="_blank" rel="noopener" class="block rounded-toss bg-toss-bg p-3 hover:bg-gray-100 transition">
+            <div class="flex items-start gap-2">
+              ${chip}
+              <div class="text-sm text-toss-dark leading-snug flex-1">${title}</div>
+            </div>
+            <div class="text-[10px] text-toss-sub mt-1">${a.source || '-'}${timeStr ? ' · ' + timeStr : ''}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderKoreaFlow(k) {
+      const items = [
+        { key: 'foreign_inst_buy_krw',   label: '외인+기관 순매수' },
+        { key: 'retail_net_buy_krw',     label: '개인 순매수' },
+        { key: 'margin_loan_krw',        label: '신용잔고',        note: '증시자금동향' },
+        { key: 'short_sale_balance',     label: '공매도 잔고' },
+        { key: 'foreign_ownership_pct',  label: '외인 시총 비중', isPct: true },
+      ];
+      const kf = k || {};
+      const available = items.filter(x => kf[x.key] != null);
+      const grid = PI.$('korea-flow');
+      // 컬럼 반응형 (1~5)
+      const n = Math.max(1, available.length);
+      const gridCls = n >= 4 ? 'md:grid-cols-2 lg:grid-cols-4'
+                    : n === 3 ? 'md:grid-cols-3'
+                    : n === 2 ? 'md:grid-cols-2'
+                              : 'md:grid-cols-1';
+      grid.className = `grid grid-cols-1 ${gridCls} gap-3`;
+      grid.innerHTML = available.map(({ key, label, isPct, note }) => {
+        const v = kf[key];
+        const valText = isPct ? `${Number(v).toFixed(1)}%` : PI.fmtKrwUnit(v);
+        const color = v > 0 ? 'text-toss-green' : v < 0 ? 'text-toss-red' : '';
+        return `
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="text-xs text-toss-sub mb-1">${label}</div>
+            <div class="text-xl font-extrabold num ${color}">${valText}</div>
+            ${note ? `<div class="text-[10px] text-toss-sub mt-1">${note}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSectors(sector) {
+      const order = [
+        { key: 'XLK',  label: '기술(XLK)'        },
+        { key: 'SMH',  label: '반도체(SMH)'      },
+        { key: 'BOTZ', label: '로봇(BOTZ)'       },
+        { key: 'IGV',  label: '소프트웨어(IGV)'  },
+        { key: 'XLF',  label: '금융(XLF)'        },
+        { key: 'XLE',  label: '에너지(XLE)'      },
+      ];
+      PI.$('sector-bars').innerHTML = order.map(({ key, label }) => {
+        const v = (sector || {})[key];
+        const rs = v !== undefined ? Number(v) : null;
+        // 0.8 ~ 1.2 범위를 0~100%로 매핑
+        const pct = rs !== null ? Math.max(0, Math.min(100, ((rs - 0.8) / 0.4) * 100)) : 0;
+        const color = rs === null ? 'bg-gray-300' :
+                      rs >= 1.1 ? 'bg-toss-green' :
+                      rs >= 1.0 ? 'bg-toss-blue' :
+                      rs >= 0.9 ? 'bg-toss-sub' :
+                                  'bg-toss-red';
+        return `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-toss-text">${label}</span>
+              <span class="text-sm font-bold num">${rs !== null ? rs.toFixed(2) : '-'}</span>
+            </div>
+            <div class="gauge"><div class="gauge-fill ${color}" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // YTD 비교 상태
+    const YTD_SPECS = [
+      { key: 'nasdaq_close', label: '나스닥',  short: '나스닥',  hex: '#3182F6' },
+      { key: 'sp500_close',  label: 'S&P 500', short: 'S&P',    hex: '#00BF5C' },
+      { key: 'soxx_close',   label: 'SOXX',    short: 'SOXX',   hex: '#F04452' },
+      { key: 'kospi_close',  label: '코스피',  short: '코스피', hex: '#FFB900' },
+    ];
+    let _ytdState = {
+      rows: [], benchmarks: [], strategyRet: null,
+      selectedKey: 'nasdaq_close',
+      markers: { buyCnn: new Set(), buyVix: new Set(), buyMargin: new Set(), sellLev: new Set() },
+    };
+
+    // 매수/매도 마커 계산 — 슬롯별 첫 발생일만 (사이클 리셋 시 슬롯 초기화)
+    function computeSignalMarkers(rows) {
+      const markers = {
+        buyCnn: new Set(),     // 매수1 · CNN<10 첫 발생
+        buyVix: new Set(),     // 매수2 · VIX>25 첫 발생
+        buyMargin: new Set(),  // 매수3 · 강제청산 첫 발생
+        sellLev: new Set(),    // 매도1 · 레버리지 +100% 첫 돌파
+        sellLead: new Set(),   // 매도2 · 주도주 3일↑ 첫 발생
+        sellExpert: new Set(), // 매도3 · 전문가 경고 첫 발생
+        tripleBuy: new Set(),  // 매수 3종(CNN+VIX+margin) 동시 발생일
+        tripleSell: new Set(), // 매도 3종(레버리지+주도주+전문가) 동시 발생일
+      };
+
+      let buySlots = { cnn: false, vix: false, margin: false };
+      let sellSlots = { lev: false, lead: false, expert: false };
+      let events = [];  // 이론 평단 계산용 (JS 시뮬레이션)
+      let cumAmount = 0;
+      let simSellLevFired = false;
+      const _n = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
+
+      rows.forEach((r, i) => {
+        // 사이클 리셋 감지 (ratio_sat=0)
+        const sat = parseFloat(r.ratio_sat);
+        if (!isNaN(sat) && sat === 0 && i > 0) {
+          buySlots = { cnn: false, vix: false, margin: false };
+          sellSlots = { lev: false, lead: false, expert: false };
+          events = [];
+          cumAmount = 0;
+          simSellLevFired = false;
+        }
+
+        // ----- 매수 -----
+        const c  = parseInt(r.cnn_trigger)    === 1;
+        const v  = parseInt(r.vix_trigger)    === 1;
+        const mg = parseInt(r.margin_trigger) === 1;
+        if (c && v && mg) markers.tripleBuy.add(i);
+
+        let pct = 0;
+        if (c && !buySlots.cnn)    { pct += 20; buySlots.cnn = true;    markers.buyCnn.add(i); }
+        if (v && !buySlots.vix)    { pct += 20; buySlots.vix = true;    markers.buyVix.add(i); }
+        if (mg && !buySlots.margin){ pct += 20; buySlots.margin = true; markers.buyMargin.add(i); }
+        if (buySlots.cnn && buySlots.vix && buySlots.margin && cumAmount < 100) pct += 5;
+        if (pct > 0 && cumAmount < 100) {
+          const take = Math.min(pct, 100 - cumAmount);
+          events.push({ tqqq: _n(r.tqqq_close), soxl: _n(r.soxl_close), koru: _n(r.koru_close), amount: take });
+          cumAmount += take;
+        }
+
+        // ----- 매도1: CSV 컬럼 OR JS 시뮬 (과거 대응) -----
+        const csvSellLev = parseInt(r.sell_leverage_trigger) === 1;
+        let simSellLev = false;
+        if (!simSellLevFired && events.length > 0) {
+          for (const t of ['tqqq', 'soxl', 'koru']) {
+            let cost = 0, wt = 0;
+            for (const e of events) {
+              if (e[t] != null) { cost += e[t] * e.amount; wt += e.amount; }
+            }
+            if (wt === 0) continue;
+            const avg = cost / wt;
+            const cur = _n(r[`${t}_close`]);
+            if (cur != null && cur / avg >= 2.0) { simSellLev = true; break; }
+          }
+          if (simSellLev) simSellLevFired = true;
+        }
+        if ((csvSellLev || simSellLev) && !sellSlots.lev) {
+          sellSlots.lev = true;
+          markers.sellLev.add(i);
+        }
+
+        // ----- 매도2: 주도주 (CSV 컬럼) -----
+        const csvSellLead = parseInt(r.sell_leading_trigger) === 1;
+        if (csvSellLead && !sellSlots.lead) {
+          sellSlots.lead = true;
+          markers.sellLead.add(i);
+        }
+
+        // ----- 매도3: 전문가 경고 (CSV 컬럼) -----
+        const csvSellExpert = parseInt(r.sell_expert_trigger) === 1;
+        if (csvSellExpert && !sellSlots.expert) {
+          sellSlots.expert = true;
+          markers.sellExpert.add(i);
+        }
+
+        // 매도 3종 동시 발생일 (2/27처럼 백필 강제 또는 향후 실제)
+        if (csvSellLev && csvSellLead && csvSellExpert) markers.tripleSell.add(i);
+      });
+
+      return markers;
+    }
+
+    async function renderYtdComparison(snapshot, exit) {
+      try {
+        const text = await PI.fetchText(PI.URLS.history);
+        const rows = PI.parseCSV(text);
+        if (rows.length < 2) return;
+
+        // YTD 행 필터 (올해)
+        const year = new Date().getFullYear();
+        const ytdRows = rows.filter(r => r.date && r.date >= `${year}-01-01`);
+        const workRows = ytdRows.length >= 2 ? ytdRows : rows;
+        if (workRows.length < 2) return;
+
+        const first = workRows[0];
+        const last  = workRows[workRows.length - 1];
+        PI.$('ytd-period').textContent = `${first.date} ~ ${last.date}`;
+
+        // 벤치마크 수익률 계산
+        const benchmarks = [];
+        for (const s of YTD_SPECS) {
+          const f = parseFloat(first[s.key]);
+          const l = parseFloat(last[s.key]);
+          if (!isNaN(f) && !isNaN(l) && f > 0) {
+            benchmarks.push({ ...s, ret: (l / f - 1) * 100 });
+          }
+        }
+
+        const strategyRet  = snapshot?.ytd_returns?.strategy_pct;
+        const strategyNote = snapshot?.ytd_returns?.calc_note || '';
+
+        // 매수/매도 시그널 마커 계산 (슬롯별 첫 발생만)
+        const markers = computeSignalMarkers(workRows);
+
+        // 전략 일별 시리즈 + 월별 breakdown (snapshot.ytd_returns)
+        const strategyDaily = snapshot?.ytd_returns?.daily_series || [];
+        const monthlyBreakdown = snapshot?.ytd_returns?.monthly_breakdown || [];
+
+        // 상태 저장
+        _ytdState = {
+          rows: workRows, benchmarks, strategyRet, strategyDaily,
+          selectedKey: 'nasdaq_close',
+          markers,
+        };
+
+        // 월별 breakdown 렌더
+        renderMonthlyBreakdown(monthlyBreakdown);
+
+        // 바 비교 (구덩이 매매법 + 4개 벤치마크)
+        const bars = [
+          strategyRet !== undefined && strategyRet !== null
+            ? { label: '구덩이 매매법', hex: '#8B5CF6', ret: strategyRet, highlight: true }
+            : null,
+          ...benchmarks.map(b => ({ label: b.label, hex: b.hex, ret: b.ret })),
+        ].filter(Boolean);
+
+        const maxAbs = Math.max(...bars.map(b => Math.abs(b.ret)), 1);
+        PI.$('ytd-bars').innerHTML = bars.map(b => {
+          const retColor = b.ret >= 0 ? 'text-toss-green' : 'text-toss-red';
+          const width = (Math.abs(b.ret) / maxAbs) * 100;
+          const label = b.highlight
+            ? `<span class="font-extrabold">${b.label}</span> <span class="chip bg-toss-purpleL text-toss-purple ml-1" style="padding:1px 6px;font-size:10px;">전략</span>`
+            : `<span class="font-semibold text-toss-text">${b.label}</span>`;
+          return `
+            <div class="flex items-center gap-3">
+              <div class="w-44 text-sm">${label}</div>
+              <div class="flex-1 gauge"><div class="gauge-fill" style="width:${width}%;background:${b.hex}"></div></div>
+              <div class="w-20 text-right text-sm font-bold num ${retColor}">${PI.fmtPct(b.ret, 2)}</div>
+            </div>
+          `;
+        }).join('');
+
+        // 전략 노트
+        PI.$('ytd-strategy-note').textContent = strategyNote || (strategyRet === undefined || strategyRet === null ? '전략 수익률은 봇이 백테스트 후 기록합니다' : '코어(QQQ/SOXX/EWY) 평시 · 매수 신호 시 위성(TQQQ/SOXL/KORU)으로 단계 이동 · 매도 3조건/긴급탈출 시 현금화');
+
+        // 벤치마크 탭 렌더
+        renderBenchmarkTabs();
+
+        // 초기 선택 벤치마크(나스닥) 으로 하이라이트 + 차트
+        updateYtdSelection(_ytdState.selectedKey);
+
+      } catch (e) {
+        console.error('YTD 비교 실패', e);
+      }
+    }
+
+    function renderMonthlyBreakdown(monthly) {
+      const wrapper = PI.$('ytd-monthly-wrapper');
+      const body    = PI.$('ytd-monthly-body');
+      if (!monthly || monthly.length === 0) {
+        wrapper.classList.add('hidden');
+        return;
+      }
+      wrapper.classList.remove('hidden');
+      body.innerHTML = monthly.map(m => {
+        const retColor = m.return_pct >= 0 ? 'text-toss-green' : 'text-toss-red';
+        const cumColor = m.end_ret_pct >= 0 ? 'text-toss-green' : 'text-toss-red';
+        const ddColor  = m.max_dd_pct >= 10 ? 'text-toss-red' : m.max_dd_pct >= 5 ? 'text-toss-yellow' : 'text-toss-sub';
+        return `
+          <tr class="border-b border-toss-border hover:bg-toss-bg">
+            <td class="py-2 px-2 font-semibold">${m.month}</td>
+            <td class="py-2 px-2 text-right num font-bold ${retColor}">${PI.fmtPct(m.return_pct, 2)}</td>
+            <td class="py-2 px-2 text-right num ${cumColor}">${PI.fmtPct(m.end_ret_pct, 2)}</td>
+            <td class="py-2 px-2 text-right num ${ddColor}">−${Number(m.max_dd_pct).toFixed(2)}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderBenchmarkTabs() {
+      const container = PI.$('ytd-benchmark-tabs');
+      if (!container) return;
+      container.innerHTML = YTD_SPECS.map(s => `
+        <button data-key="${s.key}" class="ytd-tab px-3 py-1.5 text-xs font-semibold rounded-toss transition">
+          ${s.short}
+        </button>
+      `).join('');
+      container.querySelectorAll('.ytd-tab').forEach(btn => {
+        btn.addEventListener('click', () => updateYtdSelection(btn.dataset.key));
+      });
+    }
+
+    function updateYtdSelection(key) {
+      _ytdState.selectedKey = key;
+      const sel = YTD_SPECS.find(s => s.key === key);
+      const bm = _ytdState.benchmarks.find(b => b.key === key);
+
+      // 탭 활성 스타일
+      document.querySelectorAll('.ytd-tab').forEach(btn => {
+        const on = btn.dataset.key === key;
+        btn.className = 'ytd-tab px-3 py-1.5 text-xs font-semibold rounded-toss transition ' + (
+          on ? 'bg-white text-toss-dark shadow-toss' : 'text-toss-sub hover:text-toss-dark'
+        );
+      });
+
+      // 전략 하이라이트 값 + 벤치마크 대비 뱃지
+      const sRet = _ytdState.strategyRet;
+      if (sRet !== undefined && sRet !== null && !isNaN(sRet)) {
+        const el = PI.$('ytd-strategy-value');
+        el.textContent = PI.fmtPct(sRet, 2);
+        el.className = 'text-4xl font-extrabold num ' + (sRet >= 0 ? 'text-toss-blue' : 'text-toss-red');
+
+        const badge = PI.$('ytd-strategy-badge');
+        if (bm && sel) {
+          const delta = sRet - bm.ret;
+          badge.textContent = `vs ${sel.short} ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%p`;
+          badge.className = 'chip ' + (delta >= 0 ? 'bg-toss-greenL text-toss-green' : 'bg-toss-redL text-toss-red');
+        } else {
+          badge.textContent = '-';
+          badge.className = 'chip bg-gray-100 text-toss-sub';
+        }
+      } else {
+        PI.$('ytd-strategy-value').textContent = '-';
+      }
+
+      // 라인 차트 재렌더 (전략 + 선택 1개)
+      renderYtdLineChart(_ytdState.rows, sRet, sel);
+    }
+
+    function renderYtdLineChart(rows, strategyFinal, selectedSpec) {
+      const ctx = PI.$('ytd-chart').getContext('2d');
+      const dates = rows.map(r => r.date);
+
+      const cum = (key) => {
+        const first = parseFloat(rows[0][key]);
+        if (isNaN(first) || first <= 0) return null;
+        return rows.map(r => {
+          const v = parseFloat(r[key]);
+          return isNaN(v) ? null : (v / first - 1) * 100;
+        });
+      };
+
+      const datasets = [];
+
+      // 전략 라인 — 실제 백테스트 결과 (snapshot.ytd_returns.daily_series)
+      const strategyDaily = _ytdState.strategyDaily || [];
+      if (strategyDaily.length > 0) {
+        // date → ret_pct 맵
+        const map = {};
+        strategyDaily.forEach(d => { if (d && d.date) map[d.date] = d.ret_pct; });
+        const strategyData = dates.map(d => (d in map ? map[d] : null));
+        datasets.push({
+          label: '구덩이 매매법',
+          data: strategyData,
+          borderColor: '#8B5CF6',
+          borderWidth: 3,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          backgroundColor: '#8B5CF620',
+          spanGaps: true,  // null 구간은 건너뛰고 연결
+        });
+      }
+
+      // 선택된 벤치마크 하나
+      if (selectedSpec) {
+        const data = cum(selectedSpec.key);
+        if (data) {
+          datasets.push({
+            label: selectedSpec.label,
+            data,
+            borderColor: selectedSpec.hex,
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            backgroundColor: selectedSpec.hex + '15',
+          });
+
+          // 매수/매도 시그널 마커 (슬롯별 첫 발생일만 · 색깔 구분)
+          const M = _ytdState.markers || {};
+          const markerSpecs = [
+            { label: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
+            { label: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
+            { label: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
+            { label: '매도1 · 레버리지 +100%',  set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
+            { label: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
+            { label: '매도3 · 전문가 경고',     set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
+          ];
+          markerSpecs.forEach(ms => {
+            if (!ms.set || ms.set.size === 0) return;
+            datasets.push({
+              label: ms.label,
+              data: data.map((v, i) => ms.set.has(i) ? v : null),
+              borderColor: 'transparent',
+              backgroundColor: ms.color,
+              pointRadius: 8,
+              pointHoverRadius: 11,
+              pointStyle: ms.style,
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              showLine: false,
+            });
+          });
+        }
+      }
+
+      // 배경 음영 플러그인: 매수/매도 3종 동시 발생일에 세로 음영 띠
+      const signalBackgroundPlugin = {
+        id: 'signalBackground',
+        beforeDatasetsDraw(chart) {
+          const { ctx: c, chartArea, scales } = chart;
+          if (!chartArea || !scales.x) return;
+          const M = _ytdState.markers || {};
+          const p0 = scales.x.getPixelForValue(0);
+          const p1 = scales.x.getPixelForValue(1);
+          const dx = Math.abs((p1 || 0) - (p0 || 0)) || 6;
+          const barWidth = Math.max(6, Math.min(dx * 0.9, 28));
+
+          const drawBand = (set, color) => {
+            (set || new Set()).forEach(idx => {
+              const x = scales.x.getPixelForValue(idx);
+              if (isNaN(x)) return;
+              c.fillStyle = color;
+              c.fillRect(x - barWidth / 2, chartArea.top, barWidth, chartArea.bottom - chartArea.top);
+            });
+          };
+
+          drawBand(M.tripleBuy,  'rgba(240, 68, 82, 0.15)');   // 연한 빨강 (매수 3종)
+          drawBand(M.tripleSell, 'rgba(0, 191, 92, 0.15)');    // 연한 초록 (매도 3종)
+        }
+      };
+
+      if (window._ytdChart) window._ytdChart.destroy();
+      window._ytdChart = new Chart(ctx, {
+        type: 'line',
+        plugins: [signalBackgroundPlugin],
+        data: { labels: dates, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top', align: 'end',
+              labels: { font: { family: 'Pretendard', weight: 600 }, boxWidth: 10, boxHeight: 10, padding: 8 }
+            },
+            tooltip: {
+              backgroundColor: '#191F28', padding: 10,
+              titleFont: { family: 'Pretendard', weight: 700 },
+              bodyFont:  { family: 'Pretendard' },
+              callbacks: {
+                label: (c) => `${c.dataset.label}: ${c.raw === null ? '-' : c.raw.toFixed(2) + '%'}`,
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, maxTicksLimit: 8 }, grid: { display: false } },
+            y: {
+              ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, callback: (v) => v + '%' },
+              grid: { color: '#E5E8EB' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderPosition(master, exit) {
+      const [cash, core, sat] = PI.parseRatio(master?.ratio_raw);
+      const total = Math.max(1, cash + core + sat);
+      PI.$('position-stack').innerHTML = `
+        <div class="bg-toss-sub"    style="width:${cash/total*100}%"></div>
+        <div class="bg-toss-blue"   style="width:${core/total*100}%"></div>
+        <div class="bg-toss-purple" style="width:${sat/total*100}%"></div>
+      `;
+      PI.$('pos-cash').textContent = cash + '%';
+      PI.$('pos-core').textContent = core + '%';
+      PI.$('pos-sat').textContent  = sat  + '%';
+
+      const fmtPrice = (v) => v && v > 0 ? `$${PI.fmt(v, 2)}` : '-';
+      PI.$('avg-tqqq').textContent = fmtPrice(exit?.tqqq_avg);
+      PI.$('avg-soxl').textContent = fmtPrice(exit?.soxl_avg);
+      PI.$('avg-koru').textContent = fmtPrice(exit?.koru_avg);
+
+      if (master?.memo) {
+        const memo = PI.$('position-memo');
+        memo.textContent = master.memo;
+        memo.classList.remove('hidden');
+      }
+    }
+
+    // ============================================================
+    // 로드 및 렌더
+    // ============================================================
+    // ============================================================
+    // 전문가 분석 모달 (박병창·윤지호 Gemini 판정 상세)
+    // ============================================================
+    let _lastExpertAnalysis = null;  // snapshot.expert_analysis (오늘 영상 없으면 null)
+
+    function stanceChip(stance) {
+      const map = {
+        warning:  { text: '경고',   cls: 'bg-toss-redL text-toss-red' },
+        bullish:  { text: '낙관',   cls: 'bg-toss-greenL text-toss-green' },
+        neutral:  { text: '중립',   cls: 'bg-gray-100 text-toss-sub' },
+        unknown:  { text: '판정불가', cls: 'bg-orange-100 text-orange-600' },
+      };
+      return map[stance] || map.unknown;
+    }
+
+    function renderExpertModalContent(analysis) {
+      const contentEl = PI.$('expert-modal-content');
+      const emptyEl   = PI.$('expert-modal-empty');
+      const dateEl    = PI.$('expert-modal-date');
+      if (!analysis || !analysis.videos || analysis.videos.length === 0) {
+        contentEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        dateEl.textContent = '-';
+        return;
+      }
+      emptyEl.classList.add('hidden');
+      const dateText = analysis.date || '-';
+      const isStale  = analysis._stale ? ' · 직전 분석' : '';
+      dateEl.textContent = `분석일 ${dateText}${isStale} · ${analysis.videos.length}개 영상`;
+
+      contentEl.innerHTML = analysis.videos.map(v => {
+        const a = v.analysis || {};
+        const chip = stanceChip(a.stance);
+        const title = v.title || '(제목 없음)';
+        const pubDate = (v.published || '').slice(0, 10);
+        const transcriptBadge = v.transcript_available
+          ? '<span class="text-[10px] text-toss-sub">자막 기반</span>'
+          : '<span class="text-[10px] text-orange-500">제목만 (자막 없음)</span>';
+        const err = a.error ? `<div class="text-xs text-toss-red mt-2">⚠ ${String(a.error).slice(0, 120)}</div>` : '';
+        return `
+          <div class="rounded-toss bg-toss-bg p-4 space-y-2">
+            <div class="flex items-start justify-between gap-3">
+              <a href="${v.url || '#'}" target="_blank" rel="noopener" class="font-semibold text-sm text-toss-dark hover:text-toss-blue leading-snug flex-1">
+                ${title}
+              </a>
+              <span class="chip ${chip.cls} shrink-0">${chip.text}</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-toss-sub">
+              <span>${pubDate}</span>
+              <span>·</span>
+              ${transcriptBadge}
+            </div>
+            ${a.reason ? `<div class="text-sm text-toss-text leading-relaxed mt-2 pt-2 border-t border-toss-border">${a.reason}</div>` : ''}
+            ${err}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openExpertModal() {
+      renderExpertModalContent(_lastExpertAnalysis);
+      PI.$('expert-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeExpertModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('expert-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // 캐시 파일 주소 (snapshot.expert_analysis가 없거나 비었을 때 fallback)
+    const EXPERT_CACHE_URL = (PI.URLS.snapshot.replace(/current_snapshot\.json$/, 'expert_analysis_cache.json'));
+
+    async function resolveExpertAnalysis(snapshot) {
+      // 1순위: snapshot 에 포함된 오늘자 분석
+      const inline = snapshot && snapshot.expert_analysis;
+      if (inline && inline.videos && inline.videos.length > 0) {
+        return inline;
+      }
+      // 2순위: 캐시 파일 직접 fetch (직전 분석 fallback)
+      try {
+        const cached = await PI.fetchJson(EXPERT_CACHE_URL);
+        if (cached && cached.videos && cached.videos.length > 0) {
+          return { ...cached, _stale: true };
+        }
+      } catch (e) {
+        console.warn('expert cache fetch fail', e);
+      }
+      return null;
+    }
+
+    (async () => {
+      const [master, exit, snapshot] = await Promise.all([
+        PI.fetchJson(PI.URLS.master).catch(() => null),
+        PI.fetchJson(PI.URLS.exit).catch(() => null),
+        PI.fetchJson(PI.URLS.snapshot).catch(() => null),
+      ]);
+
+      const ratio = PI.parseRatio(master?.ratio_raw);
+      const stage = PI.determineStage(snapshot, ratio);
+
+      renderHero(stage, snapshot);
+      renderEmergency(
+        snapshot?.indices?.nasdaq?.drop_pct,
+        snapshot?.indices?.kospi?.drop_pct
+      );
+      renderConditions(snapshot);
+      renderSellConditions(snapshot, exit);
+      renderIndices(snapshot?.indices);
+      renderVolatility(snapshot?.volatility);
+      renderCnnComponents(snapshot?.sentiment);
+      renderKoreaFlow(snapshot?.korea_flow);
+      renderSectors(snapshot?.sector_rs);
+      renderPosition(master, exit);
+      renderYtdComparison(snapshot, exit);
+
+      // 전문가 분석 로드 (snapshot 내장 or 캐시 fallback)
+      _lastExpertAnalysis = await resolveExpertAnalysis(snapshot);
+    })();
+
+    // ESC 로 모달 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeExpertModal();
+    });
+  </script>
+</body>
+</html>

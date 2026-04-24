@@ -1,0 +1,104 @@
+/* Pitinvest Web - 공통 커스텀 스타일 */
+
+body {
+  font-family: 'Pretendard', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.num {
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.02em;
+}
+
+.animate-fadein {
+  animation: fadein 0.4s ease-out;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* 게이지 바 */
+.gauge {
+  height: 8px;
+  background: #E5E8EB;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.gauge-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  border-radius: 4px;
+}
+
+/* 포지션 스택 바 */
+.stack-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #F2F4F6;
+}
+.stack-bar > div {
+  transition: width 0.5s ease;
+}
+
+/* 카드 호버 */
+.card-hover {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+/* 모바일 하단 네비 */
+#bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #FFFFFF;
+  border-top: 1px solid #E5E8EB;
+  z-index: 50;
+}
+
+@media (max-width: 768px) {
+  #top-nav { display: none; }
+  #bottom-nav { display: flex; }
+  main.main-content { padding-bottom: 80px; }
+}
+
+/* 스크롤바 (Toss 스타일) */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D6DB; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #8B95A1; }
+
+/* 접근성 focus */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #3182F6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}

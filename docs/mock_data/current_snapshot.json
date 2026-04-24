@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-04-24T09:00:00+09:00",
+  "sentiment": {
+    "cnn_fng": 28,
+    "cnn_components": {
+      "momentum": 22,
+      "strength": 35,
+      "breadth": 41,
+      "put_call": 18,
+      "junk_bond": 52,
+      "volatility": 25,
+      "safe_haven": 32
+    },
+    "put_call_ratio": 1.12,
+    "aaii_bull_bear_spread": -8.5
+  },
+  "volatility": {
+    "vix": 19.8,
+    "vvix": 98.4,
+    "skew": 138.2,
+    "move": 112.5,
+    "vkospi": 23.1
+  },
+  "korea_flow": {
+    "foreign_inst_buy_krw": 320000000000,
+    "retail_net_buy_krw": -180000000000,
+    "margin_loan_krw": 18500000000000,
+    "short_sale_balance": 9200000000000,
+    "foreign_ownership_pct": 32.5
+  },
+  "indices": {
+    "nasdaq": {
+      "current": 17850.32,
+      "high_52w": 18400.10,
+      "drop_pct": -2.99
+    },
+    "kospi": {
+      "current": 2680.50,
+      "high_52w": 2795.00,
+      "drop_pct": -4.10
+    },
+    "sp500": {
+      "current": 5150.20,
+      "high_52w": 5300.00,
+      "drop_pct": -2.83
+    },
+    "russell2k": {
+      "current": 2010.55,
+      "high_52w": 2185.00,
+      "drop_pct": -7.99
+    },
+    "soxx": {
+      "current": 245.30,
+      "high_52w": 259.50,
+      "drop_pct": -5.47
+    }
+  },
+  "sector_rs": {
+    "XLK": 1.05,
+    "SMH": 1.12,
+    "BOTZ": 0.98,
+    "ARKK": 0.88,
+    "XLF": 1.02,
+    "XLE": 0.92
+  },
+  "signals": {
+    "cnn_under_10": false,
+    "vix_over_25": false,
+    "margin_call_trigger": false,
+    "count": 0,
+    "emergency_exit_warning": false
+  },
+  "leverage_profit": {
+    "tqqq_profit_pct": 12.3,
+    "soxl_profit_pct": 8.7,
+    "koru_profit_pct": 105.4,
+    "tqqq_avg_used": 58.3,
+    "soxl_avg_used": 21.45,
+    "koru_avg_used": 233.55,
+    "tqqq_avg_source": "actual",
+    "soxl_avg_source": "actual",
+    "koru_avg_source": "actual"
+  },
+  "sell_signals": {
+    "leading_stock_rising_3d": true,
+    "expert_warning": false,
+    "expert_top_url": null,
+    "expert_videos_analyzed": 3
+  },
+  "expert_analysis": {
+    "expert_warning": false,
+    "expert_count": 3,
+    "videos": [
+      {
+        "video_id": "mock_abc123",
+        "title": "박병창의 시장 전망: 기술주 중심으로 매수 기회",
+        "published": "2026-04-23T10:00:00Z",
+        "url": "https://youtube.com/watch?v=mock_abc123",
+        "analyzed_source": "transcript",
+        "analysis": { "warning": 2, "bullish": 4, "net": -2 }
+      },
+      {
+        "video_id": "mock_def456",
+        "title": "윤지호 매크로: 조정 가능성은?",
+        "published": "2026-04-22T15:30:00Z",
+        "url": "https://youtube.com/watch?v=mock_def456",
+        "analyzed_source": "transcript",
+        "analysis": { "warning": 3, "bullish": 2, "net": 1 }
+      }
+    ]
+  },
+  "recommended_action": "KORU 수익 100% 돌파 · 50% 매도 실행 검토",
+  "ytd_returns": {
+    "strategy_pct": 21.5,
+    "calc_note": "코어 + 위성 매매 시뮬레이션 기준"
+  }
+}

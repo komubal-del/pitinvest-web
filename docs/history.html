@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>히스토리 · 구덩이매매법</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/tailwind.config.js"></script>
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="bg-toss-bg text-toss-dark">
+
+  <header id="app-header" class="sticky top-0 z-40 bg-toss-bg/90 backdrop-blur border-b border-toss-border"></header>
+
+  <main class="main-content max-w-5xl mx-auto px-5 py-6 space-y-6">
+
+    <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
+      <h1 class="text-3xl font-extrabold mb-2">📈 지표 히스토리</h1>
+      <p class="text-toss-text leading-relaxed">
+        봇이 매일 수집한 시장 지표의 과거 추이를 확인합니다.
+      </p>
+    </section>
+
+    <!-- ===== 기간 선택 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-5 shadow-toss">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-bold text-toss-text mr-1">기간</span>
+          <button class="range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-bg text-toss-text hover:bg-gray-200" data-range="30">1M</button>
+          <button class="range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-bg text-toss-text hover:bg-gray-200" data-range="90">3M</button>
+          <button class="range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-bg text-toss-text hover:bg-gray-200" data-range="180">6M</button>
+          <button class="range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-blue text-white" data-range="365">1Y</button>
+          <button class="range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-bg text-toss-text hover:bg-gray-200" data-range="all">ALL</button>
+        </div>
+        <span id="range-info" class="text-xs text-toss-sub">-</span>
+      </div>
+    </section>
+
+    <!-- ===== 지표 선택 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-5 shadow-toss">
+      <div class="flex items-center gap-2 flex-wrap" id="series-toggles">
+        <span class="text-sm font-bold text-toss-text mr-2">지표</span>
+        <!-- JS가 채움 -->
+      </div>
+    </section>
+
+    <!-- ===== 차트 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div style="height: 400px; position: relative;">
+        <canvas id="history-chart"></canvas>
+      </div>
+      <div id="chart-empty" class="hidden text-center py-12 text-toss-sub text-sm">
+        데이터를 불러올 수 없어요. 봇이 아직 CSV에 기록하지 않았을 수 있습니다.
+      </div>
+    </section>
+
+    <!-- ===== 최근 데이터 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">최근 데이터</h2>
+        <span class="text-xs text-toss-sub">최근 15일</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead id="data-thead" class="text-left text-toss-sub border-b border-toss-border">
+            <!-- JS 렌더 -->
+          </thead>
+          <tbody id="data-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="text-center py-8 text-xs text-toss-sub">
+      Not financial advice · 개인 매매 원칙 기록
+    </footer>
+
+  </main>
+
+  <nav id="bottom-nav"></nav>
+
+  <script src="assets/common.js"></script>
+  <script>
+    PI.initNav('history');
+
+    const PALETTE = ['#3182F6', '#F04452', '#8B5CF6', '#00BF5C', '#FFB900', '#8B95A1'];
+
+    const SERIES_CANDIDATES = [
+      { key: 'cnn',           aliases: ['cnn_fng', 'cnn', 'CNN', 'fear_greed'],                          label: 'CNN 공포탐욕' },
+      { key: 'vix',           aliases: ['vix', 'VIX'],                                                    label: 'VIX' },
+      { key: 'nasdaq_drop',   aliases: ['nasdaq_drop_pct', 'nasdaq_drop', 'nasdaq_dd', '나스닥낙폭'],   label: '나스닥 낙폭(%)' },
+      { key: 'kospi_drop',    aliases: ['kospi_drop_pct', 'kospi_drop', 'kospi_dd', '코스피낙폭'],      label: '코스피 낙폭(%)' },
+    ];
+
+    let allRows = [];
+    let dateKey = 'date';
+    let chart  = null;
+    let active = { cnn: true, vix: true, nasdaq_drop: true, kospi_drop: true };
+    let currentRange = 365;
+
+    function pickNum(row, aliases) {
+      for (const k of aliases) {
+        if (row[k] !== undefined && row[k] !== '') {
+          const n = parseFloat(row[k]);
+          if (!isNaN(n)) return n;
+        }
+      }
+      return null;
+    }
+
+    function buildSeriesData(range) {
+      const rows = range === 'all' ? allRows : allRows.slice(-range);
+      const dates = rows.map(r => r[dateKey]);
+      const datasets = [];
+      let idx = 0;
+      for (const s of SERIES_CANDIDATES) {
+        const data = rows.map(r => pickNum(r, s.aliases));
+        if (!data.some(v => v !== null)) continue;
+        if (!active[s.key]) continue;
+        datasets.push({
+          label: s.label,
+          data,
+          borderColor: PALETTE[idx % PALETTE.length],
+          backgroundColor: PALETTE[idx % PALETTE.length] + '20',
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+        });
+        idx++;
+      }
+      PI.$('range-info').textContent = rows.length > 0
+        ? `${rows[0][dateKey]} ~ ${rows[rows.length - 1][dateKey]} · ${rows.length}건`
+        : '-';
+      return { dates, datasets };
+    }
+
+    function drawChart() {
+      const { dates, datasets } = buildSeriesData(currentRange);
+      if (datasets.length === 0) {
+        PI.$('chart-empty').classList.remove('hidden');
+        PI.$('history-chart').classList.add('hidden');
+        return;
+      }
+      PI.$('chart-empty').classList.add('hidden');
+      PI.$('history-chart').classList.remove('hidden');
+      if (chart) chart.destroy();
+      const ctx = PI.$('history-chart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: dates, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top', align: 'end',
+              labels: { font: { family: 'Pretendard', weight: 600 }, boxWidth: 12, boxHeight: 12 }
+            },
+            tooltip: {
+              backgroundColor: '#191F28',
+              padding: 12,
+              titleFont: { family: 'Pretendard', weight: 700 },
+              bodyFont: { family: 'Pretendard' },
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, maxTicksLimit: 10 }, grid: { display: false } },
+            y: { ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 } }, grid: { color: '#E5E8EB' } }
+          }
+        }
+      });
+    }
+
+    function renderToggles(availableKeys) {
+      const container = PI.$('series-toggles');
+      container.innerHTML = '<span class="text-sm font-bold text-toss-text mr-2">지표</span>' +
+        SERIES_CANDIDATES
+          .filter(s => availableKeys.has(s.key))
+          .map((s, i) => `
+            <label class="inline-flex items-center gap-2 px-3 py-2 bg-toss-bg rounded-toss cursor-pointer hover:bg-gray-200">
+              <input type="checkbox" class="series-toggle accent-toss-blue" data-key="${s.key}" ${active[s.key] ? 'checked' : ''} />
+              <span class="text-sm font-semibold">${s.label}</span>
+            </label>
+          `).join('');
+
+      document.querySelectorAll('.series-toggle').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          active[e.target.dataset.key] = e.target.checked;
+          drawChart();
+        });
+      });
+    }
+
+    function renderTable() {
+      const rows = allRows.slice(-15).reverse();
+      if (rows.length === 0) return;
+      const keys = Object.keys(rows[0]);
+      PI.$('data-thead').innerHTML = '<tr>' + keys.map(k => `<th class="py-2 px-3 font-semibold">${k}</th>`).join('') + '</tr>';
+      PI.$('data-tbody').innerHTML = rows.map(r =>
+        '<tr class="border-b border-toss-border hover:bg-toss-bg">' +
+        keys.map(k => `<td class="py-2 px-3 num">${r[k] ?? '-'}</td>`).join('') +
+        '</tr>'
+      ).join('');
+    }
+
+    document.querySelectorAll('.range-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.range-btn').forEach(x => {
+          x.className = 'range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-bg text-toss-text hover:bg-gray-200';
+        });
+        b.className = 'range-btn px-4 py-2 text-sm font-semibold rounded-toss bg-toss-blue text-white';
+        currentRange = b.dataset.range === 'all' ? 'all' : parseInt(b.dataset.range, 10);
+        drawChart();
+      });
+    });
+
+    (async () => {
+      try {
+        const text = await PI.fetchText(PI.URLS.history);
+        allRows = PI.parseCSV(text);
+        if (allRows.length === 0) throw new Error('empty');
+        dateKey = Object.keys(allRows[0]).find(k => /date|날짜|일자/i.test(k)) || Object.keys(allRows[0])[0];
+
+        // 존재하는 시리즈 파악
+        const available = new Set();
+        for (const s of SERIES_CANDIDATES) {
+          if (allRows.some(r => pickNum(r, s.aliases) !== null)) available.add(s.key);
+        }
+        renderToggles(available);
+        drawChart();
+        renderTable();
+      } catch (e) {
+        console.error(e);
+        PI.$('chart-empty').classList.remove('hidden');
+        PI.$('history-chart').classList.add('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
