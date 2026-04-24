@@ -517,8 +517,13 @@
           </div>
         </div>
         <div id="upload-preview-wrap" class="hidden space-y-3">
-          <img id="upload-preview" class="w-full max-h-80 object-contain rounded-toss bg-toss-bg" />
+          <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
           <div id="upload-filename" class="text-xs text-toss-sub text-center"></div>
+        </div>
+        <div>
+          <label class="text-xs text-toss-sub block mb-1">오늘의 메모 <span class="text-[10px]">(선택 · 오늘 생각/매매 이유)</span></label>
+          <textarea id="upload-memo" rows="3" placeholder="예) KORU +100% 근접 · 50% 익절 준비 / 나스닥 반등 초기 매수 · 레버리지 추가..."
+                    class="w-full px-3 py-2 border border-toss-border rounded-toss text-sm resize-none"></textarea>
         </div>
         <div id="upload-status" class="text-sm"></div>
         <div class="flex gap-2 justify-end pt-2 border-t border-toss-border">
@@ -1588,6 +1593,7 @@
       _uploadBase64 = null;
       PI.$('upload-preview-wrap').classList.add('hidden');
       PI.$('upload-status').textContent = '';
+      PI.$('upload-memo').value = '';
       PI.$('upload-submit-btn').disabled = true;
       PI.$('upload-modal').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
@@ -1636,6 +1642,12 @@
       const ext = (_uploadFile.name.match(/\.[^./\\]+$/) || ['.png'])[0];
       const filename = `${ts}${ext}`;
       const path = `incoming/${filename}`;
+      const memo = (PI.$('upload-memo').value || '').trim();
+
+      // commit message 첫 줄 = 제목, 빈 줄 + 메모 = body → 워크플로우가 메모로 사용
+      const commitMsg = memo
+        ? `📸 웹 업로드: ${filename}\n\n${memo}`
+        : `📸 웹 업로드: ${filename}`;
 
       const url = `https://api.github.com/repos/${UPLOAD_REPO_OWNER}/${UPLOAD_REPO_NAME}/contents/${path}`;
       try {
@@ -1647,7 +1659,7 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            message: `📸 웹 업로드: ${filename}`,
+            message: commitMsg,
             content: _uploadBase64,
             branch: 'main',
           }),
