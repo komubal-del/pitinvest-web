@@ -61,14 +61,35 @@ async function fetchText(url) {
   return res.text();
 }
 
+// RFC 4180 호환: 따옴표 안 콤마 / 이스케이프된 따옴표("") / 빈 셀 처리
+function parseCSVRow(line) {
+  const cols = [];
+  let cur = '';
+  let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuote) {
+      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQuote = false; }
+      else { cur += c; }
+    } else {
+      if (c === '"') { inQuote = true; }
+      else if (c === ',') { cols.push(cur); cur = ''; }
+      else { cur += c; }
+    }
+  }
+  cols.push(cur);
+  return cols.map(s => s.trim());
+}
+
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
-  const header = lines[0].split(',').map(s => s.trim());
+  const header = parseCSVRow(lines[0]);
   return lines.slice(1).map(line => {
-    const cols = line.split(',').map(s => s.trim());
+    const cols = parseCSVRow(line);
     const row = {};
-    header.forEach((h, i) => row[h] = cols[i]);
+    header.forEach((h, i) => row[h] = cols[i] != null ? cols[i] : '');
     return row;
   });
 }
