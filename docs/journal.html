@@ -117,15 +117,20 @@
         const rs = Number(r.ratio_sat || 0);
         const dateStr = (r.date || '').slice(0, 10);
 
+        const notes = (r.notes || '').trim();
+        const notesHtml = notes
+          ? `<div class="text-sm text-toss-text mt-2 pt-2 border-t border-toss-border" style="word-break: keep-all;">📝 ${notes}</div>`
+          : '';
         return `
           <div class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition" onclick="openDetailModal(${idx})">
-            <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-start justify-between gap-3">
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-semibold">${dateStr}</div>
                 <div class="text-xs text-toss-sub mt-0.5">💰 ${PI.fmtKrwUnit(total)} · 현금 ${rc}% · 코어 ${ro}% · 위성 ${rs}%</div>
               </div>
               <span class="chip ${stage.cls} shrink-0">${stage.label}</span>
             </div>
+            ${notesHtml}
           </div>
         `;
       }).join('');
