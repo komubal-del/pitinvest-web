@@ -285,12 +285,17 @@ ${master.memo ? '메모: ' + master.memo : ''}
 ${summarizeMarket()}
 
 ## 답변 가이드
-- 한국어로 친근하고 명확하게
-- 위 원칙과 현재 상태에 근거해서 답변
-- 원칙이 커버하지 않는 건 "원칙상 규정 없음" 이라고 말하기
-- 자주 쓰는 "이건 투자자문이 아닙니다" 같은 disclaimer 반복 금지 (이미 UI에 명시)
-- 짧고 명확하게 (3~5줄)
-- 수치가 필요하면 현재 시장 상태에서 인용`;
+- 한국어로 친근하지만 단도직입적으로
+- 항상 다음 구조로 답변:
+  1) **상황 진단** (현재 어떤 stage / 어떤 신호가 켜져있는지 요약)
+  2) **구체 액션** (몇 %p, 어느 종목, 얼마, 언제 — 숫자로 명시)
+  3) **근거** (어떤 매수/매도 조건 발동인지)
+  4) **주의점** (있다면 1줄)
+- "알려드릴게요", "정확한 액션을 바로", "잠시만요" 같은 메타·서론 멘트 절대 금지 — 바로 본론
+- 원칙이 커버하지 않는 영역이면 "원칙상 규정 없음" 명시 후 보수적 보류 권고
+- "이건 투자자문이 아닙니다" 같은 disclaimer 반복 금지 (이미 UI에 명시)
+- 사용자가 "더 자세히" 요청하면 같은 답을 풀어쓰지 말고 새로운 정보(과거 트리거 이력, 다른 시나리오 분기 등)를 추가
+- 수치는 무조건 위 "현재 시장 상태"에서 인용 (지어내지 말 것)`;
 
       const contents = [];
       // 이력 (최근 10개만)
@@ -312,7 +317,11 @@ ${summarizeMarket()}
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: systemPrompt }] },
             contents,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 2048,
+              thinkingConfig: { thinkingBudget: 0 },  // 2.5-flash thinking 비활성: 출력 토큰 보존
+            },
           }),
         });
         if (!res.ok) {
@@ -320,8 +329,15 @@ ${summarizeMarket()}
           throw new Error(`HTTP ${res.status} · ${err.error?.message || '응답 실패'}`);
         }
         const data = await res.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '(빈 응답)';
-        aiMsg.text = reply;
+        const cand = data.candidates?.[0];
+        const reply = cand?.content?.parts?.[0]?.text?.trim();
+        if (reply) {
+          aiMsg.text = reply;
+        } else {
+          // 토큰 한도 초과 / 안전 필터 등으로 빈 응답일 때 원인 노출
+          const reason = cand?.finishReason || 'unknown';
+          aiMsg.text = `(빈 응답 · finishReason=${reason}${reason === 'MAX_TOKENS' ? ' — maxOutputTokens 한도 초과' : ''})`;
+        }
         aiMsg.loading = false;
       } catch (e) {
         aiMsg.text = `❌ ${e.message}`;
