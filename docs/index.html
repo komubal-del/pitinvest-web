@@ -71,35 +71,47 @@
         <span id="cond-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div class="rounded-toss bg-toss-bg p-4">
+        <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">공포탐욕지수</span>
-            <span id="cond-cnn-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="cond-cnn-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div class="flex items-baseline gap-1">
             <span id="cond-cnn-value" class="text-3xl font-extrabold num">-</span>
             <span class="text-xs text-toss-sub">/ 100</span>
           </div>
           <div class="text-xs text-toss-sub mt-1">조건: &lt; 10</div>
+          <div class="card-tip hidden">CNN Fear &amp; Greed Index가 10 미만(극단적 공포)일 때 첫 트리거. → 위성 +20%p 매수 (TQQQ/SOXL/KORU 1/3씩)</div>
         </div>
-        <div class="rounded-toss bg-toss-bg p-4">
+        <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">VIX</span>
-            <span id="cond-vix-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="cond-vix-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div id="cond-vix-value" class="text-3xl font-extrabold num">-</div>
           <div class="text-xs text-toss-sub mt-1">조건: &gt; 25</div>
+          <div class="card-tip hidden">변동성지수(VIX)가 25 초과(공포 급등)일 때 첫 트리거. 장중 High 기준이라 종가가 25 이하라도 인정. → 위성 +20%p 매수</div>
         </div>
-        <div class="rounded-toss bg-toss-bg p-4">
+        <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">국내 강제청산</span>
-            <span id="cond-margin-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="cond-margin-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div class="flex items-baseline gap-1">
             <span id="cond-margin-value" class="text-3xl font-extrabold num">-</span>
             <span class="text-xs text-toss-sub">개인 순매수</span>
           </div>
           <div class="text-xs text-toss-sub mt-1">뉴스 <span id="cond-margin-news" class="font-bold">-</span>건 · 조건: 뉴스≥1 + 개인≤−1조</div>
+          <div class="card-tip hidden">반대매매(강제청산) 뉴스 ≥1건 + 개인 순매수 ≤ −1조원(=1조 이상 매도)일 때 첫 트리거. 패닉성 투매 시그널. → 위성 +20%p 매수</div>
         </div>
       </div>
     </section>
@@ -111,11 +123,14 @@
         <span id="sell-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <!-- 조건 1: 레버리지 +100% -->
-        <div class="rounded-toss bg-toss-bg p-4">
+        <!-- 조건 1: 위성 +100% -->
+        <div class="rounded-toss bg-toss-bg p-4 relative" data-card>
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-semibold text-toss-text">레버리지 수익률 +100%</span>
-            <span id="sell-profit-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <span class="text-sm font-semibold text-toss-text">위성 수익률 +100%</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="sell-profit-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div class="space-y-1.5 mt-2">
             <div class="flex justify-between items-center text-sm">
@@ -132,28 +147,37 @@
             </div>
           </div>
           <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 해당 자산 50% 매도 (코어 이동)</div>
+          <div class="card-tip hidden">위성 종목(TQQQ/SOXL/KORU) 중 하나라도 이론평단 대비 +100%(=2배) 도달 시 첫 트리거. → 해당 자산 50% 익절 후 코어로 이동</div>
         </div>
 
         <!-- 조건 2: 주도주 3일+ 상승 -->
-        <div class="rounded-toss bg-toss-bg p-4">
+        <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">주도주 3일+ 상승</span>
-            <span id="sell-leading-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="sell-leading-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div id="sell-leading-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">삼전/하닉 3일↑ + 개인 매수 우위</div>
           <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 위성 비중 −20%p</div>
+          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 비중 −20%p 축소</div>
         </div>
 
         <!-- 조건 3: 전문가 경고 -->
-        <div id="sell-expert-card" class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition" onclick="openExpertModal()">
+        <div id="sell-expert-card" class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition relative" onclick="openExpertModal()" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">전문가 경고</span>
-            <span id="sell-expert-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="event.stopPropagation(); toggleCardTip(this)" class="card-tip-btn">?</button>
+              <span id="sell-expert-chip" class="chip bg-gray-100 text-toss-sub">-</span>
+            </div>
           </div>
           <div id="sell-expert-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">윤지호·박병창 Gemini 자동 분석</div>
           <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📄 자세히 보기 →</div>
+          <div class="card-tip hidden" onclick="event.stopPropagation()">박병창 AND 윤지호 두 전문가 모두 "현금 비중 늘려라/매도/익절" 같은 구체적 행동 권고를 내릴 때 트리거. 단순 "조심" 정도는 미인정. → 매일 −5%p 매도</div>
         </div>
       </div>
     </section>
@@ -210,7 +234,7 @@
             </span>
             <span class="flex items-center gap-1.5">
               <span style="display:inline-block;width:8px;height:8px;background:#00BF5C;transform:rotate(45deg)"></span>
-              매도1 · 레버리지 +100%
+              매도1 · 위성 +100%
             </span>
             <span class="flex items-center gap-1.5">
               <span style="display:inline-block;width:8px;height:8px;background:#3182F6;transform:rotate(45deg)"></span>
@@ -522,7 +546,7 @@
         </div>
         <div>
           <label class="text-xs text-toss-sub block mb-1">오늘의 메모 <span class="text-[10px]">(선택 · 오늘 생각/매매 이유)</span></label>
-          <textarea id="upload-memo" rows="3" placeholder="예) KORU +100% 근접 · 50% 익절 준비 / 나스닥 반등 초기 매수 · 레버리지 추가..."
+          <textarea id="upload-memo" rows="3" placeholder="예) KORU +100% 근접 · 50% 익절 준비 / 나스닥 반등 초기 매수 · 위성 추가..."
                     class="w-full px-3 py-2 border border-toss-border rounded-toss text-sm resize-none"></textarea>
         </div>
         <div id="upload-status" class="text-sm"></div>
@@ -540,6 +564,15 @@
   <script src="assets/common.js"></script>
   <script>
     PI.initNav('home');
+
+    // 카드 ? 버튼 토글
+    function toggleCardTip(btn) {
+      const card = btn.closest('[data-card]');
+      if (!card) return;
+      const tip = card.querySelector('.card-tip');
+      if (!tip) return;
+      tip.classList.toggle('hidden');
+    }
 
     // ============================================================
     // 렌더링 함수들
@@ -1246,7 +1279,7 @@
             { label: '매수1', fullLabel: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
             { label: '매수2', fullLabel: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
             { label: '매수3', fullLabel: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
-            { label: '매도1', fullLabel: '매도1 · 레버리지 +100%', set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
+            { label: '매도1', fullLabel: '매도1 · 위성 +100%',     set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
             { label: '매도2', fullLabel: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
             { label: '매도3', fullLabel: '매도3 · 전문가 경고',    set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
           ];
@@ -1323,7 +1356,18 @@
             }
           },
           scales: {
-            x: { ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, maxTicksLimit: 8 }, grid: { display: false } },
+            x: {
+              ticks: {
+                color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, maxTicksLimit: 8,
+                callback: function(val) {
+                  const label = this.getLabelForValue(val);
+                  // 'YYYY-MM-DD' → 'YY.MM'
+                  const m = String(label).match(/^\d{2}(\d{2})-(\d{2})-\d{2}$/);
+                  return m ? `${m[1]}.${m[2]}` : label;
+                }
+              },
+              grid: { display: false }
+            },
             y: {
               ticks: { color: '#8B95A1', font: { family: 'Pretendard', size: 11 }, callback: (v) => v + '%' },
               grid: { color: '#E5E8EB' }

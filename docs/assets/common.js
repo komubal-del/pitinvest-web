@@ -100,6 +100,7 @@ const NAV_ITEMS = [
   { id: 'strategy', name: '전략',     icon: '📖', href: 'strategy.html' },
   { id: 'journal',  name: '일지',     icon: '📝', href: 'journal.html' },
   { id: 'history',  name: '히스토리', icon: '📈', href: 'history.html' },
+  { id: 'chat',     name: '챗봇',     icon: '🤖', href: 'chat.html' },
 ];
 
 function _href(p) {

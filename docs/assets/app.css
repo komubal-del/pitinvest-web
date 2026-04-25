@@ -102,3 +102,38 @@ a:focus-visible, button:focus-visible {
   outline-offset: 2px;
   border-radius: 8px;
 }
+
+/* 카드 설명 토글 (?) */
+.card-tip-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #E5E8EB;
+  color: #8B95A1;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  flex-shrink: 0;
+}
+.card-tip-btn:hover {
+  background: #3182F6;
+  color: #FFFFFF;
+}
+.card-tip {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #F2F4F6;
+  border-left: 3px solid #3182F6;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #4E5968;
+  word-break: keep-all;
+}
+.card-tip.hidden { display: none; }
