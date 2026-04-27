@@ -20,8 +20,9 @@
     <!-- ===== Hero ===== -->
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <div class="flex items-center gap-2 mb-3">
-        <span class="chip bg-toss-blueL text-toss-blue">v4.3</span>
-        <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-04-20</span>
+        <span class="chip bg-toss-blueL text-toss-blue">v4.4</span>
+        <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-04-27</span>
+        <span class="chip bg-toss-purpleL text-toss-purple">섹터 전환 정량화</span>
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
         공포의 구덩이에서<br />기회를 건진다
@@ -140,12 +141,12 @@
             <span class="font-bold text-lg">구덩이 탈출</span>
             <span class="chip bg-toss-greenL text-toss-green ml-auto">Sell</span>
           </div>
-          <p class="text-sm text-toss-text mb-3">계단식 익절 · 섹터 로테이션</p>
+          <p class="text-sm text-toss-text mb-3">계단식 익절 · RS 기반 섹터 로테이션</p>
           <ul class="text-sm text-toss-text space-y-1.5 list-disc pl-5">
-            <li>레버리지 +100% 수익 → <strong>50% 매도</strong></li>
+            <li>위성 +100% 수익 → <strong>50% 매도</strong></li>
             <li>주도주 3일+ 상승 → 위성 −20%p</li>
             <li>전문가 경고 → 매일 −5%p</li>
-            <li>선발대(반도체) → 후발(로봇/AI) 로테이션</li>
+            <li>발동 즉시 RS 6주 모니터 시작 (DD 깊이별 분기)</li>
           </ul>
         </div>
 
@@ -237,7 +238,164 @@
         </div>
       </div>
       <div class="mt-4 p-3 bg-toss-greenL rounded-toss text-sm text-toss-green font-medium">
-        💡 섹터 전환 보너스: 반등 선발대(반도체) 익절 자금 → 후발 주도주(로봇·AI)로 로테이션
+        💡 1차 매도 발동 시점부터 <a href="rs.html" class="underline font-semibold">📊 RS Monitor</a>로 다음 leader 섹터 모니터 시작
+      </div>
+    </section>
+
+    <!-- ===== 섹터 전환 원칙 (v4.4) ===== -->
+    <section class="bg-toss-card rounded-tossLg p-7 shadow-toss">
+      <div class="flex items-center gap-2 mb-5 flex-wrap">
+        <h2 class="text-2xl font-bold">🔄 섹터 전환 원칙</h2>
+        <span class="chip bg-toss-purpleL text-toss-purple">v4.4 정량화</span>
+      </div>
+
+      <p class="text-toss-text leading-relaxed mb-5" style="word-break: keep-all">
+        1차 탈출 발동 후 <strong>코어를 어느 섹터로 회전할지</strong> — 기존 정성적 직관 ("선발대 → 후발")을
+        <strong>RS(Relative Strength) 기반 정량 룰</strong>로 정형화. 실시간 데이터는
+        <a href="rs.html" class="text-toss-blue underline font-semibold">📊 RS Monitor 탭</a>에서 확인.
+      </p>
+
+      <!-- 1) 발동 시점 -->
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-3">① 발동 시점</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="font-semibold mb-2">📉 1차 매도 신호 발동</div>
+            <p class="text-sm text-toss-text">위성 +100% / 주도주 3일↑ / 전문가 경고 중 1개라도 발동 → 그 시점부터 RS 모니터링 시작</p>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="font-semibold mb-2">♻️ 사이클 리셋 후</div>
+            <p class="text-sm text-toss-text">매도 3조건 모두 충족 → 100% 현금화 후, 다음 매수 신호 발동 시점부터 RS 모니터링 시작</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) DD 깊이별 분기 -->
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-3">② 직전 폭락 깊이(DD)에 따른 코어 분배</h3>
+        <p class="text-sm text-toss-text mb-3">SPY 또는 NDX의 직전 1년 peak 대비 trough %로 측정. 깊을수록 시장 패러다임 변동 가능성 ↑</p>
+
+        <div class="space-y-3">
+          <div class="rounded-toss border border-green-200 bg-toss-greenL p-4">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+              <div class="font-bold">DD &gt; −25% · 얕은 구덩이</div>
+              <span class="chip bg-white text-toss-green">QQQ : SOXX : EWY = 1 : 1 : 1</span>
+            </div>
+            <p class="text-sm text-toss-text">V자 회복 + Tech 지속 가능성 높음 (1971 이후 통계적 패턴). <strong>현재 룰 유지</strong> — 코어 균등.</p>
+          </div>
+
+          <div class="rounded-toss border border-yellow-200 bg-toss-yellowL p-4">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+              <div class="font-bold">−40% ≤ DD ≤ −25% · 중간 구덩이</div>
+              <span class="chip bg-white text-toss-yellow">QQQ 30 / SOXX 50 / EWY 20</span>
+            </div>
+            <p class="text-sm text-toss-text">반도체 회복 베타가 가장 큼 (2009 +148%, 2020 +130%, 2018Q4 +74% 검증). <strong>SOXX 비중 상향</strong>.</p>
+          </div>
+
+          <div class="rounded-toss border border-red-200 bg-toss-redL p-4">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+              <div class="font-bold">DD &lt; −40% · 깊은 구덩이</div>
+              <span class="chip bg-white text-toss-red">코어 50% + 현금 50% + 6주 모니터</span>
+            </div>
+            <p class="text-sm text-toss-text">패러다임 변동 가능 (2000 닷컴 −78%, 2008 GFC −57% 사례). 현금 50%는 6주 후 확정된 RS Top1 섹터에 집중 투입 (③ 룰).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) RS Top1 leader 확정 룰 -->
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-3">③ RS Top1 leader 확정 3조건</h3>
+
+        <div class="rounded-toss bg-toss-bg p-4 mb-3">
+          <p class="text-sm text-toss-text leading-relaxed mb-3">
+            <strong>회복 시작일(SPY 직전 1년 trough)에서 +6주 시점</strong>의 RS_ROC 1위 섹터 ETF가 leader 후보.
+            아래 3조건 모두 충족 시 확정.
+          </p>
+          <div class="space-y-2">
+            <div class="flex items-start gap-2">
+              <span class="chip bg-toss-blue text-white shrink-0">1</span>
+              <div class="text-sm"><strong>rank = 1</strong> · 30거래일 SPY 대비 RS_ROC 1위</div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="chip bg-toss-blue text-white shrink-0">2</span>
+              <div class="text-sm"><strong>RS_line 4주 신고가</strong> · 단순 1위가 아니라 절대값 상승 확인</div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="chip bg-toss-blue text-white shrink-0">3</span>
+              <div class="text-sm"><strong>RS_line 5일 SMA 상승</strong> · 추세 방향 확인</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="font-semibold mb-1 text-toss-green">✅ Do</div>
+            <p class="text-xs text-toss-text leading-relaxed">6주 시점 확정 leader → 깊은 구덩이 케이스에서 현금 50% 집중 투입. 기존 코어(QQQ/SOXX/EWY) 외 다른 섹터로도 확장 가능.</p>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="font-semibold mb-1 text-toss-red">⚠️ Don't</div>
+            <p class="text-xs text-toss-text leading-relaxed">12주 시점은 정확도 14%로 떨어짐 (이미 rotation 시작). XLE이 Top1이면 Top2도 같이 검토 — 단기 매크로 충격 시 에너지 노이즈 가능.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) Universe -->
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-3">④ 모니터 universe</h3>
+
+        <div class="text-sm font-semibold text-toss-sub mb-2">미국 섹터 ETF 10종 (Tier 1)</div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+          <span class="chip bg-toss-blueL text-toss-blue">XLK · Tech</span>
+          <span class="chip bg-toss-blueL text-toss-blue">SOXX · 반도체</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLC · Comm</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLY · Cons Disc</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLF · Fin</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLV · Health</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLE · Energy</span>
+          <span class="chip bg-toss-blueL text-toss-blue">XLI · Industrials</span>
+          <span class="chip bg-toss-blueL text-toss-blue">BOTZ · AI/Robot</span>
+          <span class="chip bg-toss-purpleL text-toss-purple">MAGS · Mag7</span>
+        </div>
+        <p class="text-xs text-toss-text mb-4">각 카드 클릭 시 Tier 2 대표 종목(Top 3-5) 표시 — 섹터 leader가 진짜 강한지 종목 RS로 한 번 더 검증.</p>
+
+        <div class="text-sm font-semibold text-toss-sub mb-2">한국 panel (참조용 · 코어 회전 직접 후보 X)</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="chip bg-toss-yellowL text-toss-yellow">005930 · 삼성전자</span>
+          <span class="chip bg-gray-100 text-toss-sub">KRW=X · USD/KRW 환율</span>
+        </div>
+      </div>
+
+      <!-- 5) 백테스트 검증 -->
+      <div class="mb-3">
+        <h3 class="font-bold text-lg mb-3">⑤ 과거 7개 폭락장 백테스트 (2000~2022)</h3>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="grid grid-cols-3 gap-3 mb-3">
+            <div>
+              <div class="text-[10px] text-toss-sub mb-1">6주 시점 정확도</div>
+              <div class="text-2xl md:text-3xl font-extrabold num text-toss-green">71.4%</div>
+              <div class="text-[10px] text-toss-sub">5/7 episode</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-toss-sub mb-1">12주 시점 정확도</div>
+              <div class="text-2xl md:text-3xl font-extrabold num text-toss-red">14.3%</div>
+              <div class="text-[10px] text-toss-sub">1/7 episode</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-toss-sub mb-1">SOXX 적중률</div>
+              <div class="text-2xl md:text-3xl font-extrabold num text-toss-blue">5/7</div>
+              <div class="text-[10px] text-toss-sub">실제 12개월 leader</div>
+            </div>
+          </div>
+          <p class="text-xs text-toss-text leading-relaxed" style="word-break: keep-all">
+            적중: 2000 닷컴(SOXX) · 2008 GFC(XLF) · 2015-16 China(SOXX) · 2018 Q4(SOXX) · 2022 인플레(SOXX). <br/>
+            오탐: 2011 EU와 2020 COVID는 둘 다 XLE(에너지) — <strong>단기 매크로 충격 시 에너지 노이즈 패턴</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 p-3 bg-toss-purpleL rounded-toss text-sm text-toss-purple font-medium" style="word-break: keep-all">
+        💡 <strong>골든타임 = 1차 매도 후 6주</strong>. 그 안에 RS Monitor에서 확정 leader 식별 → DD 깊이에 따라 분배.
+        매도1 발동 즉시 회복시작일이 자동 마킹됩니다.
       </div>
     </section>
 
@@ -304,11 +462,26 @@
           </p>
         </details>
         <details class="group bg-toss-bg rounded-toss p-4">
-          <summary class="cursor-pointer font-bold">섹터 전환은 언제 하나?</summary>
-          <p class="mt-3 text-sm text-toss-text leading-relaxed">
-            3단계 탈출 시, 반등 선발대(반도체)에서 익절한 자금의 일부를
-            후발 주도주(로봇, 피지컬 AI 등)로 전환해 수익을 극대화합니다.
-          </p>
+          <summary class="cursor-pointer font-bold">섹터 전환은 언제 / 어떻게 하나?</summary>
+          <div class="mt-3 text-sm text-toss-text leading-relaxed space-y-2">
+            <p>
+              <strong>발동</strong>: 1차 매도 신호 발동 즉시. 또는 사이클 리셋 후 다음 매수 신호 발동 시.
+            </p>
+            <p>
+              <strong>방법</strong>: 직전 폭락 깊이(DD)에 따라 분기 —
+              DD &gt; −25%면 코어 균등 유지,
+              −40~−25%면 SOXX 비중 상향(반도체 회복 베타 우위),
+              DD &lt; −40%면 코어 50% + 현금 50%로 6주간 RS 모니터.
+            </p>
+            <p>
+              <strong>확정 룰</strong>: trough +6주 시점 RS_ROC rank 1 + RS_line 4주 신고가 + 5일 SMA 상승.
+              백테스트 정확도 71.4% (2000~2022 7개 폭락장).
+            </p>
+            <p class="text-xs text-toss-sub">
+              상세는 <a href="#" onclick="document.querySelectorAll('h2').forEach(h=>{if(h.textContent.includes('섹터 전환'))h.scrollIntoView({behavior:'smooth'})});return false;" class="text-toss-blue underline">섹터 전환 원칙 섹션</a>
+              · 실시간 데이터는 <a href="rs.html" class="text-toss-blue underline">RS Monitor 탭</a>.
+            </p>
+          </div>
         </details>
       </div>
     </section>
@@ -318,15 +491,28 @@
       <h2 class="text-2xl font-bold mb-5">📅 버전 히스토리</h2>
       <div class="space-y-4 border-l-2 border-toss-border pl-5">
         <div class="relative">
-          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-blue"></div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="chip bg-toss-blueL text-toss-blue">v4.3</span>
-            <span class="text-xs text-toss-sub">2026-04-20</span>
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-purple"></div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="chip bg-toss-purpleL text-toss-purple">v4.4</span>
+            <span class="text-xs text-toss-sub">2026-04-27</span>
             <span class="chip bg-toss-greenL text-toss-green">Current</span>
           </div>
           <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
+            <li>섹터 전환을 RS(상대강도) 기반 정량 룰로 정형화</li>
+            <li>DD 깊이별 코어 분배 분기 추가 (얕은/중간/깊은 구덩이)</li>
+            <li>RS Monitor 탭 신설 (10 sector ETF + Tier-2 종목 + 한국 panel)</li>
+            <li>과거 7개 폭락장 백테스트로 6주 시점 정확도 71.4% 검증</li>
+          </ul>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-sub"></div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="chip bg-gray-100 text-toss-sub">v4.3</span>
+            <span class="text-xs text-toss-sub">2026-04-20</span>
+          </div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
             <li>심화 구간 관리 조항 추가 (100% 이후 낙폭과대주 이동)</li>
-            <li>섹터 전환 로직 명시 (반도체 → 로봇/AI)</li>
+            <li>섹터 전환 로직 명시 (반도체 → 로봇/AI · 정성적)</li>
             <li>특별 조항 추가 (-10% + 공탐&lt;10 동시 발생 케이스)</li>
           </ul>
         </div>

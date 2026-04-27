@@ -144,7 +144,7 @@ function renderHeader(active) {
           <span class="text-white text-lg">🏔️</span>
         </div>
         <span class="font-bold text-lg">구덩이매매법</span>
-        <span class="chip bg-toss-blueL text-toss-blue ml-1">v4.3</span>
+        <span class="chip bg-toss-blueL text-toss-blue ml-1">v4.4</span>
         ${IS_LOCAL ? '<span class="chip bg-toss-yellowL text-toss-yellow ml-1">LOCAL</span>' : ''}
       </a>
       <nav id="top-nav" class="flex items-center gap-1"></nav>
