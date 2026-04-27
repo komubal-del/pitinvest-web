@@ -26,6 +26,7 @@
           <div class="flex items-center gap-2 mb-3 flex-wrap">
             <span id="hero-chip" class="chip bg-gray-100 text-toss-sub">로딩 중...</span>
             <span class="chip bg-gray-100 text-toss-sub">업데이트 · <span id="hero-updated">-</span></span>
+            <a id="hero-sell1-marker" href="rs.html" class="chip bg-toss-purpleL text-toss-purple hidden">📊 -</a>
           </div>
           <div class="flex items-center gap-3 mb-2">
             <span id="hero-dot" class="dot bg-toss-sub" style="width:10px;height:10px"></span>
@@ -53,6 +54,13 @@
             <span class="text-sm font-bold num" id="em-nasdaq">-</span>
           </div>
           <div class="gauge"><div id="em-nasdaq-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-semibold text-toss-text">S&amp;P 500</span>
+            <span class="text-sm font-bold num" id="em-sp500">-</span>
+          </div>
+          <div class="gauge"><div id="em-sp500-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1.5">
@@ -578,6 +586,39 @@
     // 렌더링 함수들
     // ============================================================
 
+    // 1차 매도 발동 후 6주 카운터 계산
+    function compute6wCounter(firedDateStr) {
+      if (!firedDateStr) return null;
+      const fired = new Date(firedDateStr + 'T00:00:00');
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const target = new Date(fired); target.setDate(target.getDate() + 42);  // 6주 = 42일
+      const dayMs = 86400000;
+      const elapsed = Math.floor((today - fired) / dayMs);
+      const remaining = Math.ceil((target - today) / dayMs);
+      return {
+        firedDate: firedDateStr,
+        targetDate: target.toISOString().slice(0, 10),
+        elapsed, remaining,
+        passed: remaining <= 0,
+      };
+    }
+
+    function renderSell1Marker(master) {
+      const el = PI.$('hero-sell1-marker');
+      if (!el) return;
+      const c = compute6wCounter(master?.sell1_first_fired_date);
+      if (!c) {
+        el.classList.add('hidden');
+        return;
+      }
+      el.classList.remove('hidden');
+      const status = c.passed
+        ? `6주 경과 D+${-c.remaining + 0}일 (확정 leader 확인)`
+        : `6주 모니터 D+${c.elapsed}일 / 잔여 D-${c.remaining}일`;
+      el.textContent = `📊 1차 매도 ${c.firedDate} · ${status}`;
+    }
+
     function renderHero(stage, snapshot) {
       const st = PI.STAGE_STYLE[stage.color];
       PI.$('hero-stage').textContent = stage.label;
@@ -593,7 +634,7 @@
       PI.$('hero-action').textContent = snapshot?.recommended_action || '데이터 수집 중';
     }
 
-    function renderEmergency(nasdaqDrop, kospiDrop) {
+    function renderEmergency(nasdaqDrop, sp500Drop, kospiDrop) {
       const draw = (dropPct, elId, barId) => {
         const el = PI.$(elId);
         const bar = PI.$(barId);
@@ -608,7 +649,8 @@
         bar.className = 'gauge-fill ' + (abs >= 10 ? 'bg-toss-red' : abs >= 7 ? 'bg-toss-yellow' : 'bg-toss-green');
       };
       draw(nasdaqDrop, 'em-nasdaq', 'em-nasdaq-bar');
-      draw(kospiDrop, 'em-kospi', 'em-kospi-bar');
+      draw(sp500Drop,  'em-sp500',  'em-sp500-bar');
+      draw(kospiDrop,  'em-kospi',  'em-kospi-bar');
     }
 
     function renderConditions(snapshot) {
@@ -1567,8 +1609,10 @@
       const stage = PI.determineStage(snapshot, ratio);
 
       renderHero(stage, snapshot);
+      renderSell1Marker(master);
       renderEmergency(
         snapshot?.indices?.nasdaq?.drop_pct,
+        snapshot?.indices?.sp500?.drop_pct,
         snapshot?.indices?.kospi?.drop_pct
       );
       renderConditions(snapshot);

@@ -29,7 +29,7 @@
       </p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="rounded-toss bg-toss-bg p-3">
-          <div class="text-xs text-toss-sub mb-1">회복 시작일</div>
+          <div class="text-xs text-toss-sub mb-1">기준일 / 6주 카운터</div>
           <div id="rs-recov" class="text-lg font-bold num">-</div>
           <div id="rs-recov-src" class="text-[10px] text-toss-sub">-</div>
         </div>
@@ -125,16 +125,46 @@
       </svg>`;
     }
 
+    // 6주 카운터 계산 (1차 매도 발동일 우선, 없으면 SPY trough)
+    function compute6wCounter(firedDateStr) {
+      if (!firedDateStr) return null;
+      const fired = new Date(firedDateStr + 'T00:00:00');
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const target = new Date(fired); target.setDate(target.getDate() + 42);
+      const dayMs = 86400000;
+      const elapsed = Math.floor((today - fired) / dayMs);
+      const remaining = Math.ceil((target - today) / dayMs);
+      return {
+        firedDate: firedDateStr,
+        targetDate: target.toISOString().slice(0, 10),
+        elapsed, remaining,
+        passed: remaining <= 0,
+      };
+    }
+
     // ─────────────────── render ───────────────────
-    function renderHero(rs) {
+    function renderHero(rs, master) {
       const updEl = PI.$('rs-updated');
       if (rs.timestamp) {
         const t = new Date(rs.timestamp);
         updEl.textContent = '업데이트 ' + t.toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
       }
-      const recov = rs.recovery_start || {};
-      PI.$('rs-recov').textContent = recov.date || '-';
-      PI.$('rs-recov-src').textContent = recov.source === 'manual' ? '수동 지정' : recov.source === 'auto' ? '자동 탐지 (SPY 1년 trough)' : '-';
+
+      // 1차 매도 마커가 있으면 그 기준으로 카운터 표시, 없으면 SPY trough
+      const sell1 = master?.sell1_first_fired_date;
+      const counter = compute6wCounter(sell1);
+      if (counter) {
+        const status = counter.passed
+          ? `6주 경과 (D+${counter.elapsed}일) · 확정 leader 확인`
+          : `D+${counter.elapsed}일 / D-${counter.remaining}일 → ${counter.targetDate}`;
+        PI.$('rs-recov').textContent = `1차 매도 ${counter.firedDate}`;
+        PI.$('rs-recov-src').textContent = status;
+      } else {
+        const recov = rs.recovery_start || {};
+        PI.$('rs-recov').textContent = recov.date || '-';
+        PI.$('rs-recov-src').textContent = recov.source === 'manual' ? '수동 지정 (SPY trough)' : recov.source === 'auto' ? '자동 탐지 (SPY 1년 trough)' : '1차 매도 미발동';
+      }
 
       const ld = rs.leader || {};
       const ldEl = PI.$('rs-leader');
@@ -260,8 +290,11 @@
     // ─────────────────── load ───────────────────
     (async () => {
       try {
-        const rs = await PI.fetchJson(PI.URLS.rs_monitor);
-        renderHero(rs);
+        const [rs, master] = await Promise.all([
+          PI.fetchJson(PI.URLS.rs_monitor),
+          PI.fetchJson(PI.URLS.master).catch(() => null),
+        ]);
+        renderHero(rs, master);
         renderTier1(rs.tier1);
         renderKorea(rs.korea);
         renderErrors(rs.errors);
