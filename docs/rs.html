@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RS Monitor · 구덩이매매법</title>
+  <title>섹터 · 구덩이매매법</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,7 +20,7 @@
     <!-- ===== Hero ===== -->
     <section class="bg-toss-card rounded-tossLg p-5 md:p-6 shadow-toss animate-fadein">
       <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <h1 class="text-2xl font-extrabold">📊 RS Monitor</h1>
+        <h1 class="text-2xl font-extrabold">📊 섹터</h1>
         <span id="rs-updated" class="chip bg-gray-100 text-toss-sub">업데이트 -</span>
       </div>
       <p class="text-sm text-toss-text leading-relaxed mb-3" style="word-break: keep-all">
@@ -57,11 +57,11 @@
       </div>
     </section>
 
-    <!-- ===== 한국 panel ===== -->
+    <!-- ===== 환율 panel ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold">🇰🇷 한국</h2>
-        <span class="text-xs text-toss-sub hidden sm:inline">대표 종목 + 환율</span>
+        <h2 class="text-lg font-bold">💱 환율</h2>
+        <span class="text-xs text-toss-sub hidden sm:inline">해외자산 평가에 영향</span>
       </div>
       <div id="rs-korea" class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="text-sm text-toss-sub py-4 text-center">로딩 중...</div>
@@ -195,12 +195,21 @@
         const rocCls = fmtRocClass(t.rs_roc);
         const rankCls = rankClass(t.rank);
         const lineColor = (t.rs_roc || 0) >= 0 ? '#00BF5C' : '#F04452';
+        const isKR = t.ticker === 'EWY';
+        const priceUnit = isKR ? '원' : '$';
         const tier2Rows = (t.tier2 || []).map(s => {
           const sCls = fmtRocClass(s.rs_roc);
+          // 한국 종목은 한글명 우선, 가격은 KRW 단위 + 천단위 콤마
+          const displayName = s.name
+            ? `<span class="font-semibold">${s.name}</span> <span class="text-[10px] text-toss-sub">${s.ticker}</span>`
+            : `<span class="font-semibold">${s.ticker}</span>`;
+          const priceFmt = (s.price == null) ? '-'
+            : (isKR ? Number(s.price).toLocaleString('ko-KR') + '원'
+                    : '$' + Number(s.price).toLocaleString('en-US'));
           return `<div class="flex items-center justify-between py-1 text-sm">
-                    <span class="font-semibold">${s.ticker}</span>
+                    <div>${displayName}</div>
                     <div class="flex items-center gap-2">
-                      <span class="text-xs text-toss-sub num">$${s.price ?? '-'}</span>
+                      <span class="text-xs text-toss-sub num">${priceFmt}</span>
                       <span class="chip ${sCls} num">${fmtPct(s.rs_roc)}</span>
                     </div>
                   </div>`;
@@ -227,22 +236,6 @@
     function renderKorea(korea) {
       const wrap = PI.$('rs-korea');
       const parts = [];
-      if (korea && korea.samsung) {
-        const sam = korea.samsung;
-        const cls = fmtRocClass(sam.rs_roc);
-        parts.push(`
-          <div class="rounded-toss bg-toss-bg p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div>
-                <span class="font-bold text-base">삼성전자</span>
-                <span class="text-xs text-toss-sub ml-1">${sam.ticker}</span>
-              </div>
-              <span class="chip ${cls} num">${fmtPct(sam.rs_roc)}</span>
-            </div>
-            <div class="text-xl font-extrabold num mb-2">${(sam.price_krw||0).toLocaleString('ko-KR')}원</div>
-            ${sparklineSVG(sam.rs_line, '#3182F6')}
-          </div>`);
-      }
       if (korea && korea.usdkrw) {
         const fx = korea.usdkrw;
         const ch = fx.change_30d_pct;
@@ -262,7 +255,7 @@
           </div>`);
       }
       if (parts.length === 0) {
-        wrap.innerHTML = '<div class="text-sm text-toss-sub py-4 text-center">한국 데이터 없음</div>';
+        wrap.innerHTML = '<div class="text-sm text-toss-sub py-4 text-center">환율 데이터 없음</div>';
       } else {
         wrap.innerHTML = parts.join('');
       }
