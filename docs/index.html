@@ -531,7 +531,7 @@
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
         <div id="upload-dropzone" class="border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg"
-             onclick="if(window._fileInput) window._fileInput.click(); else alert('파일 input 초기화 실패 — 콘솔 확인');">
+             onclick="console.log('[upload] dropzone clicked, fi=', window._fileInput); if(window._fileInput) { window._fileInput.click(); console.log('[upload] click() called'); } else alert('파일 input 초기화 실패');">
           <div class="text-sm text-toss-sub pointer-events-none">
             여기를 클릭해서 스크린샷 선택<br/>
             <span class="text-[11px]">PNG · JPG · WEBP</span>
