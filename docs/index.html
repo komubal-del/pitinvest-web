@@ -977,14 +977,16 @@
 
     // YTD 비교 상태
     const YTD_SPECS = [
-      { key: 'nasdaq_close', label: '나스닥',  short: '나스닥',  hex: '#3182F6' },
-      { key: 'sp500_close',  label: 'S&P 500', short: 'S&P',    hex: '#00BF5C' },
-      { key: 'soxx_close',   label: 'SOXX',    short: 'SOXX',   hex: '#F04452' },
-      { key: 'kospi_close',  label: '코스피',  short: '코스피', hex: '#FFB900' },
+      { key: 'strategy',     label: '구덩이 매매법', short: '구덩이', hex: '#8B5CF6', isStrategy: true },
+      { key: 'nasdaq_close', label: '나스닥',        short: '나스닥', hex: '#3182F6' },
+      { key: 'sp500_close',  label: 'S&P 500',       short: 'S&P',   hex: '#00BF5C' },
+      { key: 'soxx_close',   label: 'SOXX',          short: 'SOXX',  hex: '#F04452' },
+      { key: 'kospi_close',  label: '코스피',        short: '코스피', hex: '#FFB900' },
     ];
     let _ytdState = {
       rows: [], benchmarks: [], strategyRet: null,
-      selectedKeys: new Set(['nasdaq_close']),  // 다중 선택 (Set)
+      // 기본 선택: 구덩이 매매법 + 나스닥
+      selectedKeys: new Set(['strategy', 'nasdaq_close']),
       markers: { buyCnn: new Set(), buyVix: new Set(), buyMargin: new Set(), sellLev: new Set() },
     };
 
@@ -1231,7 +1233,7 @@
         );
       });
 
-      // 전략 하이라이트 값 + 벤치마크 대비 뱃지 (1개 선택 시만 vs N% 표시, 여러 개면 평균)
+      // 전략 하이라이트 값 + 벤치마크 대비 뱃지 (strategy는 비교 대상 제외 — 본인)
       const sRet = _ytdState.strategyRet;
       if (sRet !== undefined && sRet !== null && !isNaN(sRet)) {
         const el = PI.$('ytd-strategy-value');
@@ -1239,10 +1241,11 @@
         el.className = 'text-4xl font-extrabold num ' + (sRet >= 0 ? 'text-toss-blue' : 'text-toss-red');
 
         const badge = PI.$('ytd-strategy-badge');
-        const bms = selectedSpecs.map(s => _ytdState.benchmarks.find(b => b.key === s.key)).filter(Boolean);
+        const benchSpecs = selectedSpecs.filter(s => !s.isStrategy);
+        const bms = benchSpecs.map(s => _ytdState.benchmarks.find(b => b.key === s.key)).filter(Boolean);
         if (bms.length === 1) {
           const delta = sRet - bms[0].ret;
-          const spec = selectedSpecs[0];
+          const spec = benchSpecs[0];
           badge.textContent = `vs ${spec.short} ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%p`;
           badge.className = 'chip ' + (delta >= 0 ? 'bg-toss-greenL text-toss-green' : 'bg-toss-redL text-toss-red');
         } else if (bms.length > 1) {
@@ -1282,39 +1285,29 @@
 
       const datasets = [];
 
-      // 전략 라인 — 실제 백테스트 결과 (snapshot.ytd_returns.daily_series)
+      // 전략 데이터 (strategy spec 선택 여부와 무관하게 마커 base로 사용)
       const strategyDaily = _ytdState.strategyDaily || [];
       let strategyData = null;
       if (strategyDaily.length > 0) {
         const map = {};
         strategyDaily.forEach(d => { if (d && d.date) map[d.date] = d.ret_pct; });
         strategyData = dates.map(d => (d in map ? map[d] : null));
-        datasets.push({
-          label: '구덩이 매매법',
-          data: strategyData,
-          borderColor: '#8B5CF6',
-          borderWidth: 3,
-          tension: 0.3,
-          pointRadius: 0,
-          pointHoverRadius: 5,
-          backgroundColor: '#8B5CF620',
-          spanGaps: true,
-        });
       }
 
-      // 선택된 벤치마크들 (다중)
+      // 선택된 라인들 그리기 (strategy 포함 다중)
       selectedSpecs.forEach(spec => {
-        const data = cum(spec.key);
+        const data = spec.isStrategy ? strategyData : cum(spec.key);
         if (!data) return;
         datasets.push({
           label: spec.label,
           data,
           borderColor: spec.hex,
-          borderWidth: 2,
+          borderWidth: spec.isStrategy ? 3 : 2,
           tension: 0.3,
           pointRadius: 0,
-          pointHoverRadius: 4,
-          backgroundColor: spec.hex + '15',
+          pointHoverRadius: spec.isStrategy ? 5 : 4,
+          backgroundColor: spec.hex + (spec.isStrategy ? '20' : '15'),
+          spanGaps: true,
         });
       });
 
