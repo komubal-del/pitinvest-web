@@ -533,13 +533,13 @@
         <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
-        <div id="upload-dropzone" class="border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
+        <label for="upload-file-input" id="upload-dropzone" class="block border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
           <input id="upload-file-input" type="file" accept="image/*" class="hidden" />
           <div class="text-sm text-toss-sub">
             여기를 클릭해서 스크린샷 선택<br/>
             <span class="text-[11px]">PNG · JPG · WEBP</span>
           </div>
-        </div>
+        </label>
         <div id="upload-preview-wrap" class="hidden space-y-3">
           <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
           <div id="upload-filename" class="text-xs text-toss-sub text-center"></div>
@@ -1661,10 +1661,9 @@
     }
 
     (function initUploadDropzone() {
-      const dz = document.getElementById('upload-dropzone');
+      // 클릭은 <label for=...>가 네이티브로 처리 → file picker 자동 오픈
       const fi = document.getElementById('upload-file-input');
-      if (!dz || !fi) return;
-      dz.addEventListener('click', () => fi.click());
+      if (!fi) return;
       fi.addEventListener('change', (e) => onFilePicked(e.target.files[0]));
     })();
 
