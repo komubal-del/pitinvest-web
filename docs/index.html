@@ -396,19 +396,19 @@
       </div>
     </section>
 
-    <!-- ===== 섹터 모멘텀 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold">섹터 모멘텀</h2>
-        <span class="text-xs text-toss-sub hidden sm:inline">상대강도 · 로테이션 후보 체크</span>
+    <!-- ===== 섹터 페이지 링크 (구 '섹터 모멘텀' 대체) ===== -->
+    <a href="rs.html" class="block bg-toss-card rounded-tossLg p-5 shadow-toss hover:bg-toss-bg transition group">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">📊</span>
+          <div>
+            <div class="font-bold text-base">섹터 RS 모니터</div>
+            <div class="text-xs text-toss-sub mt-0.5">11개 섹터 ETF · Tier 2 종목 · 1차 매도 6주 카운터</div>
+          </div>
+        </div>
+        <span class="text-toss-blue group-hover:translate-x-1 transition text-lg">→</span>
       </div>
-      <div id="sector-bars" class="space-y-3">
-        <!-- JS 렌더 -->
-      </div>
-      <div class="mt-4 text-xs text-toss-sub leading-relaxed">
-        💡 상대강도 &gt; 1.0 = 시장 대비 강세 / &lt; 1.0 = 약세. 반도체(SMH) 반등 선발대 → 로봇(BOTZ)·소프트웨어(IGV)로 전환 고려.
-      </div>
-    </section>
+    </a>
 
     <!-- ===== 내 포지션 ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
@@ -962,37 +962,6 @@
             <div class="text-xs text-toss-sub mb-1">${label}</div>
             <div class="text-xl font-extrabold num ${color}">${valText}</div>
             ${note ? `<div class="text-[10px] text-toss-sub mt-1">${note}</div>` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderSectors(sector) {
-      const order = [
-        { key: 'XLK',  label: '기술(XLK)'        },
-        { key: 'SMH',  label: '반도체(SMH)'      },
-        { key: 'BOTZ', label: '로봇(BOTZ)'       },
-        { key: 'IGV',  label: '소프트웨어(IGV)'  },
-        { key: 'XLF',  label: '금융(XLF)'        },
-        { key: 'XLE',  label: '에너지(XLE)'      },
-      ];
-      PI.$('sector-bars').innerHTML = order.map(({ key, label }) => {
-        const v = (sector || {})[key];
-        const rs = v !== undefined ? Number(v) : null;
-        // 0.8 ~ 1.2 범위를 0~100%로 매핑
-        const pct = rs !== null ? Math.max(0, Math.min(100, ((rs - 0.8) / 0.4) * 100)) : 0;
-        const color = rs === null ? 'bg-gray-300' :
-                      rs >= 1.1 ? 'bg-toss-green' :
-                      rs >= 1.0 ? 'bg-toss-blue' :
-                      rs >= 0.9 ? 'bg-toss-sub' :
-                                  'bg-toss-red';
-        return `
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium text-toss-text">${label}</span>
-              <span class="text-sm font-bold num">${rs !== null ? rs.toFixed(2) : '-'}</span>
-            </div>
-            <div class="gauge"><div class="gauge-fill ${color}" style="width:${pct}%"></div></div>
           </div>
         `;
       }).join('');
@@ -1621,7 +1590,6 @@
       renderVolatility(snapshot?.volatility);
       renderCnnComponents(snapshot?.sentiment);
       renderKoreaFlow(snapshot?.korea_flow);
-      renderSectors(snapshot?.sector_rs);
       renderPosition(master, exit);
       renderYtdComparison(snapshot, exit);
 
