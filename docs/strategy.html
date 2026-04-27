@@ -20,9 +20,9 @@
     <!-- ===== Hero ===== -->
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <div class="flex items-center gap-2 mb-3">
-        <span class="chip bg-toss-blueL text-toss-blue">v4.4</span>
+        <span class="chip bg-toss-blueL text-toss-blue">v4.5</span>
         <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-04-27</span>
-        <span class="chip bg-toss-purpleL text-toss-purple">섹터 전환 정량화</span>
+        <span class="chip bg-toss-purpleL text-toss-purple">긴급탈출 = 위성만 청산</span>
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
         공포의 구덩이에서<br />기회를 건진다
@@ -48,7 +48,9 @@
         </p>
         <p>
           <strong>긴급 탈출</strong>은 시스템 붕괴 방지용 안전장치다.
-          신고가 대비 −10% 하락시 무조건 현금화한다. 자존심보다 생존이 우선이다.
+          신고가 대비 −10% 하락시 <strong>위성(레버리지) 전량 청산</strong>, 코어는 유지한다.
+          위성은 이미 fear-buy 시점에 들어갔으니 추가 손실 방어가 핵심.
+          코어는 비레버리지라 회복 가능하므로 청산하지 않는다.
         </p>
       </div>
     </section>
@@ -279,26 +281,31 @@
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white rounded-toss p-5">
-          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출</div>
+          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출 (v4.5)</div>
           <p class="text-sm text-toss-text leading-relaxed">
-            나스닥/코스피 <strong>52주 신고가 대비 −10%</strong> 하락시<br />
-            → 코어 전량 매도, 100% 현금화
+            나스닥/S&amp;P/코스피 <strong>52주 신고가 대비 −10%</strong> 도달시<br />
+            → <strong>위성(레버리지) 전량 청산</strong>, 코어는 유지
           </p>
         </div>
         <div class="bg-white rounded-toss p-5">
           <div class="font-bold text-toss-blue text-lg mb-2">재진입</div>
           <p class="text-sm text-toss-text leading-relaxed">
-            현금화 상태에서 매수 신호 재확인<br />
+            위성 청산 후 매수 신호 재발동 시<br />
             → 보유 현금으로 위성 재매수 (2단계 진행)
           </p>
         </div>
         <div class="bg-white rounded-toss p-5">
-          <div class="font-bold text-toss-purple text-lg mb-2">특별 조항</div>
+          <div class="font-bold text-toss-purple text-lg mb-2">사이클 리셋</div>
           <p class="text-sm text-toss-text leading-relaxed">
-            −10% + 공탐&lt;10 <strong>동시 발생</strong><br />
-            → 우선 현금화 → 매수 원칙에 따라 재진입
+            매도 3조건 모두 충족 시<br />
+            → 코어+위성 전량 청산, 100% 현금화
           </p>
         </div>
+      </div>
+      <div class="mt-4 p-3 bg-white rounded-toss text-xs text-toss-text leading-relaxed" style="word-break: keep-all">
+        💡 <strong>왜 코어를 유지하나?</strong> 11년 백테스트 결과, "전량 청산" 룰은 회복기에 코어 노출 영구 손실로 이어졌음.
+        위성은 fear-buy로 이미 들어간 상태라 청산이 protective 효과의 90%를 차지하고, 코어 청산은 거의 의미 없음.
+        2020-2025 환경에서 V2 (위성만 청산) 룰이 누적 +178% / MDD −35.5% / Sharpe 0.50으로 best risk-adjusted.
       </div>
     </section>
 
@@ -329,8 +336,8 @@
         <details class="group bg-toss-bg rounded-toss p-4">
           <summary class="cursor-pointer font-bold">긴급 탈출 후 언제 다시 들어가나?</summary>
           <p class="mt-3 text-sm text-toss-text leading-relaxed">
-            현금화 상태에서 <strong>매수 신호(공탐&lt;10 or VIX&gt;25 or 강제청산)</strong>가 재확인되면
-            보유 현금으로 위성 재매수해 2단계를 다시 진행합니다.
+            긴급 탈출 시 코어는 그대로 유지되고 위성만 현금화됩니다. 그 후 매수 신호(공탐&lt;10 / VIX&gt;25 / 강제청산)가
+            재발동되면 보유 현금으로 위성 재매수해 2단계를 다시 진행합니다. 코어는 평시처럼 계속 holding.
           </p>
         </details>
         <details class="group bg-toss-bg rounded-toss p-4">
@@ -349,16 +356,28 @@
       <h2 class="text-2xl font-bold mb-5">📅 버전 히스토리</h2>
       <div class="space-y-4 border-l-2 border-toss-border pl-5">
         <div class="relative">
-          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-purple"></div>
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-red"></div>
           <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <span class="chip bg-toss-purpleL text-toss-purple">v4.4</span>
+            <span class="chip bg-toss-redL text-toss-red">v4.5</span>
             <span class="text-xs text-toss-sub">2026-04-27</span>
             <span class="chip bg-toss-greenL text-toss-green">Current</span>
           </div>
           <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
+            <li><strong>긴급탈출 룰 변경</strong>: −10% 도달 시 위성만 청산, 코어 유지 (이전: 전량 현금화)</li>
+            <li>2014~2024 / 2020~2025 백테스트로 검증 — V2 룰이 risk-adjusted best (Sharpe 0.50 vs 원래 0.36)</li>
+            <li>긴급탈출 게이지에 S&P 500 추가 (나스닥/S&P/코스피 동등)</li>
+          </ul>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-sub"></div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="chip bg-gray-100 text-toss-sub">v4.4</span>
+            <span class="text-xs text-toss-sub">2026-04-27</span>
+          </div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
             <li>섹터 전환을 RS(상대강도) 기반 정량 룰로 정형화</li>
             <li>DD 깊이별 코어 분배 분기 추가 (얕은/중간/깊은 구덩이)</li>
-            <li>RS Monitor 탭 신설 (10 sector ETF + Tier-2 종목 + 한국 panel)</li>
+            <li>섹터 모니터 탭 신설 (11 sector ETF + Tier-2 종목)</li>
             <li>과거 7개 폭락장 백테스트로 6주 시점 정확도 71.4% 검증</li>
           </ul>
         </div>
