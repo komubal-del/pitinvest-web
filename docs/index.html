@@ -530,8 +530,13 @@
         <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
-        <div id="upload-dropzone" class="border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg"
-             onclick="console.log('[upload] dropzone clicked, fi=', window._fileInput); if(window._fileInput) { window._fileInput.click(); console.log('[upload] click() called'); } else alert('파일 input 초기화 실패');">
+        <!-- input을 dropzone 내부 viewport 안에 absolute overlay로 깔기 (opacity 0).
+             사용자 영역 클릭 = input이 target = native default action → OS 파일창.
+             JS click() 호출 안 함 (Chrome이 화면 밖 input의 dynamic click을 차단함). -->
+        <div id="upload-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
+          <input id="upload-file-input" type="file" accept="image/*"
+                 class="absolute inset-0 w-full h-full cursor-pointer"
+                 style="opacity:0; z-index:10;" />
           <div class="text-sm text-toss-sub pointer-events-none">
             여기를 클릭해서 스크린샷 선택<br/>
             <span class="text-[11px]">PNG · JPG · WEBP</span>
@@ -1681,16 +1686,12 @@
     }
 
     (function initUploadDropzone() {
-      // 파일 input을 body 직속으로 동적 생성 (모달 z-index 등 어떤 환경에서도 영향 X)
-      const fi = document.createElement('input');
-      fi.type = 'file';
-      fi.accept = 'image/*';
-      fi.id = 'upload-file-input';
-      fi.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;';
+      // dropzone 내부 input (HTML에 정적으로 있음). change 핸들러만 등록.
+      const fi = document.getElementById('upload-file-input');
+      if (!fi) { console.warn('[upload] file input not found'); return; }
       fi.addEventListener('change', (e) => onFilePicked(e.target.files[0]));
-      document.body.appendChild(fi);
-      window._fileInput = fi;  // dropzone onclick에서 참조
-      console.log('[upload] file input ready:', fi);
+      window._fileInput = fi;
+      console.log('[upload] file input ready (in-dropzone overlay):', fi);
     })();
 
     function onFilePicked(file) {
