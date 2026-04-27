@@ -530,13 +530,15 @@
         <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
-        <label for="upload-file-input" id="upload-dropzone" class="block border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
-          <input id="upload-file-input" type="file" accept="image/*" class="hidden" />
-          <div class="text-sm text-toss-sub">
+        <!-- input을 dropzone 영역 위에 invisible overlay로 → 사용자가 영역 어디 클릭해도 input.click() 발동 (Safari/iOS 가장 호환성 높음) -->
+        <div id="upload-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center hover:bg-toss-bg">
+          <input id="upload-file-input" type="file" accept="image/*"
+                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+          <div class="text-sm text-toss-sub pointer-events-none">
             여기를 클릭해서 스크린샷 선택<br/>
             <span class="text-[11px]">PNG · JPG · WEBP</span>
           </div>
-        </label>
+        </div>
         <div id="upload-preview-wrap" class="hidden space-y-3">
           <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
           <div id="upload-filename" class="text-xs text-toss-sub text-center"></div>
