@@ -236,41 +236,23 @@
         <div class="mt-3 text-xs text-toss-sub leading-relaxed">
           <div class="flex items-center gap-3 flex-wrap mb-1">
             <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #8B5CF6"></span>
-              매수1 · CNN&lt;10
+              <span style="display:inline-block;width:14px;height:10px;background:rgba(240,68,82,0.10)"></span>
+              매수 신호 발동일
             </span>
             <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #F04452"></span>
-              매수2 · VIX&gt;25
+              <span style="display:inline-block;width:14px;height:10px;background:rgba(240,68,82,0.30)"></span>
+              매수 3종 동시
             </span>
             <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #F97316"></span>
-              매수3 · 강제청산
+              <span style="display:inline-block;width:14px;height:10px;background:rgba(0,191,92,0.10)"></span>
+              매도 신호 발동일
             </span>
             <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:8px;height:8px;background:#00BF5C;transform:rotate(45deg)"></span>
-              매도1 · 위성 +100%
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:8px;height:8px;background:#3182F6;transform:rotate(45deg)"></span>
-              매도2 · 삼전/닉스 3일↑
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:8px;height:8px;background:#FFB900;transform:rotate(45deg)"></span>
-              매도3 · 전문가 경고
+              <span style="display:inline-block;width:14px;height:10px;background:rgba(0,191,92,0.30)"></span>
+              매도 3종 · 사이클 리셋
             </span>
           </div>
-          <div class="flex items-center gap-3 flex-wrap mb-1">
-            <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:10px;height:10px;background:rgba(240,68,82,0.4);border:1px solid rgba(240,68,82,0.8)"></span>
-              매수 3종 동시 발생일 (음영)
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span style="display:inline-block;width:10px;height:10px;background:rgba(0,191,92,0.4);border:1px solid rgba(0,191,92,0.8)"></span>
-              매도 3종 충족 · 사이클 리셋 (음영)
-            </span>
-          </div>
-          <div class="text-[11px]">각 시그널의 <strong>사이클 내 첫 발생일만</strong> 마커로 표시. 3종 동시 발생일은 세로 음영 띠로 강조 · 매도2·3은 오늘부터 누적 기록</div>
+          <div class="text-[11px]">각 신호의 <strong>사이클 내 첫 발동일</strong>이 세로 음영 띠로 표시됨. 진한 띠 = 3종 동시. 어떤 신호인지 자세히는 매수/매도 카드 참고.</div>
         </div>
       </div>
 
@@ -1001,6 +983,8 @@
         sellExpert: new Set(), // 매도3 · 전문가 경고 첫 발생
         tripleBuy: new Set(),  // 매수 3종(CNN+VIX+margin) 동시 발생일
         tripleSell: new Set(), // 매도 3종(레버리지+주도주+전문가) 동시 발생일
+        buyAny: new Set(),     // 매수 신호 1개 이상 첫 발생일 (음영용)
+        sellAny: new Set(),    // 매도 신호 1개 이상 첫 발생일 (음영용)
       };
 
       let buySlots = { cnn: false, vix: false, margin: false };
@@ -1311,36 +1295,7 @@
         });
       });
 
-      // 매수/매도 시그널 마커 — strategyData 위에 고정 (선택 토글과 무관, 위치 안흔들림)
-      // strategy 라인이 차트에 안 보여도 마커는 같은 좌표에 머무름
-      const markerBase = strategyData;
-      if (markerBase) {
-        const M = _ytdState.markers || {};
-        const markerSpecs = [
-          { label: '매수1', fullLabel: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
-          { label: '매수2', fullLabel: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
-          { label: '매수3', fullLabel: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
-          { label: '매도1', fullLabel: '매도1 · 위성 +100%',     set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
-          { label: '매도2', fullLabel: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
-          { label: '매도3', fullLabel: '매도3 · 전문가 경고',    set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
-        ];
-        window._markerFullLabels = Object.fromEntries(markerSpecs.map(m => [m.label, m.fullLabel]));
-        markerSpecs.forEach(ms => {
-          if (!ms.set || ms.set.size === 0) return;
-          datasets.push({
-            label: ms.label,
-            data: markerBase.map((v, i) => ms.set.has(i) ? v : null),
-            borderColor: 'transparent',
-            backgroundColor: ms.color,
-            pointRadius: 8,
-            pointHoverRadius: 11,
-            pointStyle: ms.style,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            showLine: false,
-          });
-        });
-      }
+      // 매수/매도 시그널은 점 마커가 아닌 음영 띠로 표시 (signalBackgroundPlugin에서 그림)
 
       // 배경 음영 플러그인: 매수/매도 3종 동시 발생일에 세로 음영 띠
       const signalBackgroundPlugin = {
@@ -1363,8 +1318,15 @@
             });
           };
 
-          drawBand(M.tripleBuy,  'rgba(240, 68, 82, 0.15)');   // 연한 빨강 (매수 3종)
-          drawBand(M.tripleSell, 'rgba(0, 191, 92, 0.15)');    // 연한 초록 (매도 3종)
+          // union(매수1+2+3 첫 발동일) — 옅은 빨강 띠
+          const buyUnion = new Set([...(M.buyCnn || []), ...(M.buyVix || []), ...(M.buyMargin || [])]);
+          drawBand(buyUnion, 'rgba(240, 68, 82, 0.10)');
+          // union(매도1+2+3 첫 발동일) — 옅은 초록 띠
+          const sellUnion = new Set([...(M.sellLev || []), ...(M.sellLead || []), ...(M.sellExpert || [])]);
+          drawBand(sellUnion, 'rgba(0, 191, 92, 0.10)');
+          // 3종 동시 — 진한 띠 (위에 덧칠)
+          drawBand(M.tripleBuy,  'rgba(240, 68, 82, 0.30)');
+          drawBand(M.tripleSell, 'rgba(0, 191, 92, 0.30)');
         }
       };
 
