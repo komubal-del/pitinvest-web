@@ -1311,9 +1311,9 @@
         });
       });
 
-      // 매수/매도 시그널 마커 — 전략 라인 위에 (selected 무관, 항상 표시)
-      const markerBase = strategyData
-        || (selectedSpecs.length > 0 ? cum(selectedSpecs[0].key) : null);
+      // 매수/매도 시그널 마커 — strategyData 위에 고정 (선택 토글과 무관, 위치 안흔들림)
+      // strategy 라인이 차트에 안 보여도 마커는 같은 좌표에 머무름
+      const markerBase = strategyData;
       if (markerBase) {
         const M = _ytdState.markers || {};
         const markerSpecs = [
