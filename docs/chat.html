@@ -253,6 +253,8 @@ ${master.memo ? '메모: ' + master.memo : ''}
 
     function handleInputKey(e) {
       updateSendButton();
+      // 한글 IME composition 중이면 Enter 무시 (마지막 글자 confirm 용 Enter 흡수 방지)
+      if (e.isComposing || e.keyCode === 229) return;
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
