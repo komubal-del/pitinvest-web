@@ -984,7 +984,7 @@
     ];
     let _ytdState = {
       rows: [], benchmarks: [], strategyRet: null,
-      selectedKey: 'nasdaq_close',
+      selectedKeys: new Set(['nasdaq_close']),  // 다중 선택 (Set)
       markers: { buyCnn: new Set(), buyVix: new Set(), buyMargin: new Set(), sellLev: new Set() },
     };
 
@@ -1124,7 +1124,7 @@
         // 상태 저장
         _ytdState = {
           rows: workRows, benchmarks, strategyRet, strategyDaily,
-          selectedKey: 'nasdaq_close',
+          selectedKeys: _ytdState.selectedKeys || new Set(['nasdaq_close']),
           markers,
         };
 
@@ -1167,8 +1167,8 @@
         // 벤치마크 탭 렌더
         renderBenchmarkTabs();
 
-        // 초기 선택 벤치마크(나스닥) 으로 하이라이트 + 차트
-        updateYtdSelection(_ytdState.selectedKey);
+        // 초기 선택 (나스닥) 으로 차트 렌더
+        rerenderYtdSelection();
 
       } catch (e) {
         console.error('YTD 비교 실패', e);
@@ -1208,24 +1208,30 @@
         </button>
       `).join('');
       container.querySelectorAll('.ytd-tab').forEach(btn => {
-        btn.addEventListener('click', () => updateYtdSelection(btn.dataset.key));
+        btn.addEventListener('click', () => toggleYtdSelection(btn.dataset.key));
       });
     }
 
-    function updateYtdSelection(key) {
-      _ytdState.selectedKey = key;
-      const sel = YTD_SPECS.find(s => s.key === key);
-      const bm = _ytdState.benchmarks.find(b => b.key === key);
+    function toggleYtdSelection(key) {
+      const set = _ytdState.selectedKeys;
+      if (set.has(key)) set.delete(key);
+      else set.add(key);
+      rerenderYtdSelection();
+    }
 
-      // 탭 활성 스타일
+    function rerenderYtdSelection() {
+      const set = _ytdState.selectedKeys;
+      const selectedSpecs = YTD_SPECS.filter(s => set.has(s.key));
+
+      // 탭 활성 스타일 (선택된 것 하이라이트)
       document.querySelectorAll('.ytd-tab').forEach(btn => {
-        const on = btn.dataset.key === key;
+        const on = set.has(btn.dataset.key);
         btn.className = 'ytd-tab px-3 py-1.5 text-xs font-semibold rounded-toss transition ' + (
           on ? 'bg-white text-toss-dark shadow-toss' : 'text-toss-sub hover:text-toss-dark'
         );
       });
 
-      // 전략 하이라이트 값 + 벤치마크 대비 뱃지
+      // 전략 하이라이트 값 + 벤치마크 대비 뱃지 (1개 선택 시만 vs N% 표시, 여러 개면 평균)
       const sRet = _ytdState.strategyRet;
       if (sRet !== undefined && sRet !== null && !isNaN(sRet)) {
         const el = PI.$('ytd-strategy-value');
@@ -1233,25 +1239,37 @@
         el.className = 'text-4xl font-extrabold num ' + (sRet >= 0 ? 'text-toss-blue' : 'text-toss-red');
 
         const badge = PI.$('ytd-strategy-badge');
-        if (bm && sel) {
-          const delta = sRet - bm.ret;
-          badge.textContent = `vs ${sel.short} ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%p`;
+        const bms = selectedSpecs.map(s => _ytdState.benchmarks.find(b => b.key === s.key)).filter(Boolean);
+        if (bms.length === 1) {
+          const delta = sRet - bms[0].ret;
+          const spec = selectedSpecs[0];
+          badge.textContent = `vs ${spec.short} ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%p`;
+          badge.className = 'chip ' + (delta >= 0 ? 'bg-toss-greenL text-toss-green' : 'bg-toss-redL text-toss-red');
+        } else if (bms.length > 1) {
+          const avg = bms.reduce((s, b) => s + b.ret, 0) / bms.length;
+          const delta = sRet - avg;
+          badge.textContent = `vs 평균 ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%p (${bms.length}종)`;
           badge.className = 'chip ' + (delta >= 0 ? 'bg-toss-greenL text-toss-green' : 'bg-toss-redL text-toss-red');
         } else {
-          badge.textContent = '-';
+          badge.textContent = '벤치마크 미선택';
           badge.className = 'chip bg-gray-100 text-toss-sub';
         }
       } else {
         PI.$('ytd-strategy-value').textContent = '-';
       }
 
-      // 라인 차트 재렌더 (전략 + 선택 1개)
-      renderYtdLineChart(_ytdState.rows, sRet, sel);
+      renderYtdLineChart(_ytdState.rows, sRet, selectedSpecs);
     }
 
-    function renderYtdLineChart(rows, strategyFinal, selectedSpec) {
+    // 후방 호환: 옛 호출 시 toggle 동작
+    function updateYtdSelection(key) { toggleYtdSelection(key); }
+
+    function renderYtdLineChart(rows, strategyFinal, selectedSpecs) {
       const ctx = PI.$('ytd-chart').getContext('2d');
       const dates = rows.map(r => r.date);
+      // 후방 호환: 단일 spec 객체 들어와도 처리
+      if (selectedSpecs && !Array.isArray(selectedSpecs)) selectedSpecs = [selectedSpecs];
+      selectedSpecs = selectedSpecs || [];
 
       const cum = (key) => {
         const first = parseFloat(rows[0][key]);
@@ -1266,11 +1284,11 @@
 
       // 전략 라인 — 실제 백테스트 결과 (snapshot.ytd_returns.daily_series)
       const strategyDaily = _ytdState.strategyDaily || [];
+      let strategyData = null;
       if (strategyDaily.length > 0) {
-        // date → ret_pct 맵
         const map = {};
         strategyDaily.forEach(d => { if (d && d.date) map[d.date] = d.ret_pct; });
-        const strategyData = dates.map(d => (d in map ? map[d] : null));
+        strategyData = dates.map(d => (d in map ? map[d] : null));
         datasets.push({
           label: '구덩이 매매법',
           data: strategyData,
@@ -1280,53 +1298,55 @@
           pointRadius: 0,
           pointHoverRadius: 5,
           backgroundColor: '#8B5CF620',
-          spanGaps: true,  // null 구간은 건너뛰고 연결
+          spanGaps: true,
         });
       }
 
-      // 선택된 벤치마크 하나
-      if (selectedSpec) {
-        const data = cum(selectedSpec.key);
-        if (data) {
-          datasets.push({
-            label: selectedSpec.label,
-            data,
-            borderColor: selectedSpec.hex,
-            borderWidth: 2,
-            tension: 0.3,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            backgroundColor: selectedSpec.hex + '15',
-          });
+      // 선택된 벤치마크들 (다중)
+      selectedSpecs.forEach(spec => {
+        const data = cum(spec.key);
+        if (!data) return;
+        datasets.push({
+          label: spec.label,
+          data,
+          borderColor: spec.hex,
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          backgroundColor: spec.hex + '15',
+        });
+      });
 
-          // 매수/매도 시그널 마커 (슬롯별 첫 발생일만 · 색깔 구분)
-          const M = _ytdState.markers || {};
-          const markerSpecs = [
-            { label: '매수1', fullLabel: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
-            { label: '매수2', fullLabel: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
-            { label: '매수3', fullLabel: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
-            { label: '매도1', fullLabel: '매도1 · 위성 +100%',     set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
-            { label: '매도2', fullLabel: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
-            { label: '매도3', fullLabel: '매도3 · 전문가 경고',    set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
-          ];
-          // tooltip 시 풀 라벨로 표시
-          window._markerFullLabels = Object.fromEntries(markerSpecs.map(m => [m.label, m.fullLabel]));
-          markerSpecs.forEach(ms => {
-            if (!ms.set || ms.set.size === 0) return;
-            datasets.push({
-              label: ms.label,
-              data: data.map((v, i) => ms.set.has(i) ? v : null),
-              borderColor: 'transparent',
-              backgroundColor: ms.color,
-              pointRadius: 8,
-              pointHoverRadius: 11,
-              pointStyle: ms.style,
-              pointBorderColor: '#fff',
-              pointBorderWidth: 2,
-              showLine: false,
-            });
+      // 매수/매도 시그널 마커 — 전략 라인 위에 (selected 무관, 항상 표시)
+      const markerBase = strategyData
+        || (selectedSpecs.length > 0 ? cum(selectedSpecs[0].key) : null);
+      if (markerBase) {
+        const M = _ytdState.markers || {};
+        const markerSpecs = [
+          { label: '매수1', fullLabel: '매수1 · CNN<10',         set: M.buyCnn,     color: '#8B5CF6', style: 'triangle' },
+          { label: '매수2', fullLabel: '매수2 · VIX>25',         set: M.buyVix,     color: '#F04452', style: 'triangle' },
+          { label: '매수3', fullLabel: '매수3 · 강제청산',       set: M.buyMargin,  color: '#F97316', style: 'triangle' },
+          { label: '매도1', fullLabel: '매도1 · 위성 +100%',     set: M.sellLev,    color: '#00BF5C', style: 'rectRot' },
+          { label: '매도2', fullLabel: '매도2 · 삼전/닉스 3일↑', set: M.sellLead,   color: '#3182F6', style: 'rectRot' },
+          { label: '매도3', fullLabel: '매도3 · 전문가 경고',    set: M.sellExpert, color: '#FFB900', style: 'rectRot' },
+        ];
+        window._markerFullLabels = Object.fromEntries(markerSpecs.map(m => [m.label, m.fullLabel]));
+        markerSpecs.forEach(ms => {
+          if (!ms.set || ms.set.size === 0) return;
+          datasets.push({
+            label: ms.label,
+            data: markerBase.map((v, i) => ms.set.has(i) ? v : null),
+            borderColor: 'transparent',
+            backgroundColor: ms.color,
+            pointRadius: 8,
+            pointHoverRadius: 11,
+            pointStyle: ms.style,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            showLine: false,
           });
-        }
+        });
       }
 
       // 배경 음영 플러그인: 매수/매도 3종 동시 발생일에 세로 음영 띠
@@ -1367,7 +1387,12 @@
           plugins: {
             legend: {
               position: 'top', align: 'end',
-              labels: { font: { family: 'Pretendard', weight: 600, size: 10 }, boxWidth: 8, boxHeight: 8, padding: 6 }
+              labels: {
+                font: { family: 'Pretendard', weight: 600, size: 10 },
+                boxWidth: 8, boxHeight: 8, padding: 6,
+                // 마커 dataset (매수1~3, 매도1~3) 은 하단 visual legend에 있으므로 상단 legend에서 제외
+                filter: (item) => !/^매[수도][1-3]$/.test(item.text || ''),
+              }
             },
             tooltip: {
               backgroundColor: '#191F28', padding: 10,
