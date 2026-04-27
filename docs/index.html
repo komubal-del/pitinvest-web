@@ -613,10 +613,11 @@
         return;
       }
       el.classList.remove('hidden');
-      const status = c.passed
-        ? `6주 경과 D+${-c.remaining + 0}일 (확정 leader 확인)`
-        : `6주 모니터 D+${c.elapsed}일 / 잔여 D-${c.remaining}일`;
-      el.textContent = `📊 1차 매도 ${c.firedDate} · ${status}`;
+      let label;
+      if (c.remaining > 0)      label = `📊 섹터 변경 D-${c.remaining}`;
+      else if (c.remaining === 0) label = `📊 섹터 변경 D-DAY 🎯`;
+      else                       label = `📊 섹터 변경 D+${-c.remaining} (지남)`;
+      el.textContent = label;
     }
 
     function renderHero(stage, snapshot) {

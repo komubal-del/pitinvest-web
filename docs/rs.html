@@ -155,11 +155,12 @@
       const sell1 = master?.sell1_first_fired_date;
       const counter = compute6wCounter(sell1);
       if (counter) {
-        const status = counter.passed
-          ? `6주 경과 (D+${counter.elapsed}일) · 확정 leader 확인`
-          : `D+${counter.elapsed}일 / D-${counter.remaining}일 → ${counter.targetDate}`;
-        PI.$('rs-recov').textContent = `1차 매도 ${counter.firedDate}`;
-        PI.$('rs-recov-src').textContent = status;
+        let label;
+        if (counter.remaining > 0)       label = `섹터 변경 D-${counter.remaining}`;
+        else if (counter.remaining === 0) label = `섹터 변경 D-DAY 🎯`;
+        else                              label = `섹터 변경 D+${-counter.remaining} (지남)`;
+        PI.$('rs-recov').textContent = label;
+        PI.$('rs-recov-src').textContent = `1차 매도 ${counter.firedDate} → ${counter.targetDate}`;
       } else {
         const recov = rs.recovery_start || {};
         PI.$('rs-recov').textContent = recov.date || '-';
