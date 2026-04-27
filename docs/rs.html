@@ -57,13 +57,13 @@
       </div>
     </section>
 
-    <!-- ===== 환율 panel ===== -->
+    <!-- ===== 거시 지표 panel ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold">💱 환율</h2>
-        <span class="text-xs text-toss-sub hidden sm:inline">해외자산 평가에 영향</span>
+        <h2 class="text-lg font-bold">📈 거시 지표</h2>
+        <span class="text-xs text-toss-sub hidden sm:inline">환율 · 금리</span>
       </div>
-      <div id="rs-korea" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div id="rs-macro" class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="text-sm text-toss-sub py-4 text-center">로딩 중...</div>
       </div>
     </section>
@@ -233,13 +233,16 @@
       }).join('');
     }
 
-    function renderKorea(korea) {
-      const wrap = PI.$('rs-korea');
+    function renderMacro(macro) {
+      const wrap = PI.$('rs-macro');
       const parts = [];
-      if (korea && korea.usdkrw) {
-        const fx = korea.usdkrw;
+
+      // USD/KRW 환율
+      if (macro && macro.usdkrw) {
+        const fx = macro.usdkrw;
         const ch = fx.change_30d_pct;
         const chCls = ch > 0 ? 'text-toss-red' : ch < 0 ? 'text-toss-blue' : 'text-toss-sub';
+        const chBg  = ch > 0 ? 'bg-toss-redL ' : ch < 0 ? 'bg-toss-blueL ' : 'bg-gray-100 ';
         const note = ch > 0 ? '원화 약세 (해외자산 평가↑)' : ch < 0 ? '원화 강세 (해외자산 평가↓)' : '거의 변동 없음';
         parts.push(`
           <div class="rounded-toss bg-toss-bg p-4">
@@ -248,14 +251,39 @@
                 <span class="font-bold text-base">USD/KRW</span>
                 <span class="text-xs text-toss-sub ml-1">환율</span>
               </div>
-              <span class="chip ${chCls === 'text-toss-red' ? 'bg-toss-redL ' : chCls === 'text-toss-blue' ? 'bg-toss-blueL ' : 'bg-gray-100 '}${chCls} num">${ch > 0 ? '+' : ''}${ch ?? '-'}%</span>
+              <span class="chip ${chBg}${chCls} num">${ch > 0 ? '+' : ''}${ch ?? '-'}%</span>
             </div>
             <div class="text-xl font-extrabold num mb-2">${(fx.value||0).toLocaleString('ko-KR')}</div>
             <div class="text-xs text-toss-sub">30일 변화 · ${note}</div>
           </div>`);
       }
+
+      // 미국 10년물 국채 수익률
+      if (macro && macro.us10y) {
+        const t = macro.us10y;
+        const pp = t.change_30d_pp;  // 절대 차이 (%p)
+        // 금리 ↑ = risk-off (Tech 약세 신호) / 금리 ↓ = risk-on
+        const ppCls = pp > 0 ? 'text-toss-red' : pp < 0 ? 'text-toss-green' : 'text-toss-sub';
+        const ppBg  = pp > 0 ? 'bg-toss-redL ' : pp < 0 ? 'bg-toss-greenL ' : 'bg-gray-100 ';
+        const note  = pp > 0 ? '금리 상승 · risk-off (Tech 부담)'
+                     : pp < 0 ? '금리 하락 · risk-on (Tech 호조)'
+                              : '거의 변동 없음';
+        parts.push(`
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="font-bold text-base">미국 10Y</span>
+                <span class="text-xs text-toss-sub ml-1">국채 수익률</span>
+              </div>
+              <span class="chip ${ppBg}${ppCls} num">${pp > 0 ? '+' : ''}${pp ?? '-'}%p</span>
+            </div>
+            <div class="text-xl font-extrabold num mb-2">${(t.value ?? 0).toFixed(2)}%</div>
+            <div class="text-xs text-toss-sub">30일 변화 · ${note}</div>
+          </div>`);
+      }
+
       if (parts.length === 0) {
-        wrap.innerHTML = '<div class="text-sm text-toss-sub py-4 text-center">환율 데이터 없음</div>';
+        wrap.innerHTML = '<div class="text-sm text-toss-sub py-4 text-center">거시 지표 데이터 없음</div>';
       } else {
         wrap.innerHTML = parts.join('');
       }
@@ -289,7 +317,7 @@
         ]);
         renderHero(rs, master);
         renderTier1(rs.tier1);
-        renderKorea(rs.korea);
+        renderMacro(rs.macro);
         renderErrors(rs.errors);
       } catch (e) {
         console.error('rs load fail', e);
