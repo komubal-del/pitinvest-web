@@ -1002,14 +1002,21 @@
       const _n = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
 
       rows.forEach((r, i) => {
-        // 사이클 리셋 감지 (ratio_sat=0)
-        const sat = parseFloat(r.ratio_sat);
-        if (!isNaN(sat) && sat === 0 && i > 0) {
-          buySlots = { cnn: false, vix: false, margin: false };
-          sellSlots = { lev: false, lead: false, expert: false };
-          events = [];
-          cumAmount = 0;
-          simSellLevFired = false;
+        // 사이클 리셋 감지 — 직전 row에서 cycle이 끝났으면(=auto_reset 발동) 오늘부터 새 사이클로
+        // 신호: 직전 row의 sell_signal_count == 3 OR ratio_sat == 0
+        // 같은 row에서 reset하면 그 row의 trigger들이 "이전 사이클 마지막 신호" 인지
+        // "새 사이클 첫 신호" 인지 구분이 모호해서, 다음 row에서 reset.
+        if (i > 0) {
+          const prev_ssc = parseFloat(rows[i-1].sell_signal_count);
+          const prev_sat = parseFloat(rows[i-1].ratio_sat);
+          const cycle_ended = (prev_ssc === 3) || (!isNaN(prev_sat) && prev_sat === 0);
+          if (cycle_ended) {
+            buySlots = { cnn: false, vix: false, margin: false };
+            sellSlots = { lev: false, lead: false, expert: false };
+            events = [];
+            cumAmount = 0;
+            simSellLevFired = false;
+          }
         }
 
         // ----- 매수 -----
