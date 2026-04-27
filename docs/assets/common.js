@@ -12,10 +12,11 @@ const IS_LOCAL = new URLSearchParams(location.search).has('local')
 const BASE = IS_LOCAL ? './mock_data' : REMOTE_BASE;
 
 const URLS = {
-  master:   `${BASE}/master_data.json`,
-  exit:     `${BASE}/exit_settings.json`,
-  snapshot: `${BASE}/current_snapshot.json`,
-  history:  `${BASE}/pitinvest_history.csv`,
+  master:     `${BASE}/master_data.json`,
+  exit:       `${BASE}/exit_settings.json`,
+  snapshot:   `${BASE}/current_snapshot.json`,
+  history:    `${BASE}/pitinvest_history.csv`,
+  rs_monitor: `${BASE}/rs_monitor.json`,
 };
 
 // --- Utils ---
@@ -100,6 +101,7 @@ const NAV_ITEMS = [
   { id: 'strategy', name: '전략',     icon: '📖', href: 'strategy.html' },
   { id: 'journal',  name: '일지',     icon: '📝', href: 'journal.html' },
   { id: 'history',  name: '히스토리', icon: '📈', href: 'history.html' },
+  { id: 'rs',       name: 'RS',       icon: '📊', href: 'rs.html' },
   { id: 'chat',     name: '챗봇',     icon: '🤖', href: 'chat.html' },
 ];
 

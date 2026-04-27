@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RS Monitor · 구덩이매매법</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/tailwind.config.js"></script>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+
+<body class="bg-toss-bg text-toss-dark">
+
+  <header id="app-header" class="sticky top-0 z-40 bg-toss-bg/90 backdrop-blur border-b border-toss-border"></header>
+
+  <main class="main-content max-w-5xl mx-auto px-5 py-6 space-y-4">
+
+    <!-- ===== Hero ===== -->
+    <section class="bg-toss-card rounded-tossLg p-5 md:p-6 shadow-toss animate-fadein">
+      <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h1 class="text-2xl font-extrabold">📊 RS Monitor</h1>
+        <span id="rs-updated" class="chip bg-gray-100 text-toss-sub">업데이트 -</span>
+      </div>
+      <p class="text-sm text-toss-text leading-relaxed mb-3" style="word-break: keep-all">
+        SPY 대비 30거래일 상대강도(RS_ROC)로 섹터 leadership 모니터. <br/>
+        <strong>1차 매도 발동 후 코어 분배 결정의 정량 근거</strong>로 사용.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="rounded-toss bg-toss-bg p-3">
+          <div class="text-xs text-toss-sub mb-1">회복 시작일</div>
+          <div id="rs-recov" class="text-lg font-bold num">-</div>
+          <div id="rs-recov-src" class="text-[10px] text-toss-sub">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-3">
+          <div class="text-xs text-toss-sub mb-1">현재 leader</div>
+          <div id="rs-leader" class="text-lg font-bold">-</div>
+          <div id="rs-leader-status" class="text-[10px] text-toss-sub">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-3">
+          <div class="text-xs text-toss-sub mb-1">벤치마크 / Lookback</div>
+          <div id="rs-bench" class="text-lg font-bold num">-</div>
+          <div class="text-[10px] text-toss-sub">SPY 대비 일별 close</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Tier-1 grid ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-lg font-bold">섹터 ETF (10) · 클릭 시 종목 펼침</h2>
+        <span class="text-xs text-toss-sub hidden sm:inline">RS_ROC = (P_t/P_t-30) / (SPY_t/SPY_t-30) − 1</span>
+      </div>
+      <div id="rs-tier1-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="text-sm text-toss-sub py-8 text-center">로딩 중...</div>
+      </div>
+    </section>
+
+    <!-- ===== 한국 panel ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-lg font-bold">🇰🇷 한국</h2>
+        <span class="text-xs text-toss-sub hidden sm:inline">대표 종목 + 환율</span>
+      </div>
+      <div id="rs-korea" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="text-sm text-toss-sub py-4 text-center">로딩 중...</div>
+      </div>
+    </section>
+
+    <!-- ===== Errors ===== -->
+    <section id="rs-errors-wrap" class="hidden bg-toss-yellowL rounded-toss p-4 text-sm text-toss-yellow">
+      <strong>⚠️ 일부 ticker 데이터 누락</strong>
+      <div id="rs-errors" class="mt-2 text-xs"></div>
+    </section>
+
+    <footer class="text-center py-8 text-xs text-toss-sub">
+      Not financial advice · 데이터 출처: yfinance · 봇이 매시간 업데이트
+    </footer>
+  </main>
+
+  <nav id="bottom-nav"></nav>
+
+  <script src="assets/common.js"></script>
+  <script>
+    PI.initNav('rs');
+
+    // ─────────────────── helpers ───────────────────
+    function fmtPct(v, d = 2) {
+      if (v === null || v === undefined || isNaN(v)) return '-';
+      const sign = v > 0 ? '+' : '';
+      return `${sign}${(v * 100).toFixed(d)}%`;
+    }
+
+    function fmtRocClass(v) {
+      if (v === null || v === undefined || isNaN(v)) return 'bg-gray-100 text-toss-sub';
+      if (v > 0.005)  return 'bg-toss-greenL text-toss-green';
+      if (v < -0.005) return 'bg-toss-redL text-toss-red';
+      return 'bg-gray-100 text-toss-sub';
+    }
+
+    function rankClass(r) {
+      if (r === 1) return 'bg-toss-blue text-white';
+      if (r <= 3)  return 'bg-toss-blueL text-toss-blue';
+      return 'bg-gray-100 text-toss-sub';
+    }
+
+    // SVG sparkline (60 height)
+    function sparklineSVG(points, color = '#3182F6') {
+      if (!points || points.length < 2) {
+        return '<div class="text-[10px] text-toss-sub h-[60px] flex items-center justify-center">데이터 부족</div>';
+      }
+      const W = 280, H = 60;
+      const vals = points.map(p => p.value);
+      const min = Math.min(...vals), max = Math.max(...vals);
+      const span = max - min || 1;
+      const xs = (i) => (i / (vals.length - 1)) * W;
+      const ys = (v) => H - ((v - min) / span) * H * 0.8 - H * 0.1;
+      const d = vals.map((v, i) => `${i === 0 ? 'M' : 'L'}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(' ');
+      // baseline at 1.0
+      const baseY = ys(1.0).toFixed(1);
+      return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="w-full h-[60px]">
+        <line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="#E5E8EB" stroke-width="1" stroke-dasharray="3,3"/>
+        <path d="${d}" fill="none" stroke="${color}" stroke-width="1.8"/>
+      </svg>`;
+    }
+
+    // ─────────────────── render ───────────────────
+    function renderHero(rs) {
+      const updEl = PI.$('rs-updated');
+      if (rs.timestamp) {
+        const t = new Date(rs.timestamp);
+        updEl.textContent = '업데이트 ' + t.toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+      }
+      const recov = rs.recovery_start || {};
+      PI.$('rs-recov').textContent = recov.date || '-';
+      PI.$('rs-recov-src').textContent = recov.source === 'manual' ? '수동 지정' : recov.source === 'auto' ? '자동 탐지 (SPY 1년 trough)' : '-';
+
+      const ld = rs.leader || {};
+      const ldEl = PI.$('rs-leader');
+      const ldSt = PI.$('rs-leader-status');
+      if (ld.ticker) {
+        ldEl.textContent = ld.ticker;
+        const stat = [];
+        if (ld.confirmed) stat.push('✅ 확정');
+        else if (ld.rs_line_sma5_rising) stat.push('🟢 후보 (SMA5 상승)');
+        else stat.push('🟡 미확정');
+        if (ld.weeks_at_rank1 !== null && ld.weeks_at_rank1 !== undefined) stat.push(`${ld.weeks_at_rank1}주 연속`);
+        ldSt.textContent = stat.join(' · ');
+      } else {
+        ldEl.textContent = '-';
+        ldSt.textContent = '-';
+      }
+
+      PI.$('rs-bench').textContent = `${rs.benchmark || 'SPY'} / ${rs.lookback_days || 30}d`;
+    }
+
+    function renderTier1(tier1) {
+      const grid = PI.$('rs-tier1-grid');
+      if (!tier1 || tier1.length === 0) {
+        grid.innerHTML = '<div class="text-sm text-toss-sub py-8 text-center">데이터 없음</div>';
+        return;
+      }
+      grid.innerHTML = tier1.map(t => {
+        const rocCls = fmtRocClass(t.rs_roc);
+        const rankCls = rankClass(t.rank);
+        const lineColor = (t.rs_roc || 0) >= 0 ? '#00BF5C' : '#F04452';
+        const tier2Rows = (t.tier2 || []).map(s => {
+          const sCls = fmtRocClass(s.rs_roc);
+          return `<div class="flex items-center justify-between py-1 text-sm">
+                    <span class="font-semibold">${s.ticker}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs text-toss-sub num">$${s.price ?? '-'}</span>
+                      <span class="chip ${sCls} num">${fmtPct(s.rs_roc)}</span>
+                    </div>
+                  </div>`;
+        }).join('');
+        return `
+          <div class="rounded-toss bg-toss-bg p-4" data-card>
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="chip ${rankCls}">#${t.rank}</span>
+                <span class="font-bold text-base">${t.ticker}</span>
+                <span class="text-xs text-toss-sub">${t.name || ''}</span>
+              </div>
+              <span class="chip ${rocCls} num">${fmtPct(t.rs_roc)}</span>
+            </div>
+            ${sparklineSVG(t.rs_line, lineColor)}
+            <button onclick="toggleTier2(this)" class="mt-2 text-xs text-toss-blue font-semibold hover:underline">▼ 종목 (${(t.tier2||[]).length})</button>
+            <div class="tier2-list hidden mt-2 pt-2 border-t border-toss-border">
+              ${tier2Rows || '<div class="text-xs text-toss-sub">대표 종목 없음</div>'}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderKorea(korea) {
+      const wrap = PI.$('rs-korea');
+      const parts = [];
+      if (korea && korea.samsung) {
+        const sam = korea.samsung;
+        const cls = fmtRocClass(sam.rs_roc);
+        parts.push(`
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="font-bold text-base">삼성전자</span>
+                <span class="text-xs text-toss-sub ml-1">${sam.ticker}</span>
+              </div>
+              <span class="chip ${cls} num">${fmtPct(sam.rs_roc)}</span>
+            </div>
+            <div class="text-xl font-extrabold num mb-2">${(sam.price_krw||0).toLocaleString('ko-KR')}원</div>
+            ${sparklineSVG(sam.rs_line, '#3182F6')}
+          </div>`);
+      }
+      if (korea && korea.usdkrw) {
+        const fx = korea.usdkrw;
+        const ch = fx.change_30d_pct;
+        const chCls = ch > 0 ? 'text-toss-red' : ch < 0 ? 'text-toss-blue' : 'text-toss-sub';
+        const note = ch > 0 ? '원화 약세 (해외자산 평가↑)' : ch < 0 ? '원화 강세 (해외자산 평가↓)' : '거의 변동 없음';
+        parts.push(`
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="font-bold text-base">USD/KRW</span>
+                <span class="text-xs text-toss-sub ml-1">환율</span>
+              </div>
+              <span class="chip ${chCls === 'text-toss-red' ? 'bg-toss-redL ' : chCls === 'text-toss-blue' ? 'bg-toss-blueL ' : 'bg-gray-100 '}${chCls} num">${ch > 0 ? '+' : ''}${ch ?? '-'}%</span>
+            </div>
+            <div class="text-xl font-extrabold num mb-2">${(fx.value||0).toLocaleString('ko-KR')}</div>
+            <div class="text-xs text-toss-sub">30일 변화 · ${note}</div>
+          </div>`);
+      }
+      if (parts.length === 0) {
+        wrap.innerHTML = '<div class="text-sm text-toss-sub py-4 text-center">한국 데이터 없음</div>';
+      } else {
+        wrap.innerHTML = parts.join('');
+      }
+    }
+
+    function renderErrors(errors) {
+      if (!errors || errors.length === 0) return;
+      PI.$('rs-errors-wrap').classList.remove('hidden');
+      PI.$('rs-errors').textContent = errors.join(' · ');
+    }
+
+    // ─────────────────── card expand toggle ───────────────────
+    function toggleTier2(btn) {
+      const card = btn.closest('[data-card]');
+      if (!card) return;
+      const list = card.querySelector('.tier2-list');
+      if (!list) return;
+      const isHidden = list.classList.contains('hidden');
+      list.classList.toggle('hidden');
+      btn.textContent = (isHidden ? '▲' : '▼') + ' 종목' + btn.textContent.match(/\(\d+\)/)?.[0];
+      // re-attach the count
+      btn.textContent = (isHidden ? '▲' : '▼') + ' 종목 (' + list.children.length + ')';
+    }
+
+    // ─────────────────── load ───────────────────
+    (async () => {
+      try {
+        const rs = await PI.fetchJson(PI.URLS.rs_monitor);
+        renderHero(rs);
+        renderTier1(rs.tier1);
+        renderKorea(rs.korea);
+        renderErrors(rs.errors);
+      } catch (e) {
+        console.error('rs load fail', e);
+        PI.$('rs-tier1-grid').innerHTML = `<div class="col-span-2 text-sm text-toss-red py-8 text-center">RS 데이터 로드 실패: ${e.message}</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>
