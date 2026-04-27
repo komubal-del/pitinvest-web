@@ -313,6 +313,13 @@
     <section class="bg-toss-card rounded-tossLg p-7 shadow-toss">
       <h2 class="text-2xl font-bold mb-5">❓ FAQ</h2>
       <div class="space-y-3">
+        <details class="group bg-toss-bg rounded-toss p-4" open>
+          <summary class="cursor-pointer font-bold">홈의 "올해 수익률"이 내 실수익인가?</summary>
+          <p class="mt-3 text-sm text-toss-text leading-relaxed" style="word-break: keep-all">
+            <strong>아니에요. 백테스트 시뮬입니다.</strong> 봇이 yfinance 가격 데이터로 "1/1에 코어 60% / 위성 40% 시작 + 룰대로 자동 매매했을 때" 가상 결과를 계산.
+            실계좌 비중은 홈 상단 <strong>"내 포지션"</strong> 카드에 (스크린샷 업로드로 갱신). 둘은 완전 별개.
+          </p>
+        </details>
         <details class="group bg-toss-bg rounded-toss p-4">
           <summary class="cursor-pointer font-bold">왜 코어를 QQQ / SOXX / EWY로 구성하나?</summary>
           <p class="mt-3 text-sm text-toss-text leading-relaxed">

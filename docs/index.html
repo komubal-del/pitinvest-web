@@ -190,19 +190,26 @@
       </div>
     </section>
 
-    <!-- ===== 올해 수익률 비교 (YTD) ===== -->
+    <!-- ===== 올해 수익률 비교 (YTD 백테스트) ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-bold">올해 수익률 비교</h2>
+      <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h2 class="text-lg font-bold">올해 수익률 비교</h2>
+          <span class="chip bg-toss-yellowL text-toss-yellow">🧪 백테스트</span>
+        </div>
         <span id="ytd-period" class="text-xs text-toss-sub">YTD</span>
       </div>
+      <p class="text-xs text-toss-sub mb-5" style="word-break: keep-all">
+        ⚠️ 시뮬레이션 결과 (실계좌 무관). 1/1 코어 60% / 위성 40% 시작 가정 + 룰대로 자동 매매했을 때의 가상 수익률.
+        <br/>실제 계좌 비중·수익률은 <strong>홈 상단 "내 포지션"</strong> 섹션 참고.
+      </p>
 
       <!-- 하이라이트: 구덩이 매매법 YTD -->
       <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-5 mb-5">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
             <span class="dot bg-toss-purple" style="width:8px;height:8px"></span>
-            구덩이 매매법
+            구덩이 매매법 (시뮬)
           </span>
           <span id="ytd-strategy-badge" class="chip bg-gray-100 text-toss-sub">-</span>
         </div>
@@ -269,7 +276,7 @@
 
       <!-- 월별 Breakdown -->
       <div id="ytd-monthly-wrapper" class="pt-5 mt-5 border-t border-toss-border hidden">
-        <div class="text-sm font-semibold text-toss-text mb-3">월별 상세 (구덩이 매매법)</div>
+        <div class="text-sm font-semibold text-toss-text mb-3">월별 상세 (구덩이 매매법 시뮬)</div>
         <div class="overflow-x-auto">
           <table class="w-full text-xs md:text-sm">
             <thead class="text-left text-toss-sub border-b border-toss-border">
