@@ -19,6 +19,14 @@
 
   <main class="main-content max-w-6xl mx-auto px-5 py-6 space-y-4">
 
+    <!-- 🔬 진단용 SIMPLE TEST — 모달과 무관한 가장 raw native file input -->
+    <div id="diag-test" class="bg-yellow-50 border-2 border-yellow-400 rounded-toss p-4">
+      <div class="text-sm font-bold text-yellow-800 mb-2">🔬 진단 테스트 (잠시 후 삭제 예정)</div>
+      <div class="text-xs text-yellow-800 mb-2">아래 input은 모달 밖, 가장 raw한 native HTML. 클릭 시 OS 파일창이 떠야 정상.</div>
+      <input type="file" id="diag-input" />
+      <div class="text-xs text-yellow-800 mt-2">→ 이것도 안 뜨면 <strong>시스템/브라우저 권한 문제</strong> (우리 코드 무관).<br/>→ 뜨면 모달 안 코드 문제이니 알려주세요.</div>
+    </div>
+
     <!-- ===== 히어로: 현재 상태 + 오늘의 액션 ===== -->
     <section id="hero" class="bg-toss-card rounded-tossLg p-5 md:p-6 shadow-toss animate-fadein">
       <div class="flex items-start justify-between flex-wrap gap-4">
