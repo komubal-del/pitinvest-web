@@ -530,17 +530,15 @@
         <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
-        <!-- input을 dropzone 내부 viewport 안에 absolute overlay로 깔기 (opacity 0).
-             사용자 영역 클릭 = input이 target = native default action → OS 파일창.
-             JS click() 호출 안 함 (Chrome이 화면 밖 input의 dynamic click을 차단함). -->
-        <div id="upload-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
+        <!-- native file input을 visible로 노출 (디자인보다 작동 우선) -->
+        <div id="upload-dropzone" class="rounded-tossLg p-5 bg-toss-bg">
+          <div class="text-sm text-toss-text font-semibold mb-2">📷 스크린샷 선택</div>
           <input id="upload-file-input" type="file" accept="image/*"
-                 class="absolute inset-0 w-full h-full cursor-pointer"
-                 style="opacity:0; z-index:10;" />
-          <div class="text-sm text-toss-sub pointer-events-none">
-            여기를 클릭해서 스크린샷 선택<br/>
-            <span class="text-[11px]">PNG · JPG · WEBP</span>
-          </div>
+                 class="block w-full text-sm text-toss-text cursor-pointer
+                        file:mr-3 file:py-2 file:px-4 file:rounded-toss file:border-0
+                        file:bg-toss-blue file:text-white file:font-semibold file:cursor-pointer
+                        hover:file:bg-toss-blue/90" />
+          <div class="text-[11px] text-toss-sub mt-2">PNG · JPG · WEBP</div>
         </div>
         <div id="upload-preview-wrap" class="hidden space-y-3">
           <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
