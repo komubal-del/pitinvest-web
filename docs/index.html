@@ -19,14 +19,6 @@
 
   <main class="main-content max-w-6xl mx-auto px-5 py-6 space-y-4">
 
-    <!-- 🔬 진단용 SIMPLE TEST — 모달과 무관한 가장 raw native file input -->
-    <div id="diag-test" class="bg-yellow-50 border-2 border-yellow-400 rounded-toss p-4">
-      <div class="text-sm font-bold text-yellow-800 mb-2">🔬 진단 테스트 (잠시 후 삭제 예정)</div>
-      <div class="text-xs text-yellow-800 mb-2">아래 input은 모달 밖, 가장 raw한 native HTML. 클릭 시 OS 파일창이 떠야 정상.</div>
-      <input type="file" id="diag-input" />
-      <div class="text-xs text-yellow-800 mt-2">→ 이것도 안 뜨면 <strong>시스템/브라우저 권한 문제</strong> (우리 코드 무관).<br/>→ 뜨면 모달 안 코드 문제이니 알려주세요.</div>
-    </div>
-
     <!-- ===== 히어로: 현재 상태 + 오늘의 액션 ===== -->
     <section id="hero" class="bg-toss-card rounded-tossLg p-5 md:p-6 shadow-toss animate-fadein">
       <div class="flex items-start justify-between flex-wrap gap-4">
@@ -538,15 +530,15 @@
         <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
           ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
         </div>
-        <!-- native file input을 visible로 노출 (디자인보다 작동 우선) -->
-        <div id="upload-dropzone" class="rounded-tossLg p-5 bg-toss-bg">
-          <div class="text-sm text-toss-text font-semibold mb-2">📷 스크린샷 선택</div>
+        <!-- dropzone: native input을 영역 전체 invisible overlay로. 박스 어디든 클릭 가능 -->
+        <div id="upload-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
           <input id="upload-file-input" type="file" accept="image/*"
-                 class="block w-full text-sm text-toss-text cursor-pointer
-                        file:mr-3 file:py-2 file:px-4 file:rounded-toss file:border-0
-                        file:bg-toss-blue file:text-white file:font-semibold file:cursor-pointer
-                        hover:file:bg-toss-blue/90" />
-          <div class="text-[11px] text-toss-sub mt-2">PNG · JPG · WEBP</div>
+                 class="absolute inset-0 w-full h-full cursor-pointer"
+                 style="opacity:0; z-index:10;" />
+          <div class="text-sm text-toss-sub pointer-events-none">
+            여기를 클릭해서 스크린샷 선택<br/>
+            <span class="text-[11px]">PNG · JPG · WEBP</span>
+          </div>
         </div>
         <div id="upload-preview-wrap" class="hidden space-y-3">
           <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
@@ -1692,12 +1684,9 @@
     }
 
     (function initUploadDropzone() {
-      // dropzone 내부 input (HTML에 정적으로 있음). change 핸들러만 등록.
       const fi = document.getElementById('upload-file-input');
-      if (!fi) { console.warn('[upload] file input not found'); return; }
+      if (!fi) return;
       fi.addEventListener('change', (e) => onFilePicked(e.target.files[0]));
-      window._fileInput = fi;
-      console.log('[upload] file input ready (in-dropzone overlay):', fi);
     })();
 
     function onFilePicked(file) {
