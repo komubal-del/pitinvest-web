@@ -20,9 +20,10 @@
     <!-- ===== Hero ===== -->
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <div class="flex items-center gap-2 mb-3 flex-wrap">
-        <span class="chip bg-toss-blueL text-toss-blue">v5.0</span>
-        <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-04-29</span>
+        <span class="chip bg-toss-blueL text-toss-blue">v5.1</span>
+        <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-04-25</span>
         <span class="chip bg-toss-purpleL text-toss-purple">매수/매도 1/3 step</span>
+        <span class="chip bg-toss-greenL text-toss-green">매도자금 → 코어</span>
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
         공포의 구덩이에서<br />기회를 건진다
@@ -129,7 +130,7 @@
             <span class="font-bold text-lg">구덩이 진입</span>
             <span class="chip bg-toss-redL text-toss-red ml-auto">Buy</span>
           </div>
-          <p class="text-sm text-toss-text mb-3">공포 구간 단계적 진입 (v5.0: 1/3 step)</p>
+          <p class="text-sm text-toss-text mb-3">공포 구간 단계적 진입 (v5.1: 1/3 step)</p>
           <ul class="text-sm text-toss-text space-y-1.5 list-disc pl-5">
             <li>각 매수 신호 첫 발동 → 위성 <strong>+33%p</strong> (1/3씩)</li>
             <li>3개 다 발동 → 카운터 리셋, 위성 100% cap</li>
@@ -143,10 +144,10 @@
             <span class="font-bold text-lg">구덩이 탈출</span>
             <span class="chip bg-toss-greenL text-toss-green ml-auto">Sell</span>
           </div>
-          <p class="text-sm text-toss-text mb-3">단계적 익절 (v5.0: 1/3 step) · RS 기반 섹터 로테이션</p>
+          <p class="text-sm text-toss-text mb-3">단계적 익절 (v5.1: 1/3 step → 코어 매수) · RS 기반 섹터 로테이션</p>
           <ul class="text-sm text-toss-text space-y-1.5 list-disc pl-5">
-            <li>각 매도 신호 첫 발동 → 위성 <strong>−33%p</strong> (1/3씩)</li>
-            <li>3개 다 발동 → 위성 0% (코어 유지) + 사이클 리셋</li>
+            <li>각 매도 신호 첫 발동 → 위성 <strong>−33%p</strong> → <strong>코어 균등 매수</strong></li>
+            <li>3개 다 발동 → 위성 0%, 매도분 모두 코어로 전환 + 사이클 리셋</li>
             <li>신호 sticky: 매도1 가격 떨어져도 켜진 채 유지</li>
             <li>발동 즉시 RS 6주 모니터 시작 (DD 깊이별 분기)</li>
           </ul>
@@ -197,7 +198,7 @@
         </div>
       </div>
       <div class="mt-4 p-3 bg-toss-redL rounded-toss text-sm text-toss-red font-medium">
-        💡 v5.0: 각 조건 첫 발동 → 위성 +33%p · 3개 다 발동 시 카운터 리셋 (위성 100% cap 유지)
+        💡 v5.1: 각 조건 첫 발동 → 위성 +33%p · 3개 다 발동 시 카운터 리셋 (위성 100% cap 유지)
       </div>
     </section>
 
@@ -213,9 +214,9 @@
           <div class="flex-1">
             <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
               <div class="font-bold">위성 +100% 수익률</div>
-              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p</span>
+              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p → 코어 매수</span>
             </div>
-            <div class="text-sm text-toss-text">TQQQ·SOXL·KORU 중 평단 대비 +100% 도달 시 위성 1/3 매도 (보유 위성 균등). sticky — 가격 떨어져도 신호 유지.</div>
+            <div class="text-sm text-toss-text">TQQQ·SOXL·KORU 중 평단 대비 +100% 도달 시 위성 1/3 매도 → 코어 균등 매수. sticky — 가격 떨어져도 신호 유지.</div>
           </div>
         </div>
         <div class="flex items-start gap-4 p-4 rounded-toss bg-toss-bg">
@@ -223,9 +224,9 @@
           <div class="flex-1">
             <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
               <div class="font-bold">주도주 3일 이상 연속 상승</div>
-              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p</span>
+              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p → 코어 매수</span>
             </div>
-            <div class="text-sm text-toss-text">삼성전자 AND SK하이닉스 3거래일 연속 상승 + 개인 매수 우위 → 위성 1/3 매도 (보유 위성 균등)</div>
+            <div class="text-sm text-toss-text">삼성전자 AND SK하이닉스 3거래일 연속 상승 + 개인 매수 우위 → 위성 1/3 매도 → 코어 균등 매수</div>
           </div>
         </div>
         <div class="flex items-start gap-4 p-4 rounded-toss bg-toss-bg">
@@ -233,9 +234,9 @@
           <div class="flex-1">
             <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
               <div class="font-bold">전문가 시장 경고 발생</div>
-              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p</span>
+              <span class="chip bg-toss-greenL text-toss-green" style="font-size:11px">위성 −33%p → 코어 매수</span>
             </div>
-            <div class="text-sm text-toss-text">박병창 AND 윤지호 모두 "현금 비중 늘리자/매도/익절" 행동 권고 → 위성 1/3 매도</div>
+            <div class="text-sm text-toss-text">박병창 AND 윤지호 모두 "현금 비중 늘리자/매도/익절" 행동 권고 → 위성 1/3 매도 → 코어 균등 매수</div>
           </div>
         </div>
       </div>
@@ -281,31 +282,31 @@
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white rounded-toss p-5">
-          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출 (v4.5)</div>
+          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출 (v5.1)</div>
           <p class="text-sm text-toss-text leading-relaxed">
             나스닥/S&amp;P/코스피 <strong>52주 신고가 대비 −10%</strong> 도달시<br />
-            → <strong>위성(레버리지) 전량 청산</strong>, 코어는 유지
+            → <strong>위성 전량 매도 → 코어 균등 매수</strong>
           </p>
         </div>
         <div class="bg-white rounded-toss p-5">
           <div class="font-bold text-toss-blue text-lg mb-2">재진입</div>
           <p class="text-sm text-toss-text leading-relaxed">
             위성 청산 후 매수 신호 재발동 시<br />
-            → 보유 현금으로 위성 재매수 (2단계 진행)
+            → 코어를 매도하여 위성 재매수 (2단계 진행)
           </p>
         </div>
         <div class="bg-white rounded-toss p-5">
           <div class="font-bold text-toss-purple text-lg mb-2">사이클 리셋</div>
           <p class="text-sm text-toss-text leading-relaxed">
             매도 3조건 모두 충족 시<br />
-            → 코어+위성 전량 청산, 100% 현금화
+            → 위성 0% (전량 코어 매수), 카운터 리셋
           </p>
         </div>
       </div>
       <div class="mt-4 p-3 bg-white rounded-toss text-xs text-toss-text leading-relaxed" style="word-break: keep-all">
-        💡 <strong>왜 코어를 유지하나?</strong> 11년 백테스트 결과, "전량 청산" 룰은 회복기에 코어 노출 영구 손실로 이어졌음.
-        위성은 fear-buy로 이미 들어간 상태라 청산이 protective 효과의 90%를 차지하고, 코어 청산은 거의 의미 없음.
-        2020-2025 환경에서 V2 (위성만 청산) 룰이 누적 +178% / MDD −35.5% / Sharpe 0.50으로 best risk-adjusted.
+        💡 <strong>왜 매도자금을 코어로?</strong> 11년 백테스트 결과 (research/sell_to_cash_vs_core.md):
+        매도→현금 +72.6% / MDD −55.5% / Sharpe 0.05 vs 매도→코어 <strong>+421.9% / MDD −47.9% / Sharpe 0.39</strong>.
+        장기 우상향 시장에서 현금 hold = opportunity cost. 코어로 가면 buy-hold 효과 + 위성 사이클 alpha.
       </div>
     </section>
 
@@ -336,15 +337,16 @@
         <details class="group bg-toss-bg rounded-toss p-4">
           <summary class="cursor-pointer font-bold">3대 조건 중 하나만 충족해도 진입하나?</summary>
           <p class="mt-3 text-sm text-toss-text leading-relaxed">
-            v5.0: 각 신호 첫 발동 시 위성 +33%p (1/3 step). 3개 다 발동 시 카운터 리셋되어
+            v5.1: 각 신호 첫 발동 시 위성 +33%p (1/3 step). 3개 다 발동 시 카운터 리셋되어
             다시 신호 카운트 가능 (위성 비중은 100% cap). 공포의 깊이에 따라 매수 신호가 누적되며 단계적 진입.
           </p>
         </details>
         <details class="group bg-toss-bg rounded-toss p-4">
-          <summary class="cursor-pointer font-bold">긴급 탈출 후 언제 다시 들어가나?</summary>
+          <summary class="cursor-pointer font-bold">매도/긴급 탈출 시 자금은 어디로?</summary>
           <p class="mt-3 text-sm text-toss-text leading-relaxed">
-            긴급 탈출 시 코어는 그대로 유지되고 위성만 현금화됩니다. 그 후 매수 신호(공탐&lt;10 / VIX&gt;25 / 강제청산)가
-            재발동되면 보유 현금으로 위성 재매수해 2단계를 다시 진행합니다. 코어는 평시처럼 계속 holding.
+            v5.1부터 <strong>매도자금은 코어 3종(QQQ/SOXX/EWY)에 균등 매수</strong>. 현금으로 묶어두지 않음.
+            장기 우상향 시장에서 현금 hold는 opportunity cost가 큼 (11년 백테 +349%p 차이).
+            매수 신호 재발동 시 코어를 prorata 매도하여 위성으로 자연스럽게 회전.
           </p>
         </details>
         <details class="group bg-toss-bg rounded-toss p-4">
@@ -363,11 +365,24 @@
       <h2 class="text-2xl font-bold mb-5">📅 버전 히스토리</h2>
       <div class="space-y-4 border-l-2 border-toss-border pl-5">
         <div class="relative">
-          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-purple"></div>
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-green"></div>
           <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <span class="chip bg-toss-purpleL text-toss-purple">v5.0</span>
-            <span class="text-xs text-toss-sub">2026-04-29</span>
+            <span class="chip bg-toss-greenL text-toss-green">v5.1</span>
+            <span class="text-xs text-toss-sub">2026-04-25</span>
             <span class="chip bg-toss-greenL text-toss-green">Current</span>
+          </div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
+            <li><strong>매도자금 처리 변경</strong>: 매도/긴급탈출 시 위성 매도분을 <strong>코어 3종에 균등 매수</strong> (기존: 현금 보유)</li>
+            <li>11년 백테스트 검증: 매도→코어 +421.9% / MDD −47.9% / Sharpe 0.39 vs 매도→현금 +72.6% / MDD −55.5% / Sharpe 0.05</li>
+            <li>1년 백테스트: +243.3% vs +166.3% (+77%p)</li>
+            <li>본질: "코어 buy-hold + 위성 사이클 alpha" 전략</li>
+          </ul>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-sub"></div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="chip bg-gray-100 text-toss-sub">v5.0</span>
+            <span class="text-xs text-toss-sub">2026-04-25</span>
           </div>
           <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
             <li><strong>매수/매도 룰 단순화</strong>: 신호 발동 시 모두 위성 ±33%p (1/3 step). 매수 +20%p / 매도1 50% / 매도2 −20%p / 매도3 −5%p의 모순 제거</li>

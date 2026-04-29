@@ -144,7 +144,7 @@ function renderHeader(active) {
           <span class="text-white text-lg">🏔️</span>
         </div>
         <span class="font-bold text-lg">구덩이매매법</span>
-        <span class="chip bg-toss-blueL text-toss-blue ml-1">v5.0</span>
+        <span class="chip bg-toss-blueL text-toss-blue ml-1">v5.1</span>
         ${IS_LOCAL ? '<span class="chip bg-toss-yellowL text-toss-yellow ml-1">LOCAL</span>' : ''}
       </a>
       <nav id="top-nav" class="flex items-center gap-1"></nav>
@@ -160,10 +160,10 @@ function initNav(active) {
 
 // --- 상태 판정 로직 (봇이 계산한 display stage_key 우선 사용) ---
 const STAGE_INFO = {
-  emergency: { label: '긴급탈출',       color: 'red',    desc: '나스닥/S&P/코스피 −10% 도달 · 위성 전량 청산 (코어 유지)' },
-  reset:     { label: '자동 리셋 직후', color: 'blue',   desc: '매도 3조건 모두 충족 · 위성 0% (코어 유지)' },
-  sell_near: { label: '매도 임박',      color: 'red',    desc: '매도 2조건 충족 · 위성 −33%p 추가, 마지막 조건 대기' },
-  exit:      { label: '구덩이 탈출',    color: 'orange', desc: '매도 1조건 충족 · 위성 −33%p 매도 (1/3 step)' },
+  emergency: { label: '긴급탈출',       color: 'red',    desc: '나스닥/S&P/코스피 −10% 도달 · 위성 전량 매도 → 코어 매수' },
+  reset:     { label: '자동 리셋 직후', color: 'blue',   desc: '매도 3조건 모두 충족 · 위성 0%, 매도분 코어 매수' },
+  sell_near: { label: '매도 임박',      color: 'red',    desc: '매도 2조건 충족 · 위성 −33%p → 코어 매수, 마지막 조건 대기' },
+  exit:      { label: '구덩이 탈출',    color: 'orange', desc: '매도 1조건 충족 · 위성 −33%p 매도 → 코어 매수' },
   full:      { label: '구덩이 충족',    color: 'red',    desc: '매수 3조건 모두 충족 · 카운터 리셋 (위성 100% cap)' },
   deepening: { label: '구덩이 심화',    color: 'purple', desc: '매수 2조건 충족 · 위성 +33%p 추가 매수' },
   entry:     { label: '구덩이 진입',    color: 'yellow', desc: '매수 1조건 충족 · 위성 +33%p 매수 (1/3 step)' },

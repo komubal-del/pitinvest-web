@@ -154,7 +154,7 @@
               <span id="sell-koru-profit" class="font-bold num">-</span>
             </div>
           </div>
-          <div class="card-tip hidden">위성 종목(TQQQ/SOXL/KORU) 중 하나라도 이론평단 대비 +100%(=2배) 도달 시 첫 트리거. → 위성 −33%p 매도 (보유 위성 균등). 신호 sticky — 가격 떨어져도 카드 유지.</div>
+          <div class="card-tip hidden">위성 종목(TQQQ/SOXL/KORU) 중 하나라도 이론평단 대비 +100%(=2배) 도달 시 첫 트리거. → 위성 −33%p 매도 → 코어 균등 매수. 신호 sticky — 가격 떨어져도 카드 유지.</div>
         </div>
 
         <!-- 조건 2: 주도주 3일+ 상승 -->
@@ -168,7 +168,7 @@
           </div>
           <div id="sell-leading-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">삼전/하닉 3일↑ + 개인 매수 우위</div>
-          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 (보유 위성 균등)</div>
+          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 → 코어 균등 매수</div>
         </div>
 
         <!-- 조건 3: 전문가 경고 -->
@@ -183,7 +183,7 @@
           <div id="sell-expert-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">윤지호·박병창 Gemini 자동 분석</div>
           <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📄 자세히 보기 →</div>
-          <div class="card-tip hidden" onclick="event.stopPropagation()">박병창 AND 윤지호 두 전문가 모두 "현금 비중 늘려라/매도/익절" 같은 구체적 행동 권고를 내릴 때 트리거. 단순 "조심" 정도는 미인정. → 위성 −33%p 매도 (보유 위성 균등)</div>
+          <div class="card-tip hidden" onclick="event.stopPropagation()">박병창 AND 윤지호 두 전문가 모두 "현금 비중 늘려라/매도/익절" 같은 구체적 행동 권고를 내릴 때 트리거. 단순 "조심" 정도는 미인정. → 위성 −33%p 매도 → 코어 균등 매수</div>
         </div>
       </div>
     </section>
@@ -644,7 +644,7 @@
       draw(kospiDrop,  'em-kospi',  'em-kospi-bar');
     }
 
-    // v5.0: 발동일 + 오늘 상태 chip 표시 — 'YYYY-MM-DD' → 'M/D' 단축
+    // v5.1: 발동일 + 오늘 상태 chip 표시 — 'YYYY-MM-DD' → 'M/D' 단축
     function _ffShort(dateStr) {
       if (!dateStr) return '';
       const m = String(dateStr).match(/^\d{4}-(\d{2})-(\d{2})$/);
@@ -658,7 +658,7 @@
       PI.$('cond-count').textContent = `충족 ${count} / 3`;
       PI.$('cond-count').className = 'chip ' + (count >= 3 ? 'bg-toss-redL text-toss-red' : count >= 1 ? 'bg-toss-yellowL text-toss-yellow' : 'bg-gray-100 text-toss-sub');
 
-      // v5.0: chip 텍스트 = '충족 (4/24)' (sticky + 발동일 표시)
+      // v5.1: chip 텍스트 = '충족 (4/24)' (sticky + 발동일 표시)
       // sticky=true (sig[field])이고 today=false이면 chip은 sticky 색상 유지 + 옅은 표시
       const today = sig.today || {};
       const ff    = sig.first_fired || {};
