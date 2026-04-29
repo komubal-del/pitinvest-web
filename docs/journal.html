@@ -561,9 +561,9 @@
       period.textContent = `${first.month} ~ ${last.month}`;
       PI.$('monthly-ytd-pct').textContent = PI.fmtPct(ytdPct, 1);
       PI.$('monthly-ytd-pct').className = 'text-2xl font-extrabold num ' + (ytdPnl >= 0 ? 'text-toss-red' : 'text-toss-blue');
-      PI.$('monthly-ytd-pnl').textContent = PI.fmtKrwUnit(ytdPnl);
+      PI.$('monthly-ytd-pnl').textContent = PI.fmt(ytdPnl);
       PI.$('monthly-ytd-pnl').className = 'text-2xl font-extrabold num ' + (ytdPnl >= 0 ? 'text-toss-red' : 'text-toss-blue');
-      PI.$('monthly-current').textContent = PI.fmtKrwUnit(Number(last.end_assets || 0));
+      PI.$('monthly-current').textContent = PI.fmt(Number(last.end_assets || 0));
 
       // 차트
       const ctx = document.getElementById('monthly-chart').getContext('2d');
@@ -603,16 +603,16 @@
             tooltip: {
               callbacks: {
                 label: (c) => {
-                  if (c.dataset.label === '월별 손익') return `손익: ${PI.fmtKrwUnit(c.parsed.y)}`;
-                  return `자산: ${PI.fmtKrwUnit(c.parsed.y)}`;
+                  if (c.dataset.label === '월별 손익') return `손익: ${PI.fmt(c.parsed.y)}`;
+                  return `자산: ${PI.fmt(c.parsed.y)}`;
                 }
               }
             }
           },
           scales: {
             x: { grid: { display: false }, ticks: { font: { family: 'Pretendard' } } },
-            y1: { position: 'left', grid: { display: false }, ticks: { callback: (v) => PI.fmtKrwUnit(v), font: { family: 'Pretendard', size: 10 } } },
-            y2: { position: 'right', grid: { display: false }, ticks: { callback: (v) => PI.fmtKrwUnit(v), font: { family: 'Pretendard', size: 10 } } },
+            y1: { position: 'left', grid: { display: false }, ticks: { callback: (v) => PI.fmt(v), font: { family: 'Pretendard', size: 10 } } },
+            y2: { position: 'right', grid: { display: false }, ticks: { callback: (v) => PI.fmt(v), font: { family: 'Pretendard', size: 10 } } },
           }
         }
       });
@@ -637,8 +637,8 @@
         }
         return `<tr class="border-b border-toss-border">
           <td class="py-2 font-semibold">${m.month}</td>
-          <td class="py-2 text-right num">${PI.fmtKrwUnit(end)}</td>
-          <td class="py-2 text-right num ${pnlCls}">${PI.fmtKrwUnit(pnl)}</td>
+          <td class="py-2 text-right num">${PI.fmt(end)}</td>
+          <td class="py-2 text-right num ${pnlCls}">${PI.fmt(pnl)}</td>
           <td class="py-2 text-right num ${momCls}">${momText}</td>
         </tr>`;
       }).join('');
