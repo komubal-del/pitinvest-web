@@ -132,7 +132,7 @@
                 <th class="text-left py-2 font-semibold">월</th>
                 <th class="text-right py-2 font-semibold">기말자산</th>
                 <th class="text-right py-2 font-semibold">총손익</th>
-                <th class="text-right py-2 font-semibold">전월비</th>
+                <th class="text-right py-2 font-semibold">수익률</th>
               </tr>
             </thead>
             <tbody id="monthly-table"></tbody>
@@ -619,27 +619,24 @@
 
       // 테이블 (최신월부터)
       const sortedDesc = [...months].reverse();
-      PI.$('monthly-table').innerHTML = sortedDesc.map((m, i) => {
+      PI.$('monthly-table').innerHTML = sortedDesc.map((m) => {
         const pnl = Number(m.total_pnl || 0);
         const end = Number(m.end_assets || 0);
         const pnlCls = pnl >= 0 ? 'text-toss-red' : 'text-toss-blue';
-        // 전월비 = 이번달 자산 / 직전달 자산 - 1
-        const prev = sortedDesc[i + 1];
-        let momText = '-';
-        let momCls = 'text-toss-sub';
-        if (prev) {
-          const prevEnd = Number(prev.end_assets || 0);
-          if (prevEnd > 0) {
-            const mom = (end / prevEnd - 1) * 100;
-            momText = PI.fmtPct(mom, 1);
-            momCls = mom >= 0 ? 'text-toss-red' : 'text-toss-blue';
-          }
+        // 월 수익률 = 총손익 / 시작자본 = pnl / (end - pnl)
+        const start = end - pnl;
+        let retText = '-';
+        let retCls = 'text-toss-sub';
+        if (start > 0) {
+          const r = (pnl / start) * 100;
+          retText = PI.fmtPct(r, 1);
+          retCls = r >= 0 ? 'text-toss-red' : 'text-toss-blue';
         }
         return `<tr class="border-b border-toss-border">
           <td class="py-2 font-semibold">${m.month}</td>
           <td class="py-2 text-right num">${PI.fmt(end)}</td>
           <td class="py-2 text-right num ${pnlCls}">${PI.fmt(pnl)}</td>
-          <td class="py-2 text-right num ${momCls}">${momText}</td>
+          <td class="py-2 text-right num ${retCls}">${retText}</td>
         </tr>`;
       }).join('');
     }
