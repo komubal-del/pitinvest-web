@@ -9,6 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="assets/tailwind.config.js"></script>
   <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="bg-toss-bg text-toss-dark">
@@ -20,8 +21,124 @@
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <h1 class="text-3xl font-extrabold mb-2">📝 매매 일지</h1>
       <p class="text-toss-text leading-relaxed">
-        업로드한 포지션 스냅샷이 시간순으로 쌓입니다. 각 행을 눌러 상세 보기.
+        실계좌 포지션 + 월별 수익률 + 업로드 이력. 스크린샷을 올리면 봇이 파싱해서 표시합니다.
       </p>
+    </section>
+
+    <!-- ===== 내 포지션 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-lg font-bold">내 포지션</h2>
+        <div class="flex items-center gap-2">
+          <button onclick="openUploadModal()" class="px-3 py-1.5 text-xs font-semibold text-white bg-toss-blue rounded-toss hover:bg-toss-blue/90 transition">
+            📸 스크린샷 업로드
+          </button>
+          <button onclick="openSettingsModal()" class="text-toss-sub hover:text-toss-dark text-lg leading-none" title="업로드 설정">⚙️</button>
+        </div>
+      </div>
+
+      <div id="position-stack" class="stack-bar mb-4"></div>
+
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-sub"></span>
+            <span class="text-xs font-semibold text-toss-text">현금</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-cash">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-blue"></span>
+            <span class="text-xs font-semibold text-toss-text">코어</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-core">-</div>
+        </div>
+        <div class="rounded-toss bg-toss-bg p-4">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="dot bg-toss-purple"></span>
+            <span class="text-xs font-semibold text-toss-text">위성</span>
+          </div>
+          <div class="text-2xl font-extrabold num" id="pos-sat">-</div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-toss-border">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-semibold text-toss-text">자산별 포트폴리오 비중</div>
+          <span id="holdings-total" class="text-xs text-toss-sub">-</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+          <div style="height:240px;position:relative">
+            <canvas id="holdings-pie"></canvas>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="text-toss-sub border-b border-toss-border">
+                <tr>
+                  <th class="text-left py-1.5 font-semibold">자산</th>
+                  <th class="text-right py-1.5 font-semibold">비중</th>
+                  <th class="text-right py-1.5 font-semibold">평가금액</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 월별 수익률 ===== -->
+    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-lg font-bold">올해 월별 수익률</h2>
+        <div class="flex items-center gap-2">
+          <span id="monthly-period" class="text-xs text-toss-sub">-</span>
+          <button onclick="openMonthlyUploadModal()" class="px-3 py-1.5 text-xs font-semibold text-white bg-toss-blue rounded-toss hover:bg-toss-blue/90 transition">
+            📸 자산추이 업로드
+          </button>
+        </div>
+      </div>
+
+      <div id="monthly-empty" class="hidden text-center py-10 text-toss-sub text-sm" style="word-break: keep-all">
+        아직 업로드된 월별 수익률이 없어요. 증권사 앱의 <strong>"계좌자산추이"</strong> 화면을 캡처해서 업로드하면
+        봇이 파싱해서 자동으로 표시합니다.
+      </div>
+
+      <div id="monthly-content" class="hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="text-xs text-toss-sub mb-1">YTD 수익률</div>
+            <div id="monthly-ytd-pct" class="text-2xl font-extrabold num">-</div>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="text-xs text-toss-sub mb-1">YTD 손익</div>
+            <div id="monthly-ytd-pnl" class="text-2xl font-extrabold num">-</div>
+          </div>
+          <div class="rounded-toss bg-toss-bg p-4">
+            <div class="text-xs text-toss-sub mb-1">현재 자산</div>
+            <div id="monthly-current" class="text-2xl font-extrabold num">-</div>
+          </div>
+        </div>
+
+        <div style="height:220px;position:relative">
+          <canvas id="monthly-chart"></canvas>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-toss-sub border-b border-toss-border">
+              <tr>
+                <th class="text-left py-2 font-semibold">월</th>
+                <th class="text-right py-2 font-semibold">기말자산</th>
+                <th class="text-right py-2 font-semibold">총손익</th>
+                <th class="text-right py-2 font-semibold">전월비</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-table"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
@@ -51,6 +168,108 @@
     </footer>
 
   </main>
+
+  <!-- ===== 설정 모달 (GitHub PAT 입력) ===== -->
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeSettingsModal(event)">
+    <div class="bg-toss-card rounded-tossLg max-w-md w-full shadow-toss" onclick="event.stopPropagation()">
+      <div class="p-6 border-b border-toss-border flex items-center justify-between">
+        <h2 class="text-xl font-bold">⚙️ 업로드 설정</h2>
+        <button onclick="closeSettingsModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <div class="text-sm font-semibold mb-2">GitHub Personal Access Token</div>
+          <input id="settings-pat" type="password" placeholder="ghp_... 또는 github_pat_..."
+                 class="w-full px-3 py-2 border border-toss-border rounded-toss text-sm font-mono" />
+          <div class="text-[11px] text-toss-sub mt-2 leading-relaxed">
+            • 스크린샷 업로드 시 GitHub API에 접근하는 용도<br/>
+            • 브라우저 localStorage에만 저장, 서버 전송 X<br/>
+            • 새로 만들기: <a href="https://github.com/settings/tokens/new?scopes=repo&description=pitinvest-upload" target="_blank" class="text-toss-blue underline">여기</a> (scope: <code>repo</code>)
+          </div>
+        </div>
+        <div id="settings-status" class="text-xs"></div>
+        <div class="flex gap-2 justify-end pt-2 border-t border-toss-border">
+          <button onclick="clearPat()" class="px-3 py-2 text-xs text-toss-red">삭제</button>
+          <button onclick="savePat()" class="px-4 py-2 text-xs font-semibold text-white bg-toss-blue rounded-toss">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 포지션 업로드 모달 ===== -->
+  <div id="upload-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeUploadModal(event)">
+    <div class="bg-toss-card rounded-tossLg max-w-lg w-full shadow-toss">
+      <div class="p-6 border-b border-toss-border flex items-center justify-between">
+        <h2 class="text-xl font-bold">📸 포지션 스크린샷 업로드</h2>
+        <button onclick="closeUploadModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div id="upload-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
+          ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
+        </div>
+        <div id="upload-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
+          <input id="upload-file-input" type="file" accept="image/*"
+                 class="absolute inset-0 w-full h-full cursor-pointer"
+                 style="opacity:0; z-index:10;" />
+          <div class="text-sm text-toss-sub pointer-events-none">
+            여기를 클릭해서 스크린샷 선택<br/>
+            <span class="text-[11px]">PNG · JPG · WEBP</span>
+          </div>
+        </div>
+        <div id="upload-preview-wrap" class="hidden space-y-3">
+          <img id="upload-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
+          <div id="upload-filename" class="text-xs text-toss-sub text-center"></div>
+        </div>
+        <div>
+          <label class="text-xs text-toss-sub block mb-1">오늘의 메모 <span class="text-[10px]">(선택 · 오늘 생각/매매 이유)</span></label>
+          <textarea id="upload-memo" rows="3" placeholder="예) KORU +100% 근접 · 50% 익절 준비 / 나스닥 반등 초기 매수 · 위성 추가..."
+                    class="w-full px-3 py-2 border border-toss-border rounded-toss text-sm resize-none"></textarea>
+        </div>
+        <div id="upload-status" class="text-sm"></div>
+        <div class="flex gap-2 justify-end pt-2 border-t border-toss-border">
+          <button onclick="closeUploadModal()" class="px-3 py-2 text-xs text-toss-sub">취소</button>
+          <button id="upload-submit-btn" onclick="submitUpload()" disabled class="px-4 py-2 text-xs font-semibold text-white bg-toss-blue rounded-toss disabled:bg-gray-300">업로드</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 월별 수익률 업로드 모달 ===== -->
+  <div id="monthly-upload-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeMonthlyUploadModal(event)">
+    <div class="bg-toss-card rounded-tossLg max-w-lg w-full shadow-toss">
+      <div class="p-6 border-b border-toss-border flex items-center justify-between">
+        <h2 class="text-xl font-bold">📊 자산추이 스크린샷 업로드</h2>
+        <button onclick="closeMonthlyUploadModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div id="monthly-no-pat" class="hidden rounded-toss bg-toss-yellowL text-toss-yellow p-3 text-sm">
+          ⚠️ 먼저 <button onclick="openSettingsModal()" class="underline font-semibold">⚙️ 설정</button>에서 GitHub PAT를 등록해주세요.
+        </div>
+        <div class="rounded-toss bg-toss-blueL text-toss-blue p-3 text-xs leading-relaxed" style="word-break: keep-all">
+          💡 증권사 앱의 <strong>계좌자산추이</strong> 화면 (조회일자 · 기말자산 · 총손익 표 포함) 캡처해주세요.
+          봇이 Gemini Vision으로 월별 데이터 자동 추출.
+        </div>
+        <div id="monthly-dropzone" class="relative border-2 border-dashed border-toss-border rounded-tossLg p-8 text-center cursor-pointer hover:bg-toss-bg">
+          <input id="monthly-file-input" type="file" accept="image/*"
+                 class="absolute inset-0 w-full h-full cursor-pointer"
+                 style="opacity:0; z-index:10;" />
+          <div class="text-sm text-toss-sub pointer-events-none">
+            여기를 클릭해서 스크린샷 선택<br/>
+            <span class="text-[11px]">PNG · JPG · WEBP</span>
+          </div>
+        </div>
+        <div id="monthly-preview-wrap" class="hidden space-y-3">
+          <img id="monthly-preview" class="w-full max-h-60 object-contain rounded-toss bg-toss-bg" />
+          <div id="monthly-filename" class="text-xs text-toss-sub text-center"></div>
+        </div>
+        <div id="monthly-upload-status" class="text-sm"></div>
+        <div class="flex gap-2 justify-end pt-2 border-t border-toss-border">
+          <button onclick="closeMonthlyUploadModal()" class="px-3 py-2 text-xs text-toss-sub">취소</button>
+          <button id="monthly-upload-submit-btn" onclick="submitMonthlyUpload()" disabled class="px-4 py-2 text-xs font-semibold text-white bg-toss-blue rounded-toss disabled:bg-gray-300">업로드</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <nav id="bottom-nav"></nav>
 
@@ -216,13 +435,418 @@
     }
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeDetailModal();
+      if (e.key === 'Escape') {
+        closeDetailModal();
+        closeSettingsModal();
+        closeUploadModal();
+        closeMonthlyUploadModal();
+      }
     });
 
-    // journal.csv 로드 (common.js의 URLS.history 와 다른 경로)
+    // ============================================================
+    // 내 포지션 렌더 (master_data.json 기반)
+    // ============================================================
+    function renderPosition(master) {
+      const [cash, core, sat] = PI.parseRatio(master?.ratio_raw);
+      const total = Math.max(1, cash + core + sat);
+      PI.$('position-stack').innerHTML = `
+        <div class="bg-toss-sub"    style="width:${cash/total*100}%"></div>
+        <div class="bg-toss-blue"   style="width:${core/total*100}%"></div>
+        <div class="bg-toss-purple" style="width:${sat/total*100}%"></div>
+      `;
+      PI.$('pos-cash').textContent = cash + '%';
+      PI.$('pos-core').textContent = core + '%';
+      PI.$('pos-sat').textContent  = sat  + '%';
+      renderHoldingsBreakdown(master);
+    }
+
+    const HOLDING_ASSETS = [
+      { ticker: 'QQQ',  cat: 'core', catLabel: '코어', color: '#3182F6' },
+      { ticker: 'SOXX', cat: 'core', catLabel: '코어', color: '#6EA8FC' },
+      { ticker: 'EWY',  cat: 'core', catLabel: '코어', color: '#A8C5FD' },
+      { ticker: 'TQQQ', cat: 'sat',  catLabel: '위성', color: '#8B5CF6' },
+      { ticker: 'SOXL', cat: 'sat',  catLabel: '위성', color: '#B29BFB' },
+      { ticker: 'KORU', cat: 'sat',  catLabel: '위성', color: '#D9CFFD' },
+    ];
+
+    function renderHoldingsBreakdown(master) {
+      const holdings = (master && master.holdings) || {};
+      const total = Number((master && master.total_krw) || 0);
+
+      PI.$('holdings-total').textContent = total > 0 ? `총 ${PI.fmtKrwUnit(total)}` : '미입력';
+
+      const data = HOLDING_ASSETS.map(a => {
+        const val = Number(holdings[a.ticker] || 0);
+        const pct = total > 0 ? (val / total * 100) : 0;
+        return { ...a, val, pct };
+      });
+
+      const ctx = document.getElementById('holdings-pie').getContext('2d');
+      if (window._holdingsPie) window._holdingsPie.destroy();
+      const anyHold = data.some(d => d.val > 0);
+      window._holdingsPie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: data.map(d => d.ticker),
+          datasets: [{
+            data: anyHold ? data.map(d => d.val) : [1, 1, 1, 1, 1, 1],
+            backgroundColor: anyHold ? data.map(d => d.color) : data.map(() => '#E5E8EB'),
+            borderWidth: 2,
+            borderColor: '#FFFFFF',
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 10, family: 'Pretendard' }, boxWidth: 8, padding: 6 } },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  const d = data[c.dataIndex];
+                  if (!anyHold) return `${d.ticker}: 0%`;
+                  return `${d.ticker} (${d.catLabel}): ${d.pct.toFixed(1)}% · ${PI.fmtKrwUnit(d.val)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      PI.$('holdings-table').innerHTML = data.map(d => {
+        const pctText = total > 0 ? d.pct.toFixed(1) + '%' : '0%';
+        const krwText = d.val > 0 ? PI.fmtKrwUnit(d.val) : '0';
+        const dotHtml = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${d.color};margin-right:6px;vertical-align:middle"></span>`;
+        return `<tr class="border-b border-toss-border">
+          <td class="py-1.5">${dotHtml}<span class="font-semibold">${d.ticker}</span> <span class="text-[10px] text-toss-sub">(${d.catLabel})</span></td>
+          <td class="py-1.5 text-right num font-bold">${pctText}</td>
+          <td class="py-1.5 text-right num text-toss-sub">${krwText}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // 월별 수익률 렌더 (monthly_returns.json 기반)
+    // ============================================================
+    // schema:
+    // { account: "...", updated_at: "...",
+    //   months: [{ month: "2026-01", end_assets: 76703648, total_pnl: 23413676 }, ...] }
+    function renderMonthly(data) {
+      const months = (data && Array.isArray(data.months)) ? data.months.slice() : [];
+      const empty = PI.$('monthly-empty');
+      const content = PI.$('monthly-content');
+      const period = PI.$('monthly-period');
+
+      if (months.length === 0) {
+        empty.classList.remove('hidden');
+        content.classList.add('hidden');
+        period.textContent = '-';
+        return;
+      }
+      empty.classList.add('hidden');
+      content.classList.remove('hidden');
+
+      // 오름차순 (1월 → 최신)
+      months.sort((a, b) => String(a.month).localeCompare(String(b.month)));
+
+      const first = months[0];
+      const last = months[months.length - 1];
+      const ytdPnl = months.reduce((s, m) => s + Number(m.total_pnl || 0), 0);
+      // YTD 수익률은 각 월의 총손익 합 / (말 자산 - 손익 합) ≈ 평균투자원금 대비
+      // 단순화: 마지막달 자산 / (마지막 자산 - YTD 손익) - 1
+      const startCapital = Number(last.end_assets || 0) - ytdPnl;
+      const ytdPct = startCapital > 0 ? (ytdPnl / startCapital * 100) : 0;
+
+      period.textContent = `${first.month} ~ ${last.month}`;
+      PI.$('monthly-ytd-pct').textContent = PI.fmtPct(ytdPct, 1);
+      PI.$('monthly-ytd-pct').className = 'text-2xl font-extrabold num ' + (ytdPnl >= 0 ? 'text-toss-red' : 'text-toss-blue');
+      PI.$('monthly-ytd-pnl').textContent = PI.fmtKrwUnit(ytdPnl);
+      PI.$('monthly-ytd-pnl').className = 'text-2xl font-extrabold num ' + (ytdPnl >= 0 ? 'text-toss-red' : 'text-toss-blue');
+      PI.$('monthly-current').textContent = PI.fmtKrwUnit(Number(last.end_assets || 0));
+
+      // 차트
+      const ctx = document.getElementById('monthly-chart').getContext('2d');
+      if (window._monthlyChart) window._monthlyChart.destroy();
+      window._monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: months.map(m => String(m.month).slice(5)),  // "01", "02", ...
+          datasets: [
+            {
+              type: 'bar',
+              label: '월별 손익',
+              data: months.map(m => Number(m.total_pnl || 0)),
+              backgroundColor: months.map(m => Number(m.total_pnl || 0) >= 0 ? '#FF5847' : '#3182F6'),
+              yAxisID: 'y1',
+              order: 2,
+            },
+            {
+              type: 'line',
+              label: '기말자산',
+              data: months.map(m => Number(m.end_assets || 0)),
+              borderColor: '#191F28',
+              backgroundColor: 'rgba(25,31,40,0.05)',
+              yAxisID: 'y2',
+              tension: 0.3,
+              borderWidth: 2,
+              pointRadius: 3,
+              order: 1,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 11, family: 'Pretendard' }, boxWidth: 10 } },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  if (c.dataset.label === '월별 손익') return `손익: ${PI.fmtKrwUnit(c.parsed.y)}`;
+                  return `자산: ${PI.fmtKrwUnit(c.parsed.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'Pretendard' } } },
+            y1: { position: 'left', grid: { display: false }, ticks: { callback: (v) => PI.fmtKrwUnit(v), font: { family: 'Pretendard', size: 10 } } },
+            y2: { position: 'right', grid: { display: false }, ticks: { callback: (v) => PI.fmtKrwUnit(v), font: { family: 'Pretendard', size: 10 } } },
+          }
+        }
+      });
+
+      // 테이블 (최신월부터)
+      const sortedDesc = [...months].reverse();
+      PI.$('monthly-table').innerHTML = sortedDesc.map((m, i) => {
+        const pnl = Number(m.total_pnl || 0);
+        const end = Number(m.end_assets || 0);
+        const pnlCls = pnl >= 0 ? 'text-toss-red' : 'text-toss-blue';
+        // 전월비 = 이번달 자산 / 직전달 자산 - 1
+        const prev = sortedDesc[i + 1];
+        let momText = '-';
+        let momCls = 'text-toss-sub';
+        if (prev) {
+          const prevEnd = Number(prev.end_assets || 0);
+          if (prevEnd > 0) {
+            const mom = (end / prevEnd - 1) * 100;
+            momText = PI.fmtPct(mom, 1);
+            momCls = mom >= 0 ? 'text-toss-red' : 'text-toss-blue';
+          }
+        }
+        return `<tr class="border-b border-toss-border">
+          <td class="py-2 font-semibold">${m.month}</td>
+          <td class="py-2 text-right num">${PI.fmtKrwUnit(end)}</td>
+          <td class="py-2 text-right num ${pnlCls}">${PI.fmtKrwUnit(pnl)}</td>
+          <td class="py-2 text-right num ${momCls}">${momText}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // 스크린샷 업로드 (GitHub PAT + Contents API)
+    // ============================================================
+    const UPLOAD_REPO_OWNER = 'komubal-del';
+    const UPLOAD_REPO_NAME  = 'pitinvest-bot';
+    const PAT_STORAGE_KEY   = 'pitinvest_github_pat';
+    let _uploadFile = null;
+    let _uploadBase64 = null;
+    let _monthlyFile = null;
+    let _monthlyBase64 = null;
+
+    function getPat() {
+      return localStorage.getItem(PAT_STORAGE_KEY) || '';
+    }
+
+    function openSettingsModal() {
+      closeUploadModal();
+      closeMonthlyUploadModal();
+      const pat = getPat();
+      PI.$('settings-pat').value = pat;
+      PI.$('settings-status').innerHTML = pat
+        ? '<span class="text-toss-green">✓ 저장된 토큰 있음</span>'
+        : '<span class="text-toss-sub">아직 등록된 토큰 없음</span>';
+      PI.$('settings-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSettingsModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('settings-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    function savePat() {
+      const v = PI.$('settings-pat').value.trim();
+      if (!v) {
+        PI.$('settings-status').innerHTML = '<span class="text-toss-red">❌ 토큰 입력 필요</span>';
+        return;
+      }
+      localStorage.setItem(PAT_STORAGE_KEY, v);
+      PI.$('settings-status').innerHTML = '<span class="text-toss-green">✅ 저장됨. 이제 업로드 가능</span>';
+    }
+    function clearPat() {
+      localStorage.removeItem(PAT_STORAGE_KEY);
+      PI.$('settings-pat').value = '';
+      PI.$('settings-status').innerHTML = '<span class="text-toss-sub">토큰 삭제됨</span>';
+    }
+
+    function openUploadModal() {
+      const pat = getPat();
+      PI.$('upload-no-pat').classList.toggle('hidden', !!pat);
+      _uploadFile = null;
+      _uploadBase64 = null;
+      PI.$('upload-preview-wrap').classList.add('hidden');
+      PI.$('upload-status').textContent = '';
+      PI.$('upload-memo').value = '';
+      PI.$('upload-submit-btn').disabled = true;
+      PI.$('upload-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeUploadModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('upload-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function openMonthlyUploadModal() {
+      const pat = getPat();
+      PI.$('monthly-no-pat').classList.toggle('hidden', !!pat);
+      _monthlyFile = null;
+      _monthlyBase64 = null;
+      PI.$('monthly-preview-wrap').classList.add('hidden');
+      PI.$('monthly-upload-status').textContent = '';
+      PI.$('monthly-upload-submit-btn').disabled = true;
+      PI.$('monthly-upload-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMonthlyUploadModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('monthly-upload-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    (function initUploadDropzones() {
+      const fi1 = document.getElementById('upload-file-input');
+      if (fi1) fi1.addEventListener('change', (e) => onFilePicked(e.target.files[0], 'position'));
+      const fi2 = document.getElementById('monthly-file-input');
+      if (fi2) fi2.addEventListener('change', (e) => onFilePicked(e.target.files[0], 'monthly'));
+    })();
+
+    function onFilePicked(file, type) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const b64 = e.target.result.split(',')[1];
+        const sizeText = `${file.name} · ${(file.size/1024).toFixed(0)} KB`;
+        const hasPat = !!getPat();
+        if (type === 'monthly') {
+          _monthlyFile = file;
+          _monthlyBase64 = b64;
+          PI.$('monthly-preview').src = e.target.result;
+          PI.$('monthly-preview-wrap').classList.remove('hidden');
+          PI.$('monthly-filename').textContent = sizeText;
+          PI.$('monthly-upload-submit-btn').disabled = !hasPat;
+        } else {
+          _uploadFile = file;
+          _uploadBase64 = b64;
+          PI.$('upload-preview').src = e.target.result;
+          PI.$('upload-preview-wrap').classList.remove('hidden');
+          PI.$('upload-filename').textContent = sizeText;
+          PI.$('upload-submit-btn').disabled = !hasPat;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function _doUpload(file, base64, commitMsg, statusEl, btn) {
+      const pat = getPat();
+      if (!pat) { openSettingsModal(); return false; }
+      if (!base64 || !file) return false;
+      btn.disabled = true;
+      statusEl.innerHTML = '<span class="text-toss-sub">⏳ GitHub에 업로드 중...</span>';
+
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, -5);
+      const ext = (file.name.match(/\.[^./\\]+$/) || ['.png'])[0];
+      const filename = commitMsg.startsWith('📊')
+        ? `monthly_${ts}${ext}`
+        : `${ts}${ext}`;
+      const path = `incoming/${filename}`;
+      const url = `https://api.github.com/repos/${UPLOAD_REPO_OWNER}/${UPLOAD_REPO_NAME}/contents/${path}`;
+      try {
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${pat}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: commitMsg, content: base64, branch: 'main' }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(`HTTP ${res.status}: ${err.message || '알 수 없는 에러'}`);
+        }
+        statusEl.innerHTML = `✅ 업로드 성공! GitHub Actions가 1~2분 내에 처리합니다.<br/>
+          <span class="text-xs text-toss-sub">처리 완료 후 페이지 새로고침(F5)으로 반영 확인</span>`;
+        return true;
+      } catch (e) {
+        statusEl.innerHTML = `<span class="text-toss-red">❌ ${e.message}</span>`;
+        btn.disabled = false;
+        return false;
+      }
+    }
+
+    async function submitUpload() {
+      if (!_uploadFile) return;
+      const memo = (PI.$('upload-memo').value || '').trim();
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, -5);
+      const ext = (_uploadFile.name.match(/\.[^./\\]+$/) || ['.png'])[0];
+      const filename = `${ts}${ext}`;
+      const commitMsg = memo
+        ? `📸 웹 업로드: ${filename}\n\n${memo}`
+        : `📸 웹 업로드: ${filename}`;
+      const ok = await _doUpload(_uploadFile, _uploadBase64, commitMsg,
+        PI.$('upload-status'), PI.$('upload-submit-btn'));
+      if (ok) setTimeout(() => closeUploadModal(), 3000);
+    }
+
+    async function submitMonthlyUpload() {
+      if (!_monthlyFile) return;
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, -5);
+      const ext = (_monthlyFile.name.match(/\.[^./\\]+$/) || ['.png'])[0];
+      const filename = `monthly_${ts}${ext}`;
+      const commitMsg = `📊 월별 자산추이 업로드: ${filename}`;
+      const ok = await _doUpload(_monthlyFile, _monthlyBase64, commitMsg,
+        PI.$('monthly-upload-status'), PI.$('monthly-upload-submit-btn'));
+      if (ok) setTimeout(() => closeMonthlyUploadModal(), 3000);
+    }
+
+    // ============================================================
+    // 데이터 로드
+    // ============================================================
     const JOURNAL_URL = PI.URLS.snapshot.replace(/current_snapshot\.json$/, 'journal.csv');
+    const MONTHLY_URL = PI.URLS.snapshot.replace(/current_snapshot\.json$/, 'monthly_returns.json');
 
     (async () => {
+      // 내 포지션
+      try {
+        const master = await PI.fetchJson(PI.URLS.master);
+        renderPosition(master);
+      } catch (e) {
+        console.error('master_data 로드 실패', e);
+        renderPosition({ ratio_raw: '0:0:0', holdings: {}, total_krw: 0 });
+      }
+
+      // 월별 수익률
+      try {
+        const monthly = await PI.fetchJson(MONTHLY_URL);
+        renderMonthly(monthly);
+      } catch (e) {
+        console.warn('monthly_returns 없음 (아직 업로드 안 됨)', e?.message);
+        renderMonthly({ months: [] });
+      }
+
+      // 업로드 이력
       try {
         const text = await PI.fetchText(JOURNAL_URL);
         _journalEntries = PI.parseCSV(text);
