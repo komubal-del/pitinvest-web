@@ -646,15 +646,38 @@
       draw(kospiDrop,  'em-kospi',  'em-kospi-bar');
     }
 
+    // v5.0: 발동일 + 오늘 상태 chip 표시 — 'YYYY-MM-DD' → 'M/D' 단축
+    function _ffShort(dateStr) {
+      if (!dateStr) return '';
+      const m = String(dateStr).match(/^\d{4}-(\d{2})-(\d{2})$/);
+      if (!m) return dateStr;
+      return `${parseInt(m[1])}/${parseInt(m[2])}`;
+    }
+
     function renderConditions(snapshot) {
       const sig = snapshot?.signals || {};
       const count = sig.count || 0;
       PI.$('cond-count').textContent = `충족 ${count} / 3`;
       PI.$('cond-count').className = 'chip ' + (count >= 3 ? 'bg-toss-redL text-toss-red' : count >= 1 ? 'bg-toss-yellowL text-toss-yellow' : 'bg-gray-100 text-toss-sub');
 
-      const render = (triggered, chipEl, valueEl, valueText) => {
-        PI.$(chipEl).textContent = triggered ? '충족 ✓' : '미충족';
-        PI.$(chipEl).className = 'chip ' + (triggered ? 'bg-toss-redL text-toss-red' : 'bg-gray-100 text-toss-sub');
+      // v5.0: chip 텍스트 = '충족 (4/24)' (sticky + 발동일 표시)
+      // sticky=true (sig[field])이고 today=false이면 chip은 sticky 색상 유지 + 옅은 표시
+      const today = sig.today || {};
+      const ff    = sig.first_fired || {};
+
+      const render = (stickyField, todayField, ffKey, chipEl, valueEl, valueText) => {
+        const sticky = !!sig[stickyField];
+        const isToday = !!today[stickyField === 'cnn_under_10' ? 'cnn_under_10' : todayField];
+        const fireDate = ff[ffKey];
+        const el = PI.$(chipEl);
+        if (sticky) {
+          el.textContent = fireDate ? `충족 (${_ffShort(fireDate)})` : '충족 ✓';
+          // sticky이면 빨강. 오늘 꺼졌으면 옅은 색 (light)
+          el.className = 'chip ' + (isToday ? 'bg-toss-redL text-toss-red' : 'bg-toss-redL text-toss-red opacity-60');
+        } else {
+          el.textContent = '미충족';
+          el.className = 'chip bg-gray-100 text-toss-sub';
+        }
         PI.$(valueEl).textContent = valueText;
       };
 
@@ -663,17 +686,20 @@
       const retail = snapshot?.korea_flow?.retail_net_buy_krw;
       const news   = snapshot?.korea_flow?.news_count;
 
-      render(sig.cnn_under_10, 'cond-cnn-chip', 'cond-cnn-value', cnn != null ? PI.fmt(cnn, 0) : '-');
-      render(sig.vix_over_25,  'cond-vix-chip', 'cond-vix-value', vix != null ? PI.fmt(vix, 1) : '-');
-      render(sig.margin_call_trigger, 'cond-margin-chip', 'cond-margin-value', retail != null ? PI.fmtKrwUnit(retail) : '-');
+      render('cnn_under_10',        'cnn_under_10',        'buy_cnn',    'cond-cnn-chip',    'cond-cnn-value',    cnn != null ? PI.fmt(cnn, 0) : '-');
+      render('vix_over_25',         'vix_over_25',         'buy_vix',    'cond-vix-chip',    'cond-vix-value',    vix != null ? PI.fmt(vix, 1) : '-');
+      render('margin_call_trigger', 'margin_call_trigger', 'buy_margin', 'cond-margin-chip', 'cond-margin-value', retail != null ? PI.fmtKrwUnit(retail) : '-');
       PI.$('cond-margin-news').textContent = news != null ? news : '-';
     }
 
     function renderSellConditions(snapshot, exit) {
       const sell = (snapshot && snapshot.sell_signals) || {};
       const profits = (snapshot && snapshot.leverage_profit) || {};
+      const sig = (snapshot && snapshot.signals) || {};
+      const today = sig.today || {};
+      const ff    = sig.first_fired || {};
 
-      // --- 조건 1: 레버리지 수익률 ---
+      // --- 조건 1: 위성 +100% 수익률 ---
       const paint = (elId, val) => {
         const el = PI.$(elId);
         if (val === null || val === undefined || isNaN(val)) {
@@ -690,36 +716,46 @@
       paint('sell-tqqq-profit', tq);
       paint('sell-soxl-profit', sx);
       paint('sell-koru-profit', kr);
-      const profitTriggered = [tq, sx, kr].some(v => v !== null && v !== undefined && !isNaN(v) && v >= 100);
 
-      // --- 조건 2: 주도주 3일+ 상승 ---
-      const leadingTriggered = !!sell.leading_stock_rising_3d;
+      // sticky/today 분리 (signals.sell_leverage = sticky, signals.today.sell_leverage = today)
+      const stickyLev = !!sig.sell_leverage;
+      const todayLev  = !!today.sell_leverage;
+      const stickyLead = !!sig.sell_leading;
+      const todayLead  = !!today.sell_leading;
+      const stickyExp  = !!sig.sell_expert;
+      const todayExp   = !!today.sell_expert;
+
+      // 조건 2: 주도주 (텍스트만 today 기준)
       const leadingVal = PI.$('sell-leading-value');
       if (sell.leading_stock_rising_3d === undefined || sell.leading_stock_rising_3d === null) {
         leadingVal.textContent = '-';
       } else {
-        leadingVal.textContent = leadingTriggered ? '상승 지속 ✓' : '대기 중';
-        leadingVal.className = 'text-lg font-bold ' + (leadingTriggered ? 'text-toss-red' : '');
+        leadingVal.textContent = todayLead ? '상승 지속 ✓' : '대기 중';
+        leadingVal.className = 'text-lg font-bold ' + (todayLead ? 'text-toss-red' : '');
       }
 
-      // --- 조건 3: 전문가 경고 ---
-      const expertTriggered = (exit && exit.expert_sell_view === true) || !!sell.expert_warning;
+      // 조건 3: 전문가 경고
       const expertVal = PI.$('sell-expert-value');
-      expertVal.textContent = expertTriggered ? '경고 발생 ⚠' : '없음';
-      expertVal.className = 'text-lg font-bold ' + (expertTriggered ? 'text-toss-red' : '');
+      expertVal.textContent = todayExp ? '경고 발생 ⚠' : '없음';
+      expertVal.className = 'text-lg font-bold ' + (todayExp ? 'text-toss-red' : '');
 
-      // --- 칩 ---
-      const setChip = (id, triggered) => {
+      // chip — sticky=true이면 빨강 + 발동일 표시. today=false면 옅은 색 (sticky 잔류 표시)
+      const setChip = (id, sticky, isToday, fireDate) => {
         const el = PI.$(id);
-        el.textContent = triggered ? '충족 ✓' : '미충족';
-        el.className = 'chip ' + (triggered ? 'bg-toss-redL text-toss-red' : 'bg-gray-100 text-toss-sub');
+        if (sticky) {
+          el.textContent = fireDate ? `충족 (${_ffShort(fireDate)})` : '충족 ✓';
+          el.className = 'chip ' + (isToday ? 'bg-toss-redL text-toss-red' : 'bg-toss-redL text-toss-red opacity-60');
+        } else {
+          el.textContent = '미충족';
+          el.className = 'chip bg-gray-100 text-toss-sub';
+        }
       };
-      setChip('sell-profit-chip', profitTriggered);
-      setChip('sell-leading-chip', leadingTriggered);
-      setChip('sell-expert-chip', expertTriggered);
+      setChip('sell-profit-chip',  stickyLev,  todayLev,  ff.sell_leverage);
+      setChip('sell-leading-chip', stickyLead, todayLead, ff.sell_leading);
+      setChip('sell-expert-chip',  stickyExp,  todayExp,  ff.sell_expert);
 
-      // --- 충족 카운트 ---
-      const count = [profitTriggered, leadingTriggered, expertTriggered].filter(Boolean).length;
+      // 충족 카운트 (sticky 기준)
+      const count = [stickyLev, stickyLead, stickyExp].filter(Boolean).length;
       const cc = PI.$('sell-count');
       cc.textContent = `충족 ${count} / 3`;
       cc.className = 'chip ' + (count >= 2 ? 'bg-toss-redL text-toss-red' : count >= 1 ? 'bg-toss-yellowL text-toss-yellow' : 'bg-gray-100 text-toss-sub');
