@@ -161,12 +161,12 @@ function initNav(active) {
 // --- 상태 판정 로직 (봇이 계산한 display stage_key 우선 사용) ---
 const STAGE_INFO = {
   emergency: { label: '긴급탈출',       color: 'red',    desc: '나스닥/S&P/코스피 −10% 도달 · 위성 전량 청산 (코어 유지)' },
-  reset:     { label: '자동 리셋 직후', color: 'blue',   desc: '매도 3조건 모두 충족 · 100% 현금화 완료' },
-  sell_near: { label: '매도 임박',      color: 'red',    desc: '매도 2조건 충족 · 마지막 조건 대기' },
-  exit:      { label: '구덩이 탈출',    color: 'orange', desc: '매도 1조건 충족 · 위성 축소 시작' },
-  full:      { label: '구덩이 충족',    color: 'red',    desc: '매수 3조건 모두 충족 · 매일 +5%p 매수' },
-  deepening: { label: '구덩이 심화',    color: 'purple', desc: '매수 2조건 충족 · 슬롯 추가 채우기' },
-  entry:     { label: '구덩이 진입',    color: 'yellow', desc: '매수 1조건 충족 · 해당 슬롯 +20%p 매수' },
+  reset:     { label: '자동 리셋 직후', color: 'blue',   desc: '매도 3조건 모두 충족 · 위성 0% (코어 유지)' },
+  sell_near: { label: '매도 임박',      color: 'red',    desc: '매도 2조건 충족 · 위성 −33%p 추가, 마지막 조건 대기' },
+  exit:      { label: '구덩이 탈출',    color: 'orange', desc: '매도 1조건 충족 · 위성 −33%p 매도 (1/3 step)' },
+  full:      { label: '구덩이 충족',    color: 'red',    desc: '매수 3조건 모두 충족 · 카운터 리셋 (위성 100% cap)' },
+  deepening: { label: '구덩이 심화',    color: 'purple', desc: '매수 2조건 충족 · 위성 +33%p 추가 매수' },
+  entry:     { label: '구덩이 진입',    color: 'yellow', desc: '매수 1조건 충족 · 위성 +33%p 매수 (1/3 step)' },
   normal:    { label: '평시 운용',      color: 'green',  desc: '다음 구덩이 대기' },
 };
 

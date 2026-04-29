@@ -92,7 +92,7 @@
             <span class="text-xs text-toss-sub">/ 100</span>
           </div>
           <div class="text-xs text-toss-sub mt-1">조건: &lt; 10</div>
-          <div class="card-tip hidden">CNN Fear &amp; Greed Index가 10 미만(극단적 공포)일 때 첫 트리거. → 위성 +20%p 매수 (TQQQ/SOXL/KORU 1/3씩)</div>
+          <div class="card-tip hidden">CNN Fear &amp; Greed Index가 10 미만(극단적 공포)일 때 첫 트리거. → 위성 +33%p 매수 (보유 위성 균등). 신호 sticky.</div>
         </div>
         <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
@@ -104,7 +104,7 @@
           </div>
           <div id="cond-vix-value" class="text-3xl font-extrabold num">-</div>
           <div class="text-xs text-toss-sub mt-1">조건: &gt; 25</div>
-          <div class="card-tip hidden">변동성지수(VIX)가 25 초과(공포 급등)일 때 첫 트리거. 장중 High 기준이라 종가가 25 이하라도 인정. → 위성 +20%p 매수</div>
+          <div class="card-tip hidden">변동성지수(VIX)가 25 초과(공포 급등)일 때 첫 트리거. 장중 High 기준이라 종가가 25 이하라도 인정. → 위성 +33%p 매수 (보유 위성 균등). 신호 sticky.</div>
         </div>
         <div class="rounded-toss bg-toss-bg p-4" data-card>
           <div class="flex items-center justify-between mb-2">
@@ -119,7 +119,7 @@
             <span class="text-xs text-toss-sub">개인 순매수</span>
           </div>
           <div class="text-xs text-toss-sub mt-1">뉴스 <span id="cond-margin-news" class="font-bold">-</span>건 · 조건: 뉴스≥1 + 개인≤−1조</div>
-          <div class="card-tip hidden">반대매매(강제청산) 뉴스 ≥1건 + 개인 순매수 ≤ −1조원(=1조 이상 매도)일 때 첫 트리거. 패닉성 투매 시그널. → 위성 +20%p 매수</div>
+          <div class="card-tip hidden">반대매매(강제청산) 뉴스 ≥1건 + 개인 순매수 ≤ −1조원(=1조 이상 매도)일 때 첫 트리거. 패닉성 투매 시그널. → 위성 +33%p 매수 (보유 위성 균등). 신호 sticky.</div>
         </div>
       </div>
     </section>
@@ -154,8 +154,8 @@
               <span id="sell-koru-profit" class="font-bold num">-</span>
             </div>
           </div>
-          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 해당 자산 50% 매도 (코어 이동)</div>
-          <div class="card-tip hidden">위성 종목(TQQQ/SOXL/KORU) 중 하나라도 이론평단 대비 +100%(=2배) 도달 시 첫 트리거. → 해당 자산 50% 익절 후 코어로 이동</div>
+          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 위성 −33%p 매도 (현금화)</div>
+          <div class="card-tip hidden">위성 종목(TQQQ/SOXL/KORU) 중 하나라도 이론평단 대비 +100%(=2배) 도달 시 첫 트리거. → 위성 −33%p 매도 (보유 위성 균등). 신호 sticky — 가격 떨어져도 카드 유지.</div>
         </div>
 
         <!-- 조건 2: 주도주 3일+ 상승 -->
@@ -169,8 +169,8 @@
           </div>
           <div id="sell-leading-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">삼전/하닉 3일↑ + 개인 매수 우위</div>
-          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 위성 비중 −20%p</div>
-          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 비중 −20%p 축소</div>
+          <div class="text-xs text-toss-sub mt-3 pt-2 border-t border-toss-border">→ 위성 −33%p 매도</div>
+          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 (보유 위성 균등)</div>
         </div>
 
         <!-- 조건 3: 전문가 경고 -->
@@ -185,7 +185,7 @@
           <div id="sell-expert-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">윤지호·박병창 Gemini 자동 분석</div>
           <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📄 자세히 보기 →</div>
-          <div class="card-tip hidden" onclick="event.stopPropagation()">박병창 AND 윤지호 두 전문가 모두 "현금 비중 늘려라/매도/익절" 같은 구체적 행동 권고를 내릴 때 트리거. 단순 "조심" 정도는 미인정. → 매일 −5%p 매도</div>
+          <div class="card-tip hidden" onclick="event.stopPropagation()">박병창 AND 윤지호 두 전문가 모두 "현금 비중 늘려라/매도/익절" 같은 구체적 행동 권고를 내릴 때 트리거. 단순 "조심" 정도는 미인정. → 위성 −33%p 매도 (보유 위성 균등)</div>
         </div>
       </div>
     </section>
