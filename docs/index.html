@@ -1348,6 +1348,9 @@
           || (v.transcript_available
             ? sourceMap.transcript
             : '<span class="text-[10px] text-orange-500">제목/설명 기반</span>');
+        const staleBadge = v.is_stale_fallback
+          ? '<span class="text-[10px] text-toss-purple ml-1">📂 14일 외 이전 영상</span>'
+          : '';
         const err = a.error ? `<div class="text-xs text-toss-red mt-2">⚠ ${String(a.error).slice(0, 120)}</div>` : '';
         return `
           <div class="rounded-toss bg-toss-bg p-4 space-y-2">
@@ -1357,10 +1360,11 @@
               </a>
               <span class="chip ${chip.cls} shrink-0">${chip.text}</span>
             </div>
-            <div class="flex items-center gap-2 text-xs text-toss-sub">
+            <div class="flex items-center gap-2 text-xs text-toss-sub flex-wrap">
               <span>${pubDate}</span>
               <span>·</span>
               ${transcriptBadge}
+              ${staleBadge}
             </div>
             ${a.reason ? `<div class="text-sm text-toss-text leading-relaxed mt-2 pt-2 border-t border-toss-border">${a.reason}</div>` : ''}
             ${err}
