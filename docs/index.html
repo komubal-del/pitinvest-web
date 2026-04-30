@@ -1338,9 +1338,16 @@
         const chip = stanceChip(a.stance);
         const title = v.title || '(제목 없음)';
         const pubDate = (v.published || '').slice(0, 10);
-        const transcriptBadge = v.transcript_available
-          ? '<span class="text-[10px] text-toss-sub">자막 기반</span>'
-          : '<span class="text-[10px] text-orange-500">제목만 (자막 없음)</span>';
+        const sourceMap = {
+          transcript:  '<span class="text-[10px] text-toss-sub">자막 기반</span>',
+          description: '<span class="text-[10px] text-orange-500">설명 기반 (자막 없음)</span>',
+          title:       '<span class="text-[10px] text-toss-red">제목만 (자막·설명 없음)</span>',
+          missing:     '<span class="text-[10px] text-toss-sub">영상 없음</span>',
+        };
+        const transcriptBadge = sourceMap[v.text_source]
+          || (v.transcript_available
+            ? sourceMap.transcript
+            : '<span class="text-[10px] text-orange-500">제목/설명 기반</span>');
         const err = a.error ? `<div class="text-xs text-toss-red mt-2">⚠ ${String(a.error).slice(0, 120)}</div>` : '';
         return `
           <div class="rounded-toss bg-toss-bg p-4 space-y-2">
