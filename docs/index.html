@@ -158,17 +158,18 @@
         </div>
 
         <!-- 조건 2: 주도주 3일+ 상승 -->
-        <div class="rounded-toss bg-toss-bg p-4" data-card>
+        <div id="sell-leading-card" class="rounded-toss bg-toss-bg p-4 cursor-pointer hover:bg-gray-100 transition relative" onclick="openLeadingModal()" data-card>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-toss-text">주도주 3일+ 상승</span>
             <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleCardTip(this)" class="card-tip-btn">?</button>
+              <button type="button" onclick="event.stopPropagation(); toggleCardTip(this)" class="card-tip-btn">?</button>
               <span id="sell-leading-chip" class="chip bg-gray-100 text-toss-sub">-</span>
             </div>
           </div>
           <div id="sell-leading-value" class="text-lg font-bold">-</div>
           <div class="text-xs text-toss-sub mt-1">삼전/하닉 3일↑ + 개인 매수 우위</div>
-          <div class="card-tip hidden">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 → 코어 균등 매수</div>
+          <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📊 직전 5일 데이터 →</div>
+          <div class="card-tip hidden" onclick="event.stopPropagation()">삼성전자 AND SK하이닉스가 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 → 코어 균등 매수</div>
         </div>
 
         <!-- 조건 3: 전문가 경고 -->
@@ -403,6 +404,28 @@
     </footer>
 
   </main>
+
+  <!-- ===== 주도주 3일+ 상승 상세 모달 ===== -->
+  <div id="leading-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLeadingModal(event)">
+    <div class="bg-toss-card rounded-tossLg max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-toss animate-fadein" onclick="event.stopPropagation()">
+      <div class="p-6 border-b border-toss-border sticky top-0 bg-toss-card flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold">📊 주도주 데이터</h2>
+          <div class="text-xs text-toss-sub mt-1">삼성전자 + SK하이닉스 · 직전 5거래일</div>
+        </div>
+        <button onclick="closeLeadingModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
+      </div>
+      <div class="p-6 space-y-6">
+        <div id="leading-modal-empty" class="hidden text-center py-10 text-toss-sub text-sm">
+          데이터 없음 (네이버 매매동향 로드 실패)
+        </div>
+        <div id="leading-modal-content" class="space-y-6"></div>
+        <div class="text-[11px] text-toss-sub border-t border-toss-border pt-3 leading-relaxed" style="word-break: keep-all">
+          개인 순매수 = −(기관 + 외국인) 으로 추정 · 네이버 frgn.naver 페이지에 개인 컬럼이 없어 계산값 사용 · 단위는 주(株)
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== 전문가 분석 상세 모달 ===== -->
   <div id="expert-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeExpertModal(event)">
@@ -1385,6 +1408,120 @@
       document.body.style.overflow = '';
     }
 
+    // ============================================================
+    // 주도주 (삼전+하닉) 직전 5일 데이터 모달
+    // ============================================================
+    let _lastLeadingDetail = null;
+
+    function _kshareFmt(n) {
+      if (n === null || n === undefined || isNaN(n)) return '-';
+      const abs = Math.abs(n);
+      const sign = n < 0 ? '-' : n > 0 ? '+' : '';
+      if (abs >= 1e6) return `${sign}${(abs / 1e6).toFixed(2)}M`;
+      if (abs >= 1e3) return `${sign}${(abs / 1e3).toFixed(0)}K`;
+      return `${sign}${abs}`;
+    }
+
+    function _renderStockHistoryTable(label, code, history, threeUp, retailOk) {
+      const okChip = (threeUp && retailOk)
+        ? '<span class="chip bg-toss-redL text-toss-red">조건 충족</span>'
+        : '<span class="chip bg-gray-100 text-toss-sub">미충족</span>';
+      const upChip = threeUp
+        ? '<span class="chip bg-toss-greenL text-toss-green text-[10px]">3일↑ ✓</span>'
+        : '<span class="chip bg-gray-100 text-toss-sub text-[10px]">3일↑ ✗</span>';
+      const retailChip = retailOk
+        ? '<span class="chip bg-toss-greenL text-toss-green text-[10px]">개인 매수 ✓</span>'
+        : '<span class="chip bg-gray-100 text-toss-sub text-[10px]">개인 매수 ✗</span>';
+
+      if (!history || history.length === 0) {
+        return `
+          <div>
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <span class="font-bold">${label}</span>
+              <span class="text-xs text-toss-sub">${code}</span>
+              ${okChip}
+            </div>
+            <div class="text-sm text-toss-sub py-3">데이터 없음</div>
+          </div>
+        `;
+      }
+      const rows = history.map((r, i) => {
+        const prev = history[i + 1];
+        const upArrow = prev && r.close > prev.close
+          ? '<span class="text-toss-red">▲</span>'
+          : prev && r.close < prev.close
+          ? '<span class="text-toss-blue">▼</span>'
+          : '<span class="text-toss-sub">·</span>';
+        const chgCls = r.change_pct > 0 ? 'text-toss-red' : r.change_pct < 0 ? 'text-toss-blue' : 'text-toss-sub';
+        const retailCls = r.retail_net > 0 ? 'text-toss-red' : r.retail_net < 0 ? 'text-toss-blue' : 'text-toss-sub';
+        return `<tr class="border-b border-toss-border">
+          <td class="py-2 text-xs">${r.date}</td>
+          <td class="py-2 text-right num text-sm">${upArrow} ${PI.fmt(r.close)}</td>
+          <td class="py-2 text-right num text-sm ${chgCls}">${PI.fmtPct(r.change_pct, 2)}</td>
+          <td class="py-2 text-right num text-xs ${retailCls}">${_kshareFmt(r.retail_net)}</td>
+          <td class="py-2 text-right num text-xs text-toss-sub">${_kshareFmt(r.inst_net)}</td>
+          <td class="py-2 text-right num text-xs text-toss-sub">${_kshareFmt(r.foreign_net)}</td>
+        </tr>`;
+      }).join('');
+      return `
+        <div>
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
+            <span class="font-bold">${label}</span>
+            <span class="text-xs text-toss-sub">${code}</span>
+            ${okChip}
+            ${upChip}
+            ${retailChip}
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="text-toss-sub border-b border-toss-border">
+                <tr>
+                  <th class="text-left py-1.5 font-semibold">날짜</th>
+                  <th class="text-right py-1.5 font-semibold">종가</th>
+                  <th class="text-right py-1.5 font-semibold">등락률</th>
+                  <th class="text-right py-1.5 font-semibold">개인</th>
+                  <th class="text-right py-1.5 font-semibold">기관</th>
+                  <th class="text-right py-1.5 font-semibold">외인</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLeadingModalContent() {
+      const d = _lastLeadingDetail || {};
+      const hist = d.history || {};
+      const sec = hist.samsung || [];
+      const hyn = hist.hynix || [];
+      const empty = PI.$('leading-modal-empty');
+      const content = PI.$('leading-modal-content');
+      if (!sec.length && !hyn.length) {
+        empty.classList.remove('hidden');
+        content.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      content.innerHTML = [
+        _renderStockHistoryTable('삼성전자', '005930', sec, !!d.samsung_3d_up, !!d.samsung_retail_buying),
+        _renderStockHistoryTable('SK하이닉스', '000660', hyn, !!d.hynix_3d_up, !!d.hynix_retail_buying),
+      ].join('<div class="border-t border-toss-border my-4"></div>');
+    }
+
+    function openLeadingModal() {
+      renderLeadingModalContent();
+      PI.$('leading-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLeadingModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      PI.$('leading-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
     // 캐시 파일 주소 (snapshot.expert_analysis가 없거나 비었을 때 fallback)
     const EXPERT_CACHE_URL = (PI.URLS.snapshot.replace(/current_snapshot\.json$/, 'expert_analysis_cache.json'));
 
@@ -1425,6 +1562,7 @@
       );
       renderConditions(snapshot);
       renderSellConditions(snapshot, exit);
+      _lastLeadingDetail = (snapshot && snapshot.sell_signals && snapshot.sell_signals.leading_detail) || null;
       renderIndices(snapshot?.indices);
       renderVolatility(snapshot?.volatility);
       renderCnnComponents(snapshot?.sentiment);
@@ -1439,6 +1577,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeExpertModal();
+        closeLeadingModal();
       }
     });
   </script>
