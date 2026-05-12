@@ -1519,9 +1519,19 @@
         return;
       }
       empty.classList.add('hidden');
-      const gateBadge = d.gate_passed
-        ? '<div class="rounded-toss bg-toss-redL text-toss-red px-3 py-2 text-xs font-semibold mb-3">🎯 Gate 통과 · 삼전+하닉 둘 다 60일 신고가</div>'
-        : '<div class="rounded-toss bg-gray-100 text-toss-sub px-3 py-2 text-xs mb-3">🚪 Gate 미통과 · 둘 다 신고가 영역이어야 매도-2 발동</div>';
+      // 발동 조건: [Gate] 둘 다 60일 신고가 AND [Trigger] 둘 중 하나 (3일↑ + 개인매수)
+      const trigPassed = !!(d.samsung_ok || d.hynix_ok);
+      const allOk = !!d.gate_passed && trigPassed;
+      let gateBadge;
+      if (allOk) {
+        gateBadge = '<div class="rounded-toss bg-toss-redL text-toss-red px-3 py-2 text-xs font-semibold mb-3">🎯 오늘 매도-2 발동 · Gate(둘 다 신고가) + Trigger(하나라도 3일↑+개인매수) 충족</div>';
+      } else if (d.gate_passed) {
+        gateBadge = '<div class="rounded-toss bg-toss-yellowL text-toss-yellow px-3 py-2 text-xs font-semibold mb-3">🟡 Gate 통과 (둘 다 신고가) · Trigger 대기 — 둘 중 하나 3일↑+개인매수 필요</div>';
+      } else if (trigPassed) {
+        gateBadge = '<div class="rounded-toss bg-toss-yellowL text-toss-yellow px-3 py-2 text-xs font-semibold mb-3">🟡 Trigger 만족 (하나 이상) · Gate 미통과 — 둘 다 신고가 진입 필요</div>';
+      } else {
+        gateBadge = '<div class="rounded-toss bg-gray-100 text-toss-sub px-3 py-2 text-xs mb-3">🚪 미발동 · [Gate] 둘 다 60일 신고가 + [Trigger] 둘 중 하나 3일↑+개인매수 동시 충족 시 발동</div>';
+      }
       content.innerHTML = gateBadge + [
         _renderStockHistoryTable('삼성전자', '005930', sec, !!d.samsung_3d_up, !!d.samsung_retail_buying, !!d.samsung_at_60d_high),
         _renderStockHistoryTable('SK하이닉스', '000660', hyn, !!d.hynix_3d_up, !!d.hynix_retail_buying, !!d.hynix_at_60d_high),
