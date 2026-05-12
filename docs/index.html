@@ -1460,10 +1460,10 @@
         `;
       }
       const rows = history.map((r, i) => {
-        const prev = history[i + 1];
-        const upArrow = prev && r.close > prev.close
+        // change_pct (일간 등락률)이 양수면 ▲, 음수면 ▼, 0이면 · (윈도우 외 기준일 비교 필요 없음)
+        const upArrow = r.change_pct > 0
           ? '<span class="text-toss-red">▲</span>'
-          : prev && r.close < prev.close
+          : r.change_pct < 0
           ? '<span class="text-toss-blue">▼</span>'
           : '<span class="text-toss-sub">·</span>';
         const chgCls = r.change_pct > 0 ? 'text-toss-red' : r.change_pct < 0 ? 'text-toss-blue' : 'text-toss-sub';
