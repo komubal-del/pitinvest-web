@@ -916,6 +916,8 @@
 
       let buySlots = { cnn: false, vix: false, margin: false };
       let sellSlots = { lev: false, lead: false, expert: false };
+      let buyAllFiredThisCycle = false;   // 매수 3종 slot 완성 후 한 번만 표시
+      let sellAllFiredThisCycle = false;  // 매도 3종 slot 완성 후 한 번만 표시
       let events = [];  // 이론 평단 계산용 (JS 시뮬레이션)
       let cumAmount = 0;
       let simSellLevFired = false;
@@ -933,6 +935,8 @@
           if (cycle_ended) {
             buySlots = { cnn: false, vix: false, margin: false };
             sellSlots = { lev: false, lead: false, expert: false };
+            buyAllFiredThisCycle = false;
+            sellAllFiredThisCycle = false;
             events = [];
             cumAmount = 0;
             simSellLevFired = false;
@@ -943,12 +947,16 @@
         const c  = parseInt(r.cnn_trigger)    === 1;
         const v  = parseInt(r.vix_trigger)    === 1;
         const mg = parseInt(r.margin_trigger) === 1;
-        if (c && v && mg) markers.tripleBuy.add(i);
 
         let pct = 0;
         if (c && !buySlots.cnn)    { pct += 20; buySlots.cnn = true;    markers.buyCnn.add(i); }
         if (v && !buySlots.vix)    { pct += 20; buySlots.vix = true;    markers.buyVix.add(i); }
         if (mg && !buySlots.margin){ pct += 20; buySlots.margin = true; markers.buyMargin.add(i); }
+        // 매수 3종 sticky 슬롯이 모두 채워진 시점 = "구덩이 충족" 완성일 (한 사이클에 1회만)
+        if (buySlots.cnn && buySlots.vix && buySlots.margin && !buyAllFiredThisCycle) {
+          markers.tripleBuy.add(i);
+          buyAllFiredThisCycle = true;
+        }
         if (buySlots.cnn && buySlots.vix && buySlots.margin && cumAmount < 100) pct += 5;
         if (pct > 0 && cumAmount < 100) {
           const take = Math.min(pct, 100 - cumAmount);
@@ -991,8 +999,11 @@
           markers.sellExpert.add(i);
         }
 
-        // 매도 3종 동시 발생일 (2/27처럼 백필 강제 또는 향후 실제)
-        if (csvSellLev && csvSellLead && csvSellExpert) markers.tripleSell.add(i);
+        // 매도 3종 sticky 슬롯이 모두 채워진 시점 = "자동 리셋" 완성일 (한 사이클에 1회)
+        if (sellSlots.lev && sellSlots.lead && sellSlots.expert && !sellAllFiredThisCycle) {
+          markers.tripleSell.add(i);
+          sellAllFiredThisCycle = true;
+        }
       });
 
       return markers;
