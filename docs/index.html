@@ -167,9 +167,9 @@
             </div>
           </div>
           <div id="sell-leading-value" class="text-lg font-bold">-</div>
-          <div class="text-xs text-toss-sub mt-1">삼전 or 하닉 3일↑ + 개인 매수 우위</div>
+          <div class="text-xs text-toss-sub mt-1">삼전+하닉 둘 다 신고가 · 둘 중 하나 3일↑+개인매수</div>
           <div class="text-xs text-toss-blue mt-3 pt-2 border-t border-toss-border font-semibold">📊 직전 5일 데이터 →</div>
-          <div class="card-tip hidden" onclick="event.stopPropagation()">삼성전자 OR SK하이닉스 중 하나라도 3거래일 연속 상승 + 개인이 순매수일 때 트리거. 개인 추격매수 = 과열 신호. → 위성 −33%p 매도 → 코어 균등 매수</div>
+          <div class="card-tip hidden" onclick="event.stopPropagation()">[Gate] 삼전 AND 하닉 둘 다 60일 신고가 영역. [Trigger] 삼전 OR 하닉 중 하나라도 3일↑ + 개인 순매수. 신고가 + 개인 추격매수 동시 = 과열 시그널. → 위성 −33%p 매도 → 코어 균등 매수</div>
         </div>
 
         <!-- 조건 3: 전문가 경고 -->
@@ -1433,9 +1433,9 @@
       return `${sign}${abs}`;
     }
 
-    function _renderStockHistoryTable(label, code, history, threeUp, retailOk) {
+    function _renderStockHistoryTable(label, code, history, threeUp, retailOk, atHigh) {
       const okChip = (threeUp && retailOk)
-        ? '<span class="chip bg-toss-redL text-toss-red">조건 충족</span>'
+        ? '<span class="chip bg-toss-redL text-toss-red">트리거 조건 충족</span>'
         : '<span class="chip bg-gray-100 text-toss-sub">미충족</span>';
       const upChip = threeUp
         ? '<span class="chip bg-toss-greenL text-toss-green text-[10px]">3일↑ ✓</span>'
@@ -1443,6 +1443,9 @@
       const retailChip = retailOk
         ? '<span class="chip bg-toss-greenL text-toss-green text-[10px]">개인 매수 ✓</span>'
         : '<span class="chip bg-gray-100 text-toss-sub text-[10px]">개인 매수 ✗</span>';
+      const highChip = atHigh
+        ? '<span class="chip bg-toss-purpleL text-toss-purple text-[10px]">신고가 ✓</span>'
+        : '<span class="chip bg-gray-100 text-toss-sub text-[10px]">신고가 ✗</span>';
 
       if (!history || history.length === 0) {
         return `
@@ -1480,6 +1483,7 @@
             <span class="font-bold">${label}</span>
             <span class="text-xs text-toss-sub">${code}</span>
             ${okChip}
+            ${highChip}
             ${upChip}
             ${retailChip}
           </div>
@@ -1515,9 +1519,12 @@
         return;
       }
       empty.classList.add('hidden');
-      content.innerHTML = [
-        _renderStockHistoryTable('삼성전자', '005930', sec, !!d.samsung_3d_up, !!d.samsung_retail_buying),
-        _renderStockHistoryTable('SK하이닉스', '000660', hyn, !!d.hynix_3d_up, !!d.hynix_retail_buying),
+      const gateBadge = d.gate_passed
+        ? '<div class="rounded-toss bg-toss-redL text-toss-red px-3 py-2 text-xs font-semibold mb-3">🎯 Gate 통과 · 삼전+하닉 둘 다 60일 신고가</div>'
+        : '<div class="rounded-toss bg-gray-100 text-toss-sub px-3 py-2 text-xs mb-3">🚪 Gate 미통과 · 둘 다 신고가 영역이어야 매도-2 발동</div>';
+      content.innerHTML = gateBadge + [
+        _renderStockHistoryTable('삼성전자', '005930', sec, !!d.samsung_3d_up, !!d.samsung_retail_buying, !!d.samsung_at_60d_high),
+        _renderStockHistoryTable('SK하이닉스', '000660', hyn, !!d.hynix_3d_up, !!d.hynix_retail_buying, !!d.hynix_at_60d_high),
       ].join('<div class="border-t border-toss-border my-4"></div>');
     }
 
