@@ -949,15 +949,10 @@
           }
         }
 
-        // ----- 긴급탈출 (지수 -10% 또는 master 마커 날짜와 매칭) -----
-        const nasDd = _n(r.nasdaq_drop_pct);
-        const kosDd = _n(r.kospi_drop_pct);
-        const spDd = _n(r.sp500_drop_pct);
-        const csvEmergency = (nasDd !== null && nasDd <= -10)
-                          || (kosDd !== null && kosDd <= -10)
-                          || (spDd !== null && spDd <= -10);
+        // ----- 긴급탈출 (master_data 마커 기준만 — 봇이 실제로 인식한 발동일) -----
+        // CSV drop_pct 자동 탐지는 사용 안 함 (초기 데이터 부족 시 노이즈 발화 방지).
         const masterEmergency = emergencyMasterDate && r.date === emergencyMasterDate;
-        if ((csvEmergency || masterEmergency) && !emergencyFiredThisCycle) {
+        if (masterEmergency && !emergencyFiredThisCycle) {
           markers.emergency.add(i);
           emergencyFiredThisCycle = true;
         }
