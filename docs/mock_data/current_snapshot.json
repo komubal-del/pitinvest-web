@@ -31,37 +31,37 @@
   "indices": {
     "nasdaq": {
       "current": 17850.32,
-      "high_52w": 18400.10,
+      "high_52w": 18400.1,
       "drop_pct": -2.99,
-      "sma_200": 16850.00,
+      "sma_200": 16850.0,
       "below_sma200_streak": 0
     },
     "kospi": {
-      "current": 2680.50,
-      "high_52w": 2795.00,
-      "drop_pct": -4.10,
-      "sma_200": 2555.00,
+      "current": 2680.5,
+      "high_52w": 2795.0,
+      "drop_pct": -4.1,
+      "sma_200": 2555.0,
       "below_sma200_streak": 0
     },
     "sp500": {
-      "current": 5150.20,
-      "high_52w": 5300.00,
+      "current": 5150.2,
+      "high_52w": 5300.0,
       "drop_pct": -2.83,
-      "sma_200": 4960.00,
+      "sma_200": 4960.0,
       "below_sma200_streak": 0
     },
     "russell2k": {
       "current": 2010.55,
-      "high_52w": 2185.00,
+      "high_52w": 2185.0,
       "drop_pct": -7.99,
-      "sma_200": 2055.00,
+      "sma_200": 2055.0,
       "below_sma200_streak": 1
     },
     "soxx": {
-      "current": 245.30,
-      "high_52w": 259.50,
+      "current": 245.3,
+      "high_52w": 259.5,
       "drop_pct": -5.47,
-      "sma_200": 232.00,
+      "sma_200": 232.0,
       "below_sma200_streak": 0
     }
   },
@@ -107,7 +107,11 @@
         "published": "2026-04-23T10:00:00Z",
         "url": "https://youtube.com/watch?v=mock_abc123",
         "analyzed_source": "transcript",
-        "analysis": { "warning": 2, "bullish": 4, "net": -2 }
+        "analysis": {
+          "warning": 2,
+          "bullish": 4,
+          "net": -2
+        }
       },
       {
         "video_id": "mock_def456",
@@ -115,13 +119,19 @@
         "published": "2026-04-22T15:30:00Z",
         "url": "https://youtube.com/watch?v=mock_def456",
         "analyzed_source": "transcript",
-        "analysis": { "warning": 3, "bullish": 2, "net": 1 }
+        "analysis": {
+          "warning": 3,
+          "bullish": 2,
+          "net": 1
+        }
       }
     ]
   },
   "recommended_action": "KORU 수익 100% 돌파 · 50% 매도 실행 검토",
   "ytd_returns": {
     "strategy_pct": 21.5,
-    "calc_note": "코어 + 위성 매매 시뮬레이션 기준"
+    "calc_note": "코어 + 위성 매매 시뮬레이션 기준",
+    "my_pct": 18.4,
+    "my_note": "내 보유 평가 (데모)"
   }
 }

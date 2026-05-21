@@ -207,17 +207,29 @@
         <br/>실제 계좌 비중·수익률은 <strong><a href="journal.html" class="text-toss-blue underline">📝 일지 탭</a></strong>의 "내 포지션" / "월별 수익률" 참고.
       </p>
 
-      <!-- 하이라이트: 구덩이 매매법 YTD -->
-      <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-5 mb-5">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
-            <span class="dot bg-toss-purple" style="width:8px;height:8px"></span>
-            구덩이 매매법 (시뮬)
-          </span>
-          <span id="ytd-strategy-badge" class="chip bg-gray-100 text-toss-sub">-</span>
+      <!-- 하이라이트: 구덩이 매매법 (시뮬) vs 내 수익률 나란히 비교 -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-5">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
+              <span class="dot bg-toss-purple" style="width:8px;height:8px"></span>
+              구덩이 매매법 (시뮬)
+            </span>
+            <span id="ytd-strategy-badge" class="chip bg-gray-100 text-toss-sub hidden sm:inline">-</span>
+          </div>
+          <div id="ytd-strategy-value" class="text-3xl md:text-4xl font-extrabold num text-toss-blue">-</div>
+          <div id="ytd-strategy-note" class="text-xs text-toss-sub mt-1">전략 시뮬 (1/1~)</div>
         </div>
-        <div id="ytd-strategy-value" class="text-4xl font-extrabold num text-toss-blue">-</div>
-        <div id="ytd-strategy-note" class="text-xs text-toss-sub mt-1">-</div>
+        <div class="rounded-toss bg-gradient-to-br from-green-50 to-toss-greenL p-5">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
+              <span class="dot bg-toss-green" style="width:8px;height:8px"></span>
+              내 수익률 (실계좌)
+            </span>
+          </div>
+          <div id="ytd-my-value" class="text-3xl md:text-4xl font-extrabold num text-toss-green">-</div>
+          <div id="ytd-my-note" class="text-xs text-toss-sub mt-1">-</div>
+        </div>
       </div>
 
       <!-- 바 비교 -->
@@ -1130,8 +1142,22 @@
           PI.$('ytd-strategy-note').textContent = '전략 수익률은 봇이 백테스트 후 기록합니다';
           PI.$('ytd-strategy-note').classList.remove('hidden');
         } else {
-          PI.$('ytd-strategy-note').textContent = '';
-          PI.$('ytd-strategy-note').classList.add('hidden');
+          PI.$('ytd-strategy-note').textContent = '전략 시뮬 (1/1~)';
+          PI.$('ytd-strategy-note').classList.remove('hidden');
+        }
+
+        // 내 수익률 (실계좌, 일지 무관 — 보유 평가수익률)
+        const myPct  = snapshot?.ytd_returns?.my_pct;
+        const myNote = snapshot?.ytd_returns?.my_note || '내 보유 평가';
+        const myEl = PI.$('ytd-my-value'), myNoteEl = PI.$('ytd-my-note');
+        if (myPct !== undefined && myPct !== null && !isNaN(myPct)) {
+          myEl.textContent = PI.fmtPct(myPct, 2);
+          myEl.className = 'text-3xl md:text-4xl font-extrabold num ' + (myPct >= 0 ? 'text-toss-green' : 'text-toss-red');
+          myNoteEl.textContent = myNote;
+        } else {
+          myEl.textContent = '-';
+          myEl.className = 'text-3xl md:text-4xl font-extrabold num text-toss-sub';
+          myNoteEl.textContent = '포지션 업로드 시 표시';
         }
 
         // 벤치마크 탭 렌더
