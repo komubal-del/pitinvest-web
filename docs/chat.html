@@ -117,7 +117,7 @@
 매도 행동 (v5.1):
 - 각 조건 "첫 트리거" 시 → 위성 −33%p (1/3 step) → **코어 3종(QQQ/SOXX/EWY) 균등 매수**
 - 3개 모두 충족 → 위성 0% (전량 코어로 전환). 사이클 리셋
-- 긴급탈출 (v5.2): 나스닥/S&P/코스피 중 하나라도 200일선 −2% 하회(2거래일 연속) → 위성 즉시 청산 → 코어 균등 매수. 200일선 위로 회복하면 재진입
+- 긴급탈출 (v5.3): 나스닥/S&P/코스피 중 하나라도 200일선 아래 30거래일 연속(레짐 체인지) → 위성 전량 **현금화**(코어 유지). 200일선 위로 회복하면 재진입. ※ 일반 매도신호는 코어로, 긴급탈출은 현금으로 (레짐 체인지 국면엔 코어도 동반 하락)
 - 매도1 sticky: 가격 떨어져도 신호 유지 (이미 익절 완료, 추가 액션 없음)
 - v5.1 근거: 11년 백테 매도→코어 +421.9% vs 매도→현금 +72.6% (+349%p)
 
@@ -201,7 +201,7 @@ ${master.memo ? '메모: ' + master.memo : ''}
 - 위성 +100%: ${chk(s.sell_leverage)} (TQQQ:${fmtN(lev.tqqq_profit_pct)}%, SOXL:${fmtN(lev.soxl_profit_pct)}%, KORU:${fmtN(lev.koru_profit_pct)}%)
 - 주도주 3일↑ (삼전+하닉): ${chk(s.sell_leading)}
 - 전문가 경고 (박병창+윤지호 AND): ${chk(s.sell_expert)} · 개별: ${JSON.stringify(expSt)}
-- 긴급탈출 (200일선 −2% 하회): ${chk(s.emergency_exit_warning)}
+- 긴급탈출 (200일선 아래 30일 연속): ${chk(s.emergency_exit_warning)}
 
 오늘의 봇 추천 액션: ${_snapshot.recommended_action || '-'}`.trim();
     }

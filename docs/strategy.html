@@ -20,7 +20,7 @@
     <!-- ===== Hero ===== -->
     <section class="bg-toss-card rounded-tossLg p-8 shadow-toss animate-fadein">
       <div class="flex items-center gap-2 mb-3 flex-wrap">
-        <span class="chip bg-toss-blueL text-toss-blue">v5.2</span>
+        <span class="chip bg-toss-blueL text-toss-blue">v5.3</span>
         <span class="chip bg-gray-100 text-toss-sub">업데이트 2026-05-21</span>
         <span class="chip bg-toss-purpleL text-toss-purple">매수/매도 1/3 step</span>
         <span class="chip bg-toss-greenL text-toss-green">매도자금 → 코어</span>
@@ -48,11 +48,11 @@
           100% 수익이 도달하면 계단식 익절하고, 다음 공포까지 다시 기다린다.
         </p>
         <p>
-          <strong>긴급 탈출</strong>은 시스템 붕괴 방지용 안전장치다.
-          나스닥·S&amp;P500·코스피 중 <strong>하나라도 200일 이동평균을 −2% 하회(2거래일 연속)</strong>하면
-          <strong>위성(레버리지) 전량 청산</strong>, 코어는 유지한다. 200일선 위로 회복하면 재진입.
-          위성은 이미 fear-buy 시점에 들어갔으니 추가 손실 방어가 핵심.
-          코어는 비레버리지라 회복 가능하므로 청산하지 않는다.
+          <strong>긴급 탈출</strong>은 시스템 붕괴(레짐 체인지) 방지용 안전장치다.
+          나스닥·S&amp;P500·코스피 중 <strong>하나라도 200일 이동평균 아래로 30거래일 연속</strong> 머물면
+          (= 살 만한 딥이 아니라 진짜 베어로 확인되면) <strong>위성(레버리지) 전량 현금화</strong>, 코어는 유지한다.
+          200일선 위로 회복하면 재진입. 짧은 딥(중앙값 3일)·V반등은 무시하고 <strong>지속된 추세 하락만</strong> 잡는다.
+          현금화하는 이유: 레짐 체인지 국면에선 코어(1x)도 동반 하락하므로, 매도자금을 코어로 넣지 않고 현금으로 방어한다.
         </p>
       </div>
     </section>
@@ -283,10 +283,10 @@
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white rounded-toss p-5">
-          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출 (v5.2)</div>
+          <div class="font-bold text-toss-red text-lg mb-2">긴급 탈출 (v5.3)</div>
           <p class="text-sm text-toss-text leading-relaxed">
-            나스닥/S&amp;P/코스피 중 하나라도 <strong>200일선 −2% 하회(2거래일 연속)</strong>시<br />
-            → <strong>위성 전량 매도 → 코어 균등 매수</strong><br />
+            나스닥/S&amp;P/코스피 중 하나라도 <strong>200일선 아래 30거래일 연속</strong>(레짐 체인지)시<br />
+            → <strong>위성 전량 현금화 (코어 유지)</strong><br />
             <span class="text-xs text-toss-sub">200일선 위로 회복하면 재진입</span>
           </p>
         </div>
@@ -306,9 +306,11 @@
         </div>
       </div>
       <div class="mt-4 p-3 bg-white rounded-toss text-xs text-toss-text leading-relaxed" style="word-break: keep-all">
-        💡 <strong>왜 매도자금을 코어로?</strong> 11년 백테스트 결과 (research/sell_to_cash_vs_core.md):
-        매도→현금 +72.6% / MDD −55.5% / Sharpe 0.05 vs 매도→코어 <strong>+421.9% / MDD −47.9% / Sharpe 0.39</strong>.
-        장기 우상향 시장에서 현금 hold = opportunity cost. 코어로 가면 buy-hold 효과 + 위성 사이클 alpha.
+        💡 <strong>매도자금 행선지는 상황에 따라 다르다.</strong>
+        <strong>일반 매도/익절 신호</strong> → 코어 균등 매수 (11년 백테스트: 매도→코어 +421.9%/MDD −47.9% vs 매도→현금 +72.6%/MDD −55.5%.
+        장기 우상향장에선 현금 hold = 기회비용).
+        <strong>긴급탈출(v5.3, 200일선 아래 30일 = 레짐 체인지)</strong> → <strong>현금화</strong>. 진짜 베어 국면엔 코어(1x)도 동반 하락하므로 코어로 넣으면 보호가 사라진다.
+        즉 "회복될 딥의 매도분"은 코어로, "레짐 체인지의 매도분"은 현금으로.
       </div>
     </section>
 
@@ -369,16 +371,26 @@
         <div class="relative">
           <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-green"></div>
           <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <span class="chip bg-toss-greenL text-toss-green">v5.2</span>
+            <span class="chip bg-toss-greenL text-toss-green">v5.3</span>
             <span class="text-xs text-toss-sub">2026-05-21</span>
             <span class="chip bg-toss-greenL text-toss-green">Current</span>
           </div>
           <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
-            <li><strong>긴급탈출 룰 전면 개편: 고정 낙폭 −10% → 200일선 트렌드 필터</strong>. 나스닥/S&amp;P500/코스피 중 하나라도 200일 이동평균을 −2% 하회(2거래일 연속)하면 위성 청산, 200일선 회복 시 재진입</li>
-            <li><strong>배경</strong>: 기존 단일지수 −10% 룰은 코스피 단독 급락(미국 정상) 같은 일시적 휩쏘에 오발동. 2026-05 코스피 −10%→다음날 +8% V반등 사건에서 바닥 청산 손실 발생</li>
-            <li><strong>문헌 근거</strong>: Kaminski &amp; Lo(2014) — 손절은 손실이 추세적일 때만 가치, 평균회귀 구간엔 손해 / Faber(2007) — 200일선 트렌드 필터로 MDD 대폭 축소 / LETF+200일선 연구 — 변동성 붕괴까지 회피</li>
-            <li><strong>백테스트</strong>: NASDAQ 3x 2010~2026 — 현재(−10%) CAGR 15.6%/MDD −64% vs 200일선+2% <strong>CAGR 30.4%/Sharpe 0.82/MDD −56%</strong> (수익·샤프·MDD 모두 우위). S&amp;P 56년 휩쏘율: −10% 룰 59% vs 200일선 50%</li>
-            <li>홈 대시보드 "긴급탈출 트렌드 필터" 카드 신설 — 각 지수의 200일선 대비 위치 실시간 팔로업</li>
+            <li><strong>긴급탈출 = 레짐 필터(지속성) + 현금화</strong>. 나스닥/S&amp;P500/코스피 중 하나라도 <strong>200일선 아래 30거래일 연속</strong> 머물면 위성 전량 <strong>현금화(코어 유지)</strong>, 200일선 회복 시 재진입</li>
+            <li><strong>왜 지속성(30일)인가</strong>: 트렌드 필터(−2%)는 공포 딥에 발동해 역발상 매수 원칙과 충돌(2026-03 사례). S&amp;P 56년 분석상 "살 만한 딥"은 200일선 아래 중앙값 3일·2026년 13일인 반면, 진짜 베어(2008·2000·1973·2022·1987)는 전부 100일+ 지속 → 30일 기준이 둘을 정확히 가름</li>
+            <li><strong>왜 현금화인가</strong>: 레짐 체인지 국면에선 코어(1x)도 동반 하락. 매도자금을 코어로 넣으면 보호 효과 소멸 → 현금이 트리거 의미와 일관 (단, 일반 매도신호 자금은 기존대로 코어 매수)</li>
+            <li><strong>백테스트(탈출=현금 기준)</strong>: S&amp;P 1x 1990~2026 지속성30일 <strong>CAGR 8.8%/Sharpe 0.65/MDD −33.9%</strong> (BuyHold 8.7%/0.55/−56.8% 대비 보호 우위). 거시 금리/역전 신호는 비통화 충격(코로나) 못 잡고 구현 민감 → 미채택</li>
+            <li>홈 대시보드 카드 → "긴급탈출 레짐 필터": 각 지수 200일선 아래 연속일수 / 30일 팔로업</li>
+          </ul>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-toss-sub"></div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="chip bg-gray-100 text-toss-sub">v5.2</span>
+            <span class="text-xs text-toss-sub">2026-05-21</span>
+          </div>
+          <ul class="text-sm text-toss-text space-y-1 list-disc pl-4">
+            <li>긴급탈출: 고정 낙폭 −10% → 200일선 트렌드 필터(−2%/2일). v5.3에서 지속성 30일 + 현금화로 개선</li>
           </ul>
         </div>
         <div class="relative">
