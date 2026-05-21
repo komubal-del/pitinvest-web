@@ -32,27 +32,37 @@
     "nasdaq": {
       "current": 17850.32,
       "high_52w": 18400.10,
-      "drop_pct": -2.99
+      "drop_pct": -2.99,
+      "sma_200": 16850.00,
+      "below_sma200_streak": 0
     },
     "kospi": {
       "current": 2680.50,
       "high_52w": 2795.00,
-      "drop_pct": -4.10
+      "drop_pct": -4.10,
+      "sma_200": 2555.00,
+      "below_sma200_streak": 0
     },
     "sp500": {
       "current": 5150.20,
       "high_52w": 5300.00,
-      "drop_pct": -2.83
+      "drop_pct": -2.83,
+      "sma_200": 4960.00,
+      "below_sma200_streak": 0
     },
     "russell2k": {
       "current": 2010.55,
       "high_52w": 2185.00,
-      "drop_pct": -7.99
+      "drop_pct": -7.99,
+      "sma_200": 2055.00,
+      "below_sma200_streak": 1
     },
     "soxx": {
       "current": 245.30,
       "high_52w": 259.50,
-      "drop_pct": -5.47
+      "drop_pct": -5.47,
+      "sma_200": 232.00,
+      "below_sma200_streak": 0
     }
   },
   "sector_rs": {

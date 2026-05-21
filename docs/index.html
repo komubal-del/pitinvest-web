@@ -41,30 +41,34 @@
       </div>
     </section>
 
-    <!-- ===== 긴급탈출 게이지 ===== -->
+    <!-- ===== 긴급탈출 트렌드 필터 (200일선) ===== -->
     <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold">긴급탈출 임박도</h2>
-        <span class="text-xs text-toss-sub hidden sm:inline">52주 신고가 대비 −10% 도달시 위성 청산 (코어 유지)</span>
+      <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+        <h2 class="text-lg font-bold">긴급탈출 트렌드 필터 <span class="text-toss-sub font-semibold text-sm">200일선</span></h2>
+        <span id="em-status" class="chip bg-gray-100 text-toss-sub">-</span>
       </div>
+      <p class="text-xs text-toss-sub mb-4" style="word-break: keep-all">
+        코스피·S&amp;P500·나스닥 중 <strong>하나라도 200일선을 −2% 하회(2거래일 연속)</strong>하면 위성 전량 청산 → 코어 매수.
+        200일선 위로 회복하면 재진입. (값 = 현재가의 200일선 대비 위치)
+      </p>
       <div class="space-y-4">
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">나스닥</span>
+            <span class="text-sm font-semibold text-toss-text">나스닥 <span id="em-nasdaq-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
             <span class="text-sm font-bold num" id="em-nasdaq">-</span>
           </div>
           <div class="gauge"><div id="em-nasdaq-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">S&amp;P 500</span>
+            <span class="text-sm font-semibold text-toss-text">S&amp;P 500 <span id="em-sp500-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
             <span class="text-sm font-bold num" id="em-sp500">-</span>
           </div>
           <div class="gauge"><div id="em-sp500-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">코스피</span>
+            <span class="text-sm font-semibold text-toss-text">코스피 <span id="em-kospi-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
             <span class="text-sm font-bold num" id="em-kospi">-</span>
           </div>
           <div class="gauge"><div id="em-kospi-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
@@ -515,23 +519,44 @@
       PI.$('hero-action').textContent = snapshot?.recommended_action || '데이터 수집 중';
     }
 
-    function renderEmergency(nasdaqDrop, sp500Drop, kospiDrop) {
-      const draw = (dropPct, elId, barId) => {
-        const el = PI.$(elId);
-        const bar = PI.$(barId);
-        if (dropPct === null || dropPct === undefined) {
-          el.textContent = '-'; bar.style.width = '0%';
+    // v5.2: 긴급탈출 = 200일선 트렌드 필터. 각 지수의 현재가 vs 200일선(sma_200) 위치를 표시.
+    // 트리거: 현재가 < 200일선 × (1 − 2%) → 발동(red). 0~−2% 사이 → 임박(yellow). 그 외 → 안전(green).
+    const EM_BUFFER = 2;   // 200일선 하회 버퍼(%)
+    function renderEmergency(indices) {
+      let firedCount = 0, hasData = false;
+      const draw = (idx, elId, barId, subId) => {
+        const el = PI.$(elId), bar = PI.$(barId), sub = PI.$(subId);
+        const cur = idx && idx.current, sma = idx && idx.sma_200;
+        if (cur == null || sma == null) {
+          el.textContent = '-'; bar.style.width = '0%'; sub.textContent = '';
           return;
         }
-        const abs = Math.abs(dropPct);
-        const fillPct = Math.min(100, (abs / 10) * 100);
-        el.textContent = PI.fmtPct(dropPct);
+        hasData = true;
+        const vsPct = (cur / sma - 1) * 100;     // 200일선 대비 (+위 / −아래)
+        const fired = vsPct <= -EM_BUFFER;        // 발동
+        const near  = vsPct <= 0 && !fired;       // 200일선~−2% 사이(임박)
+        if (fired) firedCount++;
+        // 게이지: +20%(여유) → 0% 채움, −2%(발동선) → 100% 채움
+        const fillPct = Math.max(0, Math.min(100, (20 - vsPct) / 22 * 100));
+        el.textContent = (vsPct > 0 ? '+' : '') + vsPct.toFixed(1) + '%';
+        el.className = 'text-sm font-bold num ' + (fired ? 'text-toss-red' : near ? 'text-toss-yellow' : 'text-toss-green');
         bar.style.width = fillPct + '%';
-        bar.className = 'gauge-fill ' + (abs >= 10 ? 'bg-toss-red' : abs >= 7 ? 'bg-toss-yellow' : 'bg-toss-green');
+        bar.className = 'gauge-fill ' + (fired ? 'bg-toss-red' : near ? 'bg-toss-yellow' : 'bg-toss-green');
+        sub.textContent = '· 200일선 ' + PI.fmt(sma, 0);
       };
-      draw(nasdaqDrop, 'em-nasdaq', 'em-nasdaq-bar');
-      draw(sp500Drop,  'em-sp500',  'em-sp500-bar');
-      draw(kospiDrop,  'em-kospi',  'em-kospi-bar');
+      const ix = indices || {};
+      draw(ix.nasdaq, 'em-nasdaq', 'em-nasdaq-bar', 'em-nasdaq-sub');
+      draw(ix.sp500,  'em-sp500',  'em-sp500-bar',  'em-sp500-sub');
+      draw(ix.kospi,  'em-kospi',  'em-kospi-bar',  'em-kospi-sub');
+      // 상단 상태 chip
+      const chip = PI.$('em-status');
+      if (!hasData) {
+        chip.textContent = '데이터 대기'; chip.className = 'chip bg-gray-100 text-toss-sub';
+      } else if (firedCount > 0) {
+        chip.textContent = `🚨 긴급탈출 발동 (${firedCount}개 지수)`; chip.className = 'chip bg-toss-redL text-toss-red';
+      } else {
+        chip.textContent = '✅ 안전 (전 지수 200일선 위)'; chip.className = 'chip bg-toss-greenL text-toss-green';
+      }
     }
 
     // v5.1: 발동일 + 오늘 상태 chip 표시 — 'YYYY-MM-DD' → 'M/D' 단축
@@ -1603,11 +1628,7 @@
 
       renderHero(stage, snapshot);
       renderSell1Marker(master);
-      renderEmergency(
-        snapshot?.indices?.nasdaq?.drop_pct,
-        snapshot?.indices?.sp500?.drop_pct,
-        snapshot?.indices?.kospi?.drop_pct
-      );
+      renderEmergency(snapshot?.indices);
       renderConditions(snapshot);
       renderSellConditions(snapshot, exit);
       _lastLeadingDetail = (snapshot && snapshot.sell_signals && snapshot.sell_signals.leading_detail) || null;
