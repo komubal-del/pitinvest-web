@@ -47,31 +47,32 @@
         <h2 class="text-lg font-bold">긴급탈출 레짐 필터 <span class="text-toss-sub font-semibold text-sm">200일선 지속</span></h2>
         <span id="em-status" class="chip bg-gray-100 text-toss-sub">-</span>
       </div>
-      <p class="text-xs text-toss-sub mb-4" style="word-break: keep-all">
+      <p class="text-xs text-toss-sub mb-3" style="word-break: keep-all">
         코스피·S&amp;P500·나스닥 중 <strong>하나라도 200일선 아래로 30거래일 연속</strong> 머물면(=레짐 체인지 확인)
-        위성 전량 <strong>현금화</strong>, 코어는 유지. 200일선 위로 회복하면 재진입. (값 = 200일선 아래 연속일수 / 30)
+        위성 전량 <strong>현금화</strong>, 코어는 유지. 200일선 위로 회복하면 재진입.
+        <span class="text-toss-sub">(차트: <span class="text-toss-text font-semibold">종가</span> vs <span class="text-toss-sub">200일선</span> · 숫자 = 200일선 아래 연속일수)</span>
       </p>
-      <div class="space-y-4">
+      <div class="grid grid-cols-3 gap-2">
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">나스닥 <span id="em-nasdaq-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
-            <span class="text-sm font-bold num" id="em-nasdaq">-</span>
+          <div class="text-sm font-semibold text-toss-text mb-1 text-center">나스닥</div>
+          <div class="relative rounded-toss bg-toss-bg overflow-hidden" style="height:104px">
+            <span id="em-nasdaq-days" class="absolute top-1.5 left-2 z-10 text-xs font-bold num">-</span>
+            <canvas id="em-nasdaq-chart"></canvas>
           </div>
-          <div class="gauge"><div id="em-nasdaq-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">S&amp;P 500 <span id="em-sp500-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
-            <span class="text-sm font-bold num" id="em-sp500">-</span>
+          <div class="text-sm font-semibold text-toss-text mb-1 text-center">S&amp;P 500</div>
+          <div class="relative rounded-toss bg-toss-bg overflow-hidden" style="height:104px">
+            <span id="em-sp500-days" class="absolute top-1.5 left-2 z-10 text-xs font-bold num">-</span>
+            <canvas id="em-sp500-chart"></canvas>
           </div>
-          <div class="gauge"><div id="em-sp500-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-sm font-semibold text-toss-text">코스피 <span id="em-kospi-sub" class="text-xs text-toss-sub font-normal num">-</span></span>
-            <span class="text-sm font-bold num" id="em-kospi">-</span>
+          <div class="text-sm font-semibold text-toss-text mb-1 text-center">코스피</div>
+          <div class="relative rounded-toss bg-toss-bg overflow-hidden" style="height:104px">
+            <span id="em-kospi-days" class="absolute top-1.5 left-2 z-10 text-xs font-bold num">-</span>
+            <canvas id="em-kospi-chart"></canvas>
           </div>
-          <div class="gauge"><div id="em-kospi-bar" class="gauge-fill bg-toss-green" style="width:0%"></div></div>
         </div>
       </div>
     </section>
@@ -531,38 +532,85 @@
       PI.$('hero-action').textContent = snapshot?.recommended_action || '데이터 수집 중';
     }
 
-    // v5.3: 긴급탈출 = 레짐 필터. 각 지수가 200일선 아래로 머문 '연속 거래일수' 를 30일 기준으로 표시.
-    // 30일 도달 → 발동(현금화). 1~29일 → 경계(yellow). 0일(200일선 위) → 정상(green).
-    const EM_TRIGGER_DAYS = 30;   // 200일선 아래 연속일수 발동선
-    function renderEmergency(indices) {
+    // v5.3: 긴급탈출 = 레짐 필터. 지수별 미니차트(종가 vs 200일선) + 200일선 아래 연속일수 표시.
+    // 30일 도달 → 발동(red). 1~29일 → 경계(orange). 0일(200일선 위) → 정상(green).
+    const EM_TRIGGER_DAYS = 30;
+
+    // CSV close 시리즈로 sma200 폴백 계산 (CSV에 sma200 컬럼 없을 때)
+    function _smaFallback(closes, win) {
+      const out = []; const q = []; let s = 0;
+      for (const v of closes) {
+        if (v == null || isNaN(v)) { out.push(null); continue; }
+        q.push(v); s += v;
+        if (q.length > win) s -= q.shift();
+        out.push(q.length >= 20 ? s / q.length : null);
+      }
+      return out;
+    }
+
+    // 지수 미니차트: 최근 N거래일 종가(컬러) + 200일선(회색 점선)
+    function drawRegimeChart(canvasId, rows, key, fired, warn) {
+      const cv = PI.$(canvasId);
+      if (!cv || !window.Chart) return;
+      const recent = (rows || []).filter(r => {
+        const c = parseFloat(r[`${key}_close`]); return r[`${key}_close`] && !isNaN(c);
+      }).slice(-120);
+      if (recent.length < 2) return;
+      const labels = recent.map(r => r.date);
+      const closes = recent.map(r => parseFloat(r[`${key}_close`]));
+      let smas = recent.map(r => { const v = parseFloat(r[`${key}_sma200`]); return isNaN(v) ? null : v; });
+      if (smas.every(v => v == null)) smas = _smaFallback(closes, 200);
+      const lineColor = fired ? '#F04452' : warn ? '#FF9500' : '#15C472';
+      if (!window._emCharts) window._emCharts = {};
+      if (window._emCharts[canvasId]) window._emCharts[canvasId].destroy();
+      window._emCharts[canvasId] = new Chart(cv.getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets: [
+          { data: closes, borderColor: lineColor, borderWidth: 1.6, pointRadius: 0, tension: 0.15, fill: false },
+          { data: smas,   borderColor: '#C2C8CE', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, tension: 0.15, fill: false },
+        ] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } },
+          layout: { padding: { top: 20, bottom: 2, left: 2, right: 2 } },
+        },
+      });
+    }
+
+    async function renderEmergency(indices) {
+      const ix = indices || {};
+      let rows = [];
+      try { rows = PI.parseCSV(await PI.fetchText(PI.URLS.history)); } catch (e) { /* prod/local 모두 graceful */ }
       let firedCount = 0, warnCount = 0, hasData = false;
-      const draw = (idx, elId, barId, subId) => {
-        const el = PI.$(elId), bar = PI.$(barId), sub = PI.$(subId);
-        const cur = idx && idx.current, sma = idx && idx.sma_200;
-        if (cur == null || sma == null) {
-          el.textContent = '-'; bar.style.width = '0%'; sub.textContent = '';
-          return;
-        }
-        hasData = true;
+      const cfg = [
+        ['nasdaq', 'em-nasdaq-days', 'em-nasdaq-chart'],
+        ['sp500',  'em-sp500-days',  'em-sp500-chart'],
+        ['kospi',  'em-kospi-days',  'em-kospi-chart'],
+      ];
+      for (const [key, daysId, canvasId] of cfg) {
+        const idx = ix[key] || {};
+        const cur = idx.current, sma = idx.sma_200;
+        const known = (cur != null && sma != null);
         const streak = (idx.below_sma200_streak != null) ? idx.below_sma200_streak : 0;
-        const above = cur >= sma;
+        const above = known ? (cur >= sma) : true;
         const fired = streak >= EM_TRIGGER_DAYS;
         const warn  = streak > 0 && !fired;
+        if (known) hasData = true;
         if (fired) firedCount++; else if (warn) warnCount++;
-        const fillPct = Math.max(0, Math.min(100, streak / EM_TRIGGER_DAYS * 100));
-        el.textContent = above ? '0일' : `${streak}일`;
-        el.className = 'text-sm font-bold num ' + (fired ? 'text-toss-red' : warn ? 'text-toss-yellow' : 'text-toss-green');
-        bar.style.width = fillPct + '%';
-        bar.className = 'gauge-fill ' + (fired ? 'bg-toss-red' : warn ? 'bg-toss-yellow' : 'bg-toss-green');
-        // 200일선 대비 위치도 보조로 표기
-        const vsPct = (cur / sma - 1) * 100;
-        sub.textContent = `· 200일선 ${vsPct >= 0 ? '+' : ''}${vsPct.toFixed(1)}% (${PI.fmt(sma, 0)})`;
-      };
-      const ix = indices || {};
-      draw(ix.nasdaq, 'em-nasdaq', 'em-nasdaq-bar', 'em-nasdaq-sub');
-      draw(ix.sp500,  'em-sp500',  'em-sp500-bar',  'em-sp500-sub');
-      draw(ix.kospi,  'em-kospi',  'em-kospi-bar',  'em-kospi-sub');
-      // 상단 상태 chip
+        const dEl = PI.$(daysId);
+        const base = 'absolute top-1.5 left-2 z-10 text-xs font-bold num ';
+        if (!known) {
+          dEl.textContent = '-'; dEl.className = base + 'text-toss-sub';
+        } else if (above) {
+          dEl.textContent = `200일선 위 +${((cur / sma - 1) * 100).toFixed(0)}%`;
+          dEl.className = base + 'text-toss-green';
+        } else {
+          dEl.textContent = `${streak}일째 아래`;
+          dEl.className = base + (fired ? 'text-toss-red' : 'text-toss-yellow');
+        }
+        drawRegimeChart(canvasId, rows, key, fired, warn);
+      }
       const chip = PI.$('em-status');
       if (!hasData) {
         chip.textContent = '데이터 대기'; chip.className = 'chip bg-gray-100 text-toss-sub';
@@ -593,16 +641,22 @@
       // sticky=true (sig[field])이고 today=false이면 chip은 sticky 색상 유지 + 옅은 표시
       const today = sig.today || {};
       const ff    = sig.first_fired || {};
+      const lf    = sig.last_fired || {};   // 사이클 리셋돼도 유지되는 '최근 충족일' (표시 전용)
 
       const render = (stickyField, todayField, ffKey, chipEl, valueEl, valueText) => {
         const sticky = !!sig[stickyField];
         const isToday = !!today[stickyField === 'cnn_under_10' ? 'cnn_under_10' : todayField];
-        const fireDate = ff[ffKey];
+        const fireDate = ff[ffKey] || lf[ffKey];
+        const lastDate = lf[ffKey];
         const el = PI.$(chipEl);
         if (sticky) {
           el.textContent = fireDate ? `충족 (${_ffShort(fireDate)})` : '충족 ✓';
           // sticky이면 빨강. 오늘 꺼졌으면 옅은 색 (light)
           el.className = 'chip ' + (isToday ? 'bg-toss-redL text-toss-red' : 'bg-toss-redL text-toss-red opacity-60');
+        } else if (lastDate) {
+          // 현재 미충족(카운트 0)이지만 과거 충족 기록 있음 → 최근 충족일을 옅게 표시
+          el.textContent = `최근 ${_ffShort(lastDate)}`;
+          el.className = 'chip bg-gray-100 text-toss-sub';
         } else {
           el.textContent = '미충족';
           el.className = 'chip bg-gray-100 text-toss-sub';
