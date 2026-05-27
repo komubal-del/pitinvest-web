@@ -42,7 +42,7 @@
     </section>
 
     <!-- ===== 긴급탈출 레짐 필터 (200일선 지속) ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
         <h2 class="text-lg font-bold">긴급탈출 레짐 필터 <span class="text-toss-sub font-semibold text-sm">200일선 지속</span></h2>
         <span id="em-status" class="chip bg-gray-100 text-toss-sub">-</span>
@@ -78,7 +78,7 @@
     </section>
 
     <!-- ===== 매수 3조건 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">매수 3대 조건</h2>
         <span id="cond-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
@@ -130,7 +130,7 @@
     </section>
 
     <!-- ===== 매도 3조건 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">매도 3대 조건</h2>
         <span id="sell-count" class="chip bg-gray-100 text-toss-sub">충족 0 / 3</span>
@@ -195,7 +195,7 @@
     </section>
 
     <!-- ===== 올해 수익률 비교 (YTD 백테스트) ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-lg font-bold">올해 수익률 비교</h2>
@@ -209,8 +209,9 @@
       </p>
 
       <!-- 하이라이트: 구덩이 매매법 (시뮬) vs 내 수익률 나란히 비교 -->
-      <div class="grid grid-cols-2 gap-3 mb-5">
-        <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-5">
+      <!-- 모바일(sm 미만): 세로 1-col + 폰트 2xl. sm 이상: 2-col + 3xl. md 이상: 4xl. -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+        <div class="rounded-toss bg-gradient-to-br from-toss-blueL to-purple-50 p-4 sm:p-5">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
               <span class="dot bg-toss-purple" style="width:8px;height:8px"></span>
@@ -218,17 +219,17 @@
             </span>
             <span id="ytd-strategy-badge" class="chip bg-gray-100 text-toss-sub hidden sm:inline">-</span>
           </div>
-          <div id="ytd-strategy-value" class="text-3xl md:text-4xl font-extrabold num text-toss-blue">-</div>
+          <div id="ytd-strategy-value" class="text-2xl sm:text-3xl md:text-4xl font-extrabold num text-toss-blue break-all">-</div>
           <div id="ytd-strategy-note" class="text-xs text-toss-sub mt-1">전략 시뮬 (1/1~)</div>
         </div>
-        <div class="rounded-toss bg-gradient-to-br from-green-50 to-toss-greenL p-5">
+        <div class="rounded-toss bg-gradient-to-br from-green-50 to-toss-greenL p-4 sm:p-5">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-sm font-semibold text-toss-text flex items-center gap-1.5">
               <span class="dot bg-toss-green" style="width:8px;height:8px"></span>
               내 수익률 (실계좌)
             </span>
           </div>
-          <div id="ytd-my-value" class="text-3xl md:text-4xl font-extrabold num text-toss-green">-</div>
+          <div id="ytd-my-value" class="text-2xl sm:text-3xl md:text-4xl font-extrabold num text-toss-green break-all">-</div>
           <div id="ytd-my-note" class="text-xs text-toss-sub mt-1">-</div>
         </div>
       </div>
@@ -293,7 +294,7 @@
     </section>
 
     <!-- ===== 지수 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">주요 지수</h2>
         <span class="text-xs text-toss-sub hidden sm:inline">현재가 · 52주 신고가 · 낙폭</span>
@@ -304,7 +305,7 @@
     </section>
 
     <!-- ===== 변동성 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">변동성 지표</h2>
         <span class="text-xs text-toss-sub hidden sm:inline">시장 공포 심화 체크</span>
@@ -315,7 +316,7 @@
     </section>
 
     <!-- ===== 심리 상세 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">심리 상세</h2>
         <span class="text-xs text-toss-sub hidden sm:inline">CNN 구성요소 + 보조지표</span>
@@ -391,7 +392,7 @@
     </section>
 
     <!-- ===== 국내 수급 ===== -->
-    <section class="bg-toss-card rounded-tossLg p-6 shadow-toss">
+    <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 class="text-lg font-bold">국내 수급</h2>
         <span class="text-xs text-toss-sub hidden sm:inline">한국 주식시장 자금 흐름</span>
@@ -447,14 +448,14 @@
   <!-- ===== 전문가 분석 상세 모달 ===== -->
   <div id="expert-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeExpertModal(event)">
     <div class="bg-toss-card rounded-tossLg max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-toss animate-fadein" onclick="event.stopPropagation()">
-      <div class="p-6 border-b border-toss-border sticky top-0 bg-toss-card flex items-center justify-between">
+      <div class="p-4 sm:p-6 border-b border-toss-border sticky top-0 bg-toss-card flex items-center justify-between">
         <div>
           <h2 class="text-xl font-bold">🎙️ 전문가 분석</h2>
           <div id="expert-modal-date" class="text-xs text-toss-sub mt-1">-</div>
         </div>
         <button onclick="closeExpertModal()" class="text-toss-sub hover:text-toss-dark text-2xl leading-none px-2">×</button>
       </div>
-      <div class="p-6">
+      <div class="p-4 sm:p-6">
         <div id="expert-modal-empty" class="hidden text-center py-10 text-toss-sub text-sm px-4" style="word-break: keep-all;">
           아직 분석된 영상이 없어요
         </div>
@@ -1207,11 +1208,11 @@
         const myEl = PI.$('ytd-my-value'), myNoteEl = PI.$('ytd-my-note');
         if (myPct !== undefined && myPct !== null && !isNaN(myPct)) {
           myEl.textContent = PI.fmtPct(myPct, 2);
-          myEl.className = 'text-3xl md:text-4xl font-extrabold num ' + (myPct >= 0 ? 'text-toss-green' : 'text-toss-red');
+          myEl.className = 'text-2xl sm:text-3xl md:text-4xl font-extrabold num break-all ' + (myPct >= 0 ? 'text-toss-green' : 'text-toss-red');
           myNoteEl.textContent = myNote;
         } else {
           myEl.textContent = '-';
-          myEl.className = 'text-3xl md:text-4xl font-extrabold num text-toss-sub';
+          myEl.className = 'text-2xl sm:text-3xl md:text-4xl font-extrabold num break-all text-toss-sub';
           myNoteEl.textContent = '포지션 업로드 시 표시';
         }
 
@@ -1287,7 +1288,7 @@
       if (sRet !== undefined && sRet !== null && !isNaN(sRet)) {
         const el = PI.$('ytd-strategy-value');
         el.textContent = PI.fmtPct(sRet, 2);
-        el.className = 'text-4xl font-extrabold num ' + (sRet >= 0 ? 'text-toss-blue' : 'text-toss-red');
+        el.className = 'text-2xl sm:text-3xl md:text-4xl font-extrabold num break-all ' + (sRet >= 0 ? 'text-toss-blue' : 'text-toss-red');
 
         const badge = PI.$('ytd-strategy-badge');
         const benchSpecs = selectedSpecs.filter(s => !s.isStrategy);
