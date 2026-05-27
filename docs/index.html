@@ -1030,8 +1030,9 @@
         // "새 사이클 첫 신호" 인지 구분이 모호해서, 다음 row에서 reset.
         if (i > 0) {
           const prev_ssc = parseFloat(rows[i-1].sell_signal_count);
-          const prev_sat = parseFloat(rows[i-1].ratio_sat);
-          const cycle_ended = (prev_ssc === 3) || (!isNaN(prev_sat) && prev_sat === 0);
+          // 누적수익률은 순수 룰 시뮬 기준 — 사용자 실거래/일지(ratio_sat) 반영 X.
+          // 매도 3종 sticky 완성(ssc==3)만 사이클 경계로 인정.
+          const cycle_ended = (prev_ssc === 3);
           if (cycle_ended) {
             buySlots = { cnn: false, vix: false, margin: false };
             sellSlots = { lev: false, lead: false, expert: false };
