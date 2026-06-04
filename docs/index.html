@@ -1022,9 +1022,12 @@
       let events = [];  // 이론 평단 계산용 (JS 시뮬레이션)
       let cumAmount = 0;
       let simSellLevFired = false;
+      // 직전 row에서 raw로 켜져 있던 매도 신호 — 사이클 경계 연속 신호 dedupe용
+      let prevSellRaw = { lev: false, lead: false, expert: false };
       const _n = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
 
       rows.forEach((r, i) => {
+        let justReset = false;  // 이 row 진입 시 사이클 리셋이 일어났는가
         // 사이클 리셋 감지 — 직전 row에서 cycle이 끝났으면(=auto_reset 발동) 오늘부터 새 사이클로
         // 신호: 직전 row의 sell_signal_count == 3 OR ratio_sat == 0
         // 같은 row에서 reset하면 그 row의 trigger들이 "이전 사이클 마지막 신호" 인지
@@ -1037,6 +1040,7 @@
           // 일지(ratio_sat) 는 참조 X — 누적수익률은 순수 룰 시뮬 기준.
           const sellAllFilledPrev = sellSlots.lev && sellSlots.lead && sellSlots.expert;
           if (sellAllFilledPrev) {
+            justReset = true;
             buySlots = { cnn: false, vix: false, margin: false };
             sellSlots = { lev: false, lead: false, expert: false };
             buyAllFiredThisCycle = false;
@@ -1093,23 +1097,25 @@
           }
           if (simSellLev) simSellLevFired = true;
         }
-        if ((csvSellLev || simSellLev) && !sellSlots.lev) {
+        const curSellLev = csvSellLev || simSellLev;
+        if (curSellLev && !sellSlots.lev) {
           sellSlots.lev = true;
-          markers.sellLev.add(i);
+          // 리셋 직후 row에서 직전과 동일하게 연속된 신호면 띠 중복 → 마커 생략
+          if (!(justReset && prevSellRaw.lev)) markers.sellLev.add(i);
         }
 
         // ----- 매도2: 주도주 (CSV 컬럼) -----
         const csvSellLead = parseInt(r.sell_leading_trigger) === 1;
         if (csvSellLead && !sellSlots.lead) {
           sellSlots.lead = true;
-          markers.sellLead.add(i);
+          if (!(justReset && prevSellRaw.lead)) markers.sellLead.add(i);
         }
 
         // ----- 매도3: 전문가 경고 (CSV 컬럼) -----
         const csvSellExpert = parseInt(r.sell_expert_trigger) === 1;
         if (csvSellExpert && !sellSlots.expert) {
           sellSlots.expert = true;
-          markers.sellExpert.add(i);
+          if (!(justReset && prevSellRaw.expert)) markers.sellExpert.add(i);
         }
 
         // 매도 3종 sticky 슬롯이 모두 채워진 시점 = "자동 리셋" 완성일 (한 사이클에 1회)
@@ -1117,6 +1123,9 @@
           markers.tripleSell.add(i);
           sellAllFiredThisCycle = true;
         }
+
+        // 다음 row의 사이클 경계 dedupe 판정용 — 이 row의 raw 매도 신호 상태 기록
+        prevSellRaw = { lev: curSellLev, lead: csvSellLead, expert: csvSellExpert };
       });
 
       return markers;
