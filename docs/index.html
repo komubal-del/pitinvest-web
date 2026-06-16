@@ -41,16 +41,16 @@
       </div>
     </section>
 
-    <!-- ===== 긴급탈출 레짐 필터 (200일선 지속) ===== -->
+    <!-- ===== 50일선 이격도 (지수 과열도) ===== -->
     <section class="bg-toss-card rounded-tossLg p-4 sm:p-6 shadow-toss">
       <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h2 class="text-lg font-bold">긴급탈출 레짐 필터 <span class="text-toss-sub font-semibold text-sm">200일선 지속</span></h2>
+        <h2 class="text-lg font-bold">지수 과열도 <span class="text-toss-sub font-semibold text-sm">50일선 위 얼마나</span></h2>
         <span id="em-status" class="chip bg-gray-100 text-toss-sub">-</span>
       </div>
       <p class="text-xs text-toss-sub mb-3" style="word-break: keep-all">
-        코스피·S&amp;P500·나스닥 중 <strong>하나라도 200일선 아래로 30거래일 연속</strong> 머물면(=레짐 체인지 확인)
-        위성 전량 <strong>현금화</strong>, 코어는 유지. 200일선 위로 회복하면 재진입.
-        <span class="text-toss-sub">(차트: <span class="text-toss-text font-semibold">종가</span> vs <span class="text-toss-sub">200일선</span> · 숫자 = 200일선 아래 연속일수)</span>
+        코스피·S&amp;P500·나스닥의 <strong>50일선 이격도</strong>(=종가가 50일 이동평균보다 몇 % 위/아래에 있는지)를 본다.
+        이격이 크게 <strong>플러스</strong>면 단기 과열, <strong>마이너스</strong>면 단기 조정 구간.
+        <span class="text-toss-sub">(차트: <span class="text-toss-text font-semibold">종가</span> vs <span class="text-toss-sub">50일선</span> · 숫자 = 50일선 대비 이격도)</span>
       </p>
       <div class="grid grid-cols-3 gap-2">
         <div>
@@ -533,41 +533,44 @@
       PI.$('hero-action').textContent = snapshot?.recommended_action || '데이터 수집 중';
     }
 
-    // v5.3: 긴급탈출 = 레짐 필터. 지수별 미니차트(종가 vs 200일선) + 200일선 아래 연속일수 표시.
-    // 30일 도달 → 발동(red). 1~29일 → 경계(orange). 0일(200일선 위) → 정상(green).
-    const EM_TRIGGER_DAYS = 30;
+    // 50일선 이격도(과열도): 지수별 미니차트(종가 vs 50일선) + 50일선 대비 이격도(%) 표시.
+    // 종가가 50일 이동평균 대비 몇 % 위/아래에 있는지를 본다. (봇 스냅샷 의존 없이 CSV 종가로 SMA50 계산)
+    const EM_SMA_WIN = 50;
 
-    // CSV close 시리즈로 sma200 폴백 계산 (CSV에 sma200 컬럼 없을 때)
-    function _smaFallback(closes, win) {
+    // CSV close 시리즈로 SMA 계산 (전 구간을 win 윈도우로 이동평균)
+    function _smaSeries(closes, win) {
       const out = []; const q = []; let s = 0;
       for (const v of closes) {
         if (v == null || isNaN(v)) { out.push(null); continue; }
         q.push(v); s += v;
         if (q.length > win) s -= q.shift();
-        out.push(q.length >= 20 ? s / q.length : null);
+        out.push(q.length >= win ? s / win : null);
       }
       return out;
     }
 
-    // 지수 미니차트: 최근 N거래일 종가(컬러) + 200일선(회색 점선)
-    function drawRegimeChart(canvasId, rows, key, fired, warn) {
+    // 지수 미니차트: 최근 N거래일 종가(컬러) + 50일선(회색 점선)
+    // SMA50을 제대로 그리려면 표시 구간 앞 49거래일이 더 필요 → 전 구간에서 SMA 계산 후 최근 N일만 표시.
+    function drawDeviationChart(canvasId, rows, key) {
       const cv = PI.$(canvasId);
       if (!cv || !window.Chart) return;
-      const recent = (rows || []).filter(r => {
+      const all = (rows || []).filter(r => {
         const c = parseFloat(r[`${key}_close`]); return r[`${key}_close`] && !isNaN(c);
-      }).slice(-120);
-      if (recent.length < 2) return;
+      });
+      if (all.length < 2) return;
+      const allCloses = all.map(r => parseFloat(r[`${key}_close`]));
+      const allSmas = _smaSeries(allCloses, EM_SMA_WIN);
+      const SHOW = 120;
+      const recent = all.slice(-SHOW);
       const labels = recent.map(r => r.date);
-      const closes = recent.map(r => parseFloat(r[`${key}_close`]));
-      let smas = recent.map(r => { const v = parseFloat(r[`${key}_sma200`]); return isNaN(v) ? null : v; });
-      if (smas.every(v => v == null)) smas = _smaFallback(closes, 200);
-      const lineColor = fired ? '#F04452' : warn ? '#FF9500' : '#15C472';
+      const closes = allCloses.slice(-SHOW);
+      const smas = allSmas.slice(-SHOW);
       if (!window._emCharts) window._emCharts = {};
       if (window._emCharts[canvasId]) window._emCharts[canvasId].destroy();
       window._emCharts[canvasId] = new Chart(cv.getContext('2d'), {
         type: 'line',
         data: { labels, datasets: [
-          { data: closes, borderColor: lineColor, borderWidth: 1.6, pointRadius: 0, tension: 0.15, fill: false },
+          { data: closes, borderColor: '#3182F6', borderWidth: 1.6, pointRadius: 0, tension: 0.15, fill: false },
           { data: smas,   borderColor: '#C2C8CE', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, tension: 0.15, fill: false },
         ] },
         options: {
@@ -579,48 +582,45 @@
       });
     }
 
-    async function renderEmergency(indices) {
-      const ix = indices || {};
+    async function renderEmergency() {
       let rows = [];
       try { rows = PI.parseCSV(await PI.fetchText(PI.URLS.history)); } catch (e) { /* prod/local 모두 graceful */ }
-      let firedCount = 0, warnCount = 0, hasData = false;
       const cfg = [
         ['nasdaq', 'em-nasdaq-days', 'em-nasdaq-chart'],
         ['sp500',  'em-sp500-days',  'em-sp500-chart'],
         ['kospi',  'em-kospi-days',  'em-kospi-chart'],
       ];
+      const devs = [];
       for (const [key, daysId, canvasId] of cfg) {
-        const idx = ix[key] || {};
-        const cur = idx.current, sma = idx.sma_200;
-        const known = (cur != null && sma != null);
-        const streak = (idx.below_sma200_streak != null) ? idx.below_sma200_streak : 0;
-        const above = known ? (cur >= sma) : true;
-        const fired = streak >= EM_TRIGGER_DAYS;
-        const warn  = streak > 0 && !fired;
-        if (known) hasData = true;
-        if (fired) firedCount++; else if (warn) warnCount++;
+        const all = (rows || []).filter(r => {
+          const c = parseFloat(r[`${key}_close`]); return r[`${key}_close`] && !isNaN(c);
+        });
+        const closes = all.map(r => parseFloat(r[`${key}_close`]));
+        const smas = _smaSeries(closes, EM_SMA_WIN);
+        const cur = closes.length ? closes[closes.length - 1] : null;
+        const sma = smas.length ? smas[smas.length - 1] : null;
+        const known = (cur != null && sma != null && !isNaN(cur) && !isNaN(sma) && sma > 0);
+        const dev = known ? (cur / sma - 1) * 100 : null;
         const dEl = PI.$(daysId);
         const base = 'absolute top-1.5 left-2 z-10 text-xs font-bold num ';
         if (!known) {
           dEl.textContent = '-'; dEl.className = base + 'text-toss-sub';
-        } else if (above) {
-          dEl.textContent = `200일선 위 +${((cur / sma - 1) * 100).toFixed(0)}%`;
-          dEl.className = base + 'text-toss-green';
         } else {
-          dEl.textContent = `${streak}일째 아래`;
-          dEl.className = base + (fired ? 'text-toss-red' : 'text-toss-yellow');
+          devs.push(dev);
+          const sign = dev >= 0 ? '+' : '';
+          dEl.textContent = `50일선 ${dev >= 0 ? '위' : '아래'} ${sign}${dev.toFixed(1)}%`;
+          dEl.className = base + 'text-toss-text';
         }
-        drawRegimeChart(canvasId, rows, key, fired, warn);
+        drawDeviationChart(canvasId, rows, key);
       }
       const chip = PI.$('em-status');
-      if (!hasData) {
+      if (!devs.length) {
         chip.textContent = '데이터 대기'; chip.className = 'chip bg-gray-100 text-toss-sub';
-      } else if (firedCount > 0) {
-        chip.textContent = `🚨 긴급탈출 발동 (${firedCount}개 지수 30일↑)`; chip.className = 'chip bg-toss-redL text-toss-red';
-      } else if (warnCount > 0) {
-        chip.textContent = `⚠️ 경계 (200일선 아래 진행)`; chip.className = 'chip bg-toss-yellowL text-toss-yellow';
       } else {
-        chip.textContent = '✅ 정상 (전 지수 200일선 위)'; chip.className = 'chip bg-toss-greenL text-toss-green';
+        const avg = devs.reduce((a, b) => a + b, 0) / devs.length;
+        const sign = avg >= 0 ? '+' : '';
+        chip.textContent = `평균 이격도 ${sign}${avg.toFixed(1)}%`;
+        chip.className = 'chip bg-gray-100 text-toss-sub';
       }
     }
 
@@ -1725,7 +1725,7 @@
 
       renderHero(stage, snapshot);
       renderSell1Marker(master);
-      renderEmergency(snapshot?.indices);
+      renderEmergency();
       renderConditions(snapshot);
       renderSellConditions(snapshot, exit);
       _lastLeadingDetail = (snapshot && snapshot.sell_signals && snapshot.sell_signals.leading_detail) || null;
