@@ -996,7 +996,7 @@
     };
 
     // 매수/매도 마커 계산 — 슬롯별 첫 발생일만 (사이클 리셋 시 슬롯 초기화)
-    function computeSignalMarkers(rows, masterMeta) {
+    function computeSignalMarkers(rows) {
       const markers = {
         buyCnn: new Set(),     // 매수1 · CNN<10 첫 발생
         buyVix: new Set(),     // 매수2 · VIX>25 첫 발생
@@ -1006,14 +1006,9 @@
         sellExpert: new Set(), // 매도3 · 전문가 경고 첫 발생
         tripleBuy: new Set(),  // 매수 3종(CNN+VIX+margin) 동시 발생일
         tripleSell: new Set(), // 매도 3종(레버리지+주도주+전문가) 동시 발생일
-        emergency: new Set(),  // 긴급탈출 발동일 (지수 -10% 또는 master 마커)
         buyAny: new Set(),     // 매수 신호 1개 이상 첫 발생일 (음영용)
         sellAny: new Set(),    // 매도 신호 1개 이상 첫 발생일 (음영용)
       };
-
-      // 긴급탈출 마커: master_data.emergency_first_fired_date 우선, 그 다음 CSV drop_pct -10%
-      const emergencyMasterDate = masterMeta?.emergencyDate || null;
-      let emergencyFiredThisCycle = false;
 
       let buySlots = { cnn: false, vix: false, margin: false };
       let sellSlots = { lev: false, lead: false, expert: false };
@@ -1045,19 +1040,10 @@
             sellSlots = { lev: false, lead: false, expert: false };
             buyAllFiredThisCycle = false;
             sellAllFiredThisCycle = false;
-            emergencyFiredThisCycle = false;
             events = [];
             cumAmount = 0;
             simSellLevFired = false;
           }
-        }
-
-        // ----- 긴급탈출 (master_data 마커 기준만 — 봇이 실제로 인식한 발동일) -----
-        // CSV drop_pct 자동 탐지는 사용 안 함 (초기 데이터 부족 시 노이즈 발화 방지).
-        const masterEmergency = emergencyMasterDate && r.date === emergencyMasterDate;
-        if (masterEmergency && !emergencyFiredThisCycle) {
-          markers.emergency.add(i);
-          emergencyFiredThisCycle = true;
         }
 
         // ----- 매수 -----
@@ -1131,7 +1117,7 @@
       return markers;
     }
 
-    async function renderYtdComparison(snapshot, exit, master) {
+    async function renderYtdComparison(snapshot, exit) {
       try {
         const text = await PI.fetchText(PI.URLS.history);
         const rows = PI.parseCSV(text);
@@ -1160,11 +1146,8 @@
         const strategyRet  = snapshot?.ytd_returns?.strategy_pct;
         const strategyNote = snapshot?.ytd_returns?.calc_note || '';
 
-        // 매수/매도/긴급탈출 시그널 마커 계산 (슬롯별 첫 발생만)
-        const masterMeta = {
-          emergencyDate: master?.emergency_first_fired_date || null,
-        };
-        const markers = computeSignalMarkers(workRows, masterMeta);
+        // 매수/매도 시그널 마커 계산 (슬롯별 첫 발생만)
+        const markers = computeSignalMarkers(workRows);
 
         // 전략 일별 시리즈 + 월별 breakdown (snapshot.ytd_returns)
         const strategyDaily = snapshot?.ytd_returns?.daily_series || [];
@@ -1404,8 +1387,6 @@
           // 3종 동시 — 진한 띠 (위에 덧칠)
           drawBand(M.tripleBuy,  'rgba(240, 68, 82, 0.30)');
           drawBand(M.tripleSell, 'rgba(0, 191, 92, 0.30)');
-          // 긴급탈출 — 진한 주황 띠 (가장 위에)
-          drawBand(M.emergency,  'rgba(255, 140, 0, 0.45)');
         }
       };
 
@@ -1448,7 +1429,6 @@
                   if (M.sellExpert?.has(idx)) labels.push('🟩 매도3 · 전문가 경고');
                   if (M.tripleBuy?.has(idx))  labels.push('🔴 매수 3종 동시');
                   if (M.tripleSell?.has(idx)) labels.push('🟢 매도 3종 · 사이클 리셋');
-                  if (M.emergency?.has(idx))  labels.push('🚨 긴급탈출 · 위성 청산 → 코어 매수, 모든 신호 리셋');
                   return labels.length > 0 ? ['', '─ 신호 ─', ...labels] : [];
                 },
               }
@@ -1733,7 +1713,7 @@
       renderVolatility(snapshot?.volatility);
       renderCnnComponents(snapshot?.sentiment);
       renderKoreaFlow(snapshot?.korea_flow);
-      renderYtdComparison(snapshot, exit, master);
+      renderYtdComparison(snapshot, exit);
 
       // 전문가 분석 로드 (snapshot 내장 or 캐시 fallback)
       _lastExpertAnalysis = await resolveExpertAnalysis(snapshot);
